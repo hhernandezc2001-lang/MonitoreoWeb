@@ -1,0 +1,81 @@
+﻿@model MonitoreoWeb.Models.ViewModels.RegistroUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Registrar usuario";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Registrar usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="card shadow border-0 rounded-4 p-4" style="width: 100%; max-width: 520px;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-1">Registro</h2>
+                <p class="text-muted mb-0">Crea un nuevo usuario interno del sistema</p>
+            </div>
+
+            <form asp-action="Registrar" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                    <input asp-for="Nombre" class="form-control form-control-lg"/>
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold"></label>
+                    <input asp-for="Email" class="form-control form-control-lg"/>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold"></label>
+                    <input asp-for="Password" class="form-control form-control-lg" placeholder="Ingresa la contraseña" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmarPassword" class="form-label fw-semibold"></label>
+                    <input asp-for="ConfirmarPassword" class="form-control form-control-lg"/>
+                    <span asp-validation-for="ConfirmarPassword" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Rol" class="form-label fw-semibold"></label>
+                    <select asp-for="Rol" class="form-select form-select-lg">
+                        <option value="">Seleccione un rol</option>
+                        <option value="Admin">Administrador</option>
+                        <option value="Tecnico">Técnico</option>
+                    </select>
+                    <span asp-validation-for="Rol" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="Activo" class="form-check-input" />
+                    <label asp-for="Activo" class="form-check-label"></label>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg rounded-3">
+                        Registrar usuario
+                    </button>
+                    <a asp-action="Login" class="btn btn-outline-secondary rounded-3">
+                        Volver al login
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>
