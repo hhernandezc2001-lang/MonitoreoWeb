@@ -4,6 +4,7 @@ using MonitoreoWeb.Data;
 using MonitoreoWeb.Models;
 using MonitoreoWeb.Models.ViewModels;
 
+// comentario de prueba
 namespace MonitoreoWeb.Controllers
 {
     [Authorize(Roles = "Admin")]
