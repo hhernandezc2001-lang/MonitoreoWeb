@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+// Registrar cliente
 namespace MonitoreoWeb.Models.ViewModels
 {
     public class RegistroClienteViewModel
