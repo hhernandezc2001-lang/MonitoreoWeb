@@ -33,7 +33,7 @@ namespace MonitoreoWeb.Controllers
 
             if (existe != null)
             {
-                ModelState.AddModelError("", "ATENCIÓN, Ya existe un cliente con ese correo");
+                ModelState.AddModelError("","Ya existe un cliente con ese correo");
                 return View(model);
             }
 
