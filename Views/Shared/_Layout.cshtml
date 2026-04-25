@@ -1,89 +1,133 @@
 ﻿@using System.Security.Claims
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = User.IsInRole("Admin");
+
+    string Active(string controller, string action = "")
+    {
+        var controllerOk = currentController.Equals(controller, StringComparison.OrdinalIgnoreCase);
+        var actionOk = string.IsNullOrEmpty(action) || currentAction.Equals(action, StringComparison.OrdinalIgnoreCase);
+
+        return controllerOk && actionOk ? "active" : "";
+    }
+}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MonitoreoWeb</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">MonitoreoWeb</a>
+    @if (isAuthenticated && isAdmin)
+    {
+        <div class="admin-layout">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
-                    {
-                        <ul class="navbar-nav me-auto mb-2 mb-sm-0">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Clientes" asp-action="Index">Clientes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dispositivos" asp-action="Index">Dispositivos</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Reparaciones" asp-action="Index">Reparaciones</a>
-                            </li>
-
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Auth" asp-action="Registrar">Usuarios</a>
-                                </li>
-                            }
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                <ul class="navbar-nav me-auto mb-2 mb-sm-0">
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                                    </li>
-
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <li class="nav-item">
-                                            <a class="nav-link" asp-controller="Clientes" asp-action="Registrar">Registrar cliente</a>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                        </ul>
-
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <span class="nav-link text-light">
-                                    @User.Identity.Name
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-warning" asp-controller="Auth" asp-action="Logout">Cerrar sesión</a>
-                            </li>
-                        </ul>
-                    }
+            <!-- Barra lateral -->
+            <aside class="admin-sidebar">
+                <div class="admin-sidebar-title">
+                    MonitoreoWeb
                 </div>
-            </div>
-        </nav>
-    </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+                <nav class="admin-menu">
+
+                    <a class="admin-menu-link @Active("Admin", "Inicio")"
+                       asp-controller="Admin"
+                       asp-action="Inicio">
+                        Inicio
+                    </a>
+
+                    <a class="admin-menu-link @Active("Dashboard", "Index")"
+                       asp-controller="Dashboard"
+                       asp-action="Index">
+                        Dashboards
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "DispositivosReparacion")"
+                       asp-controller="Admin"
+                       asp-action="DispositivosReparacion">
+                        Dispositivos en reparación
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "Tecnicos")"
+                       asp-controller="Admin"
+                       asp-action="Tecnicos">
+                        Técnicos dados de alta
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "RegistrarUsuario")"
+                       asp-controller="Admin"
+                       asp-action="RegistrarUsuario">
+                        Registrar nuevos usuarios
+                    </a>
+
+                    <a class="admin-menu-link @Active("Clientes", "Registrar")"
+                       asp-controller="Clientes"
+                       asp-action="Registrar">
+                        Registrar clientes
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "GenerarToken")"
+                       asp-controller="Admin"
+                       asp-action="GenerarToken">
+                        Generación de token único
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "Activaciones")"
+                       asp-controller="Admin"
+                       asp-action="Activaciones">
+                        Activar/Desactivar Tokens y Técnicos
+                    </a>
+
+                </nav>
+
+                <!-- Footer de la barra lateral -->
+                <div class="admin-sidebar-footer">
+                    <div class="admin-user-name">
+                        @User.Identity?.Name
+                    </div>
+
+                    <div class="admin-user-role">
+                        Rol: @User.FindFirst(ClaimTypes.Role)?.Value
+                    </div>
+
+                    <!-- Botón de Cerrar sesión -->
+                    <a class="admin-logout"
+                       asp-controller="Auth"
+                       asp-action="Logout">
+                        Cerrar sesión
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="admin-main">
+                <div class="admin-content">
+                    @RenderBody()
+                </div>
+            </main>
+
+        </div>
+    }
+    else
+    {
+        <main>
             @RenderBody()
         </main>
-    </div>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
 
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

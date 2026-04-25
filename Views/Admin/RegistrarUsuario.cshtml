@@ -1,0 +1,65 @@
+﻿@model MonitoreoWeb.Models.ViewModels.RegistroUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Registrar Usuario";
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="RegistrarUsuario" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ConfirmarPassword" class="form-label"></label>
+            <input asp-for="ConfirmarPassword" type="password" class="form-control" />
+            <span asp-validation-for="ConfirmarPassword" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Rol" class="form-label"></label>
+            <select asp-for="Rol" class="form-control">
+                <option value="Admin">Administrador</option>
+                <option value="Tecnico">Técnico</option>
+            </select>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input asp-for="Activo" type="checkbox" class="form-check-input" />
+            <label asp-for="Activo" class="form-check-label">Activo</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar</button>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

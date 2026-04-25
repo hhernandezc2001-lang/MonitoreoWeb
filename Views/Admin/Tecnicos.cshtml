@@ -1,0 +1,70 @@
+﻿@model IEnumerable<MonitoreoWeb.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Técnicos dados de alta";
+}
+
+<div class="admin-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Técnicos dados de alta</h2>
+            <p class="text-muted mb-0">
+                Lista de técnicos activos registrados en el sistema.
+            </p>
+        </div>
+
+        <a asp-controller="Admin" asp-action="RegistrarUsuario" class="btn btn-primary">
+            Registrar técnico
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Fecha de creación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tecnico in Model)
+                    {
+                        <tr>
+                            <td>@tecnico.IdUsuario</td>
+                            <td>@tecnico.Nombre</td>
+                            <td>@tecnico.Email</td>
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    @tecnico.Rol
+                                </span>
+                            </td>
+                            <td>
+                                @if (tecnico.Activo)
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactivo</span>
+                                }
+                            </td>
+                            <td>@tecnico.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            No hay técnicos activos registrados.
+        </div>
+    }
+</div>

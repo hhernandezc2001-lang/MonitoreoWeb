@@ -2,7 +2,8 @@
 
 @{
     ViewData["Title"] = "Registrar usuario";
-    Layout = null;
+    Layout = "_Layout";
+    <!-- Cambié esto para usar el layout principal -->
 }
 
 <!DOCTYPE html>
@@ -27,13 +28,13 @@
 
                 <div class="mb-3">
                     <label asp-for="Nombre" class="form-label fw-semibold"></label>
-                    <input asp-for="Nombre" class="form-control form-control-lg"/>
+                    <input asp-for="Nombre" class="form-control form-control-lg" />
                     <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label fw-semibold"></label>
-                    <input asp-for="Email" class="form-control form-control-lg"/>
+                    <input asp-for="Email" class="form-control form-control-lg" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
@@ -45,7 +46,7 @@
 
                 <div class="mb-3">
                     <label asp-for="ConfirmarPassword" class="form-label fw-semibold"></label>
-                    <input asp-for="ConfirmarPassword" class="form-control form-control-lg"/>
+                    <input asp-for="ConfirmarPassword" class="form-control form-control-lg" />
                     <span asp-validation-for="ConfirmarPassword" class="text-danger small"></span>
                 </div>
 

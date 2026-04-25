@@ -25,13 +25,14 @@ namespace MonitoreoWeb.Controllers
             return View();
         }
 
+        // Modificación: Login POST
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var usuario = _context.Usuarios
+            var usuario = _context.Usuario
                 .FirstOrDefault(u => u.Email == model.Email && u.Activo);
 
             if (usuario == null)
@@ -68,20 +69,25 @@ namespace MonitoreoWeb.Controllers
                     IsPersistent = model.Recordarme
                 });
 
-            return RedirectToAction("Index", "Dashboard");
+            // **Aquí redirigimos al "Inicio" del AdminController**
+            return RedirectToAction("Inicio", "Admin");  // Redirige a "Inicio" en lugar de "Dashboard"
         }
+        // Fin de la modificación 
 
+        // Cerrar sesión
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Auth");
         }
 
+        // Página de acceso denegado
         public IActionResult AccessDenied()
         {
             return View();
         }
 
+        // Vista para registrar un nuevo usuario
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Registrar()
@@ -89,6 +95,7 @@ namespace MonitoreoWeb.Controllers
             return View();
         }
 
+        // Acción para registrar un nuevo usuario
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult Registrar(RegistroUsuarioViewModel model)
@@ -96,7 +103,7 @@ namespace MonitoreoWeb.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var existe = _context.Usuarios.FirstOrDefault(u => u.Email == model.Email);
+            var existe = _context.Usuario.FirstOrDefault(u => u.Email == model.Email);
 
             if (existe != null)
             {
@@ -116,7 +123,7 @@ namespace MonitoreoWeb.Controllers
             var passwordHasher = new PasswordHasher<Usuario>();
             usuario.PasswordHash = passwordHasher.HashPassword(usuario, model.Password);
 
-            _context.Usuarios.Add(usuario);
+            _context.Usuario.Add(usuario);
             _context.SaveChanges();
 
             TempData["Success"] = "Usuario registrado correctamente";
