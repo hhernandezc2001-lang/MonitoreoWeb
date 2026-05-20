@@ -1,83 +1,102 @@
 ﻿@model IEnumerable<MonitoreoWeb.Models.Cliente>
-
 @{
     ViewData["Title"] = "Clientes registrados";
 }
-
 <div class="container mt-4">
-
     <div class="card shadow p-4"
          style="border-radius:15px;">
-
         <h2 class="mb-4">
             Clientes registrados
         </h2>
 
+        <!-- FILTROS -->
+        <div class="row mb-3 g-2">
+            <div class="col-md-4">
+                <input type="text" id="filtraNombre" class="form-control"
+                       placeholder="Buscar por nombre o apellido..." />
+            </div>
+            <div class="col-md-4">
+                <input type="date" id="filtraFecha" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <select id="filtraEstado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+            </div>
+        </div>
+
         <table class="table table-hover align-middle">
-
             <thead class="table-dark">
-
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
                     <th>Teléfono</th>
                     <th>Email</th>
-                    <th>Activo</th>
+                    <th>Estado</th>
+                    <th>Fecha de registro</th>
                 </tr>
-
             </thead>
-
             <tbody>
-
                 @foreach (var cliente in Model)
                 {
                     <tr>
-
+                        <td>@cliente.IdCliente</td>
+                        <td>@cliente.Nombre</td>
+                        <td>@cliente.Apellido</td>
+                        <td>@cliente.Telefono</td>
+                        <td>@cliente.Email</td>
                         <td>
-                            @cliente.IdCliente
-                        </td>
-
-                        <td>
-                            @cliente.Nombre
-                        </td>
-
-                        <td>
-                            @cliente.Apellido
-                        </td>
-
-                        <td>
-                            @cliente.Telefono
-                        </td>
-
-                        <td>
-                            @cliente.Email
-                        </td>
-
-                        <td>
-
                             @if (cliente.Activo)
                             {
-                                <span class="badge bg-success">
-                                    Activo
-                                </span>
+                                <span class="badge bg-success">Activo</span>
                             }
                             else
                             {
-                                <span class="badge bg-danger">
-                                    Inactivo
-                                </span>
+                                <span class="badge bg-danger">Inactivo</span>
                             }
-
                         </td>
-
+                        <td>@cliente.FechaRegistro.ToString("dd/MM/yyyy")</td>
                     </tr>
                 }
-
             </tbody>
-
         </table>
-
     </div>
-
 </div>
+
+@section Scripts {
+    <script>
+        function aplicarFiltros() {
+            const nombre = document.getElementById('filtraNombre').value.toLowerCase();
+            const fecha = document.getElementById('filtraFecha').value;
+            const estado = document.getElementById('filtraEstado').value.toLowerCase();
+            const filas = document.querySelectorAll('tbody tr');
+
+            filas.forEach(fila => {
+                const tdNombre  = fila.cells[1].textContent.toLowerCase();
+                const tdApellido = fila.cells[2].textContent.toLowerCase();
+                const tdEstado  = fila.cells[5].textContent.toLowerCase().trim();
+                const tdFecha   = fila.cells[6].textContent.trim();
+
+                // Convertir fecha (dd/MM/yyyy) a yyyy-MM-dd para comparar
+                let fechaCoincide = true;
+                if (fecha) {
+                    const partes = tdFecha.split('/');
+                    const fechaFila = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    fechaCoincide = fechaFila === fecha;
+                }
+
+                const nombreCoincide = tdNombre.includes(nombre) || tdApellido.includes(nombre);
+                const estadoCoincide = estado === '' || tdEstado.includes(estado);
+
+                fila.style.display = (nombreCoincide && fechaCoincide && estadoCoincide) ? '' : 'none';
+            });
+        }
+
+        document.getElementById('filtraNombre').addEventListener('keyup', aplicarFiltros);
+        document.getElementById('filtraFecha').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtraEstado').addEventListener('change', aplicarFiltros);
+    </script>
+}
