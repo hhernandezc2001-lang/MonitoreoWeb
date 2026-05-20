@@ -36,14 +36,15 @@ namespace MonitoreoWeb.Controllers
         public IActionResult RegistrarUsuario(RegistroUsuarioViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            // Verificar si el correo ya está registrado
-            var existe = _context.Usuario.Any(u => u.Email == model.Email);
-
-            if (existe)
             {
-                ModelState.AddModelError("Email", "Ya existe un usuario con ese correo.");
+                var errores = ModelState.Values
+                    .SelectMany(v => v.Errors);
+
+                foreach (var error in errores)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
                 return View(model);
             }
 

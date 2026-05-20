@@ -1,0 +1,83 @@
+﻿@model IEnumerable<MonitoreoWeb.Models.Cliente>
+
+@{
+    ViewData["Title"] = "Clientes registrados";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow p-4"
+         style="border-radius:15px;">
+
+        <h2 class="mb-4">
+            Clientes registrados
+        </h2>
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Activo</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var cliente in Model)
+                {
+                    <tr>
+
+                        <td>
+                            @cliente.IdCliente
+                        </td>
+
+                        <td>
+                            @cliente.Nombre
+                        </td>
+
+                        <td>
+                            @cliente.Apellido
+                        </td>
+
+                        <td>
+                            @cliente.Telefono
+                        </td>
+
+                        <td>
+                            @cliente.Email
+                        </td>
+
+                        <td>
+
+                            @if (cliente.Activo)
+                            {
+                                <span class="badge bg-success">
+                                    Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    Inactivo
+                                </span>
+                            }
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

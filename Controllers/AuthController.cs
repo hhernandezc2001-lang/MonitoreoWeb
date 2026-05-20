@@ -19,13 +19,19 @@ namespace MonitoreoWeb.Controllers
             _context = context;
         }
 
+        // =========================
+        // LOGIN GET
+        // =========================
         [HttpGet]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public IActionResult Login()
         {
             return View();
         }
 
-        // Modificación: Login POST
+        // =========================
+        // LOGIN POST
+        // =========================
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -33,20 +39,33 @@ namespace MonitoreoWeb.Controllers
                 return View(model);
 
             var usuario = _context.Usuario
-                .FirstOrDefault(u => u.Email == model.Email && u.Activo);
+                .FirstOrDefault(u =>
+                    u.Email == model.Email &&
+                    u.Activo);
 
             if (usuario == null)
             {
-                ModelState.AddModelError("", "Usuario o contraseña incorrectos");
+                ModelState.AddModelError("",
+                    "Usuario o contraseña incorrectos");
+
                 return View(model);
             }
 
-            var passwordHasher = new PasswordHasher<Usuario>();
-            var resultado = passwordHasher.VerifyHashedPassword(usuario, usuario.PasswordHash, model.Password);
+            var passwordHasher =
+                new PasswordHasher<Usuario>();
+
+            var resultado =
+                passwordHasher.VerifyHashedPassword(
+                    usuario,
+                    usuario.PasswordHash,
+                    model.Password
+                );
 
             if (resultado == PasswordVerificationResult.Failed)
             {
-                ModelState.AddModelError("", "Usuario o contraseña incorrectos");
+                ModelState.AddModelError("",
+                    "Usuario o contraseña incorrectos");
+
                 return View(model);
             }
 
@@ -55,11 +74,17 @@ namespace MonitoreoWeb.Controllers
                 new Claim(ClaimTypes.Name, usuario.Nombre),
                 new Claim(ClaimTypes.Email, usuario.Email),
                 new Claim(ClaimTypes.Role, usuario.Rol),
-                new Claim("IdUsuario", usuario.IdUsuario.ToString())
+                new Claim("IdUsuario",
+                    usuario.IdUsuario.ToString())
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            var principal =
+                new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -68,26 +93,42 @@ namespace MonitoreoWeb.Controllers
                 {
                     IsPersistent = model.Recordarme
                 });
+            // REDIRECCIÓN SEGÚN EL ROL
+            if (usuario.Rol == "Admin")
+            {
+                return RedirectToAction("Inicio", "Admin");
+            }
+            else if (usuario.Rol == "Tecnico")
+            {
+                return RedirectToAction("Inicio", "Tecnico");
+            }
 
-            // **Aquí redirigimos al "Inicio" del AdminController**
-            return RedirectToAction("Inicio", "Admin");  // Redirige a "Inicio" en lugar de "Dashboard"
+            return RedirectToAction("Login");
         }
-        // Fin de la modificación 
 
-        // Cerrar sesión
+        // =========================
+        // LOGOUT
+        // =========================
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
             return RedirectToAction("Login", "Auth");
         }
 
-        // Página de acceso denegado
+        // =========================
+        // ACCESS DENIED
+        // =========================
         public IActionResult AccessDenied()
         {
             return View();
         }
 
-        // Vista para registrar un nuevo usuario
+        // =========================
+        // REGISTRAR GET
+        // =========================
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Registrar()
@@ -95,39 +136,107 @@ namespace MonitoreoWeb.Controllers
             return View();
         }
 
-        // Acción para registrar un nuevo usuario
+        // =========================
+        // REGISTRAR POST
+        // =========================
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Registrar(RegistroUsuarioViewModel model)
+        public IActionResult Registrar(
+            RegistroUsuarioViewModel model)
         {
+            // VALIDACIÓN MVC
             if (!ModelState.IsValid)
-                return View(model);
-
-            var existe = _context.Usuario.FirstOrDefault(u => u.Email == model.Email);
-
-            if (existe != null)
             {
-                ModelState.AddModelError("", "Ya existe un usuario con ese correo");
+                foreach (var item in ModelState)
+                {
+                    var campo = item.Key;
+
+                    foreach (var error in item.Value.Errors)
+                    {
+                        Console.WriteLine(
+                            $"CAMPO: {campo}"
+                        );
+
+                        Console.WriteLine(
+                            $"ERROR: {error.ErrorMessage}"
+                        );
+                    }
+                }
+
                 return View(model);
             }
 
-            var usuario = new Usuario
+            // VALIDAR EMAIL EXISTENTE
+            var existe = _context.Usuario
+                .FirstOrDefault(u =>
+                    u.Email == model.Email);
+
+            if (existe != null)
             {
-                Nombre = model.Nombre,
-                Email = model.Email,
-                Rol = model.Rol,
-                Activo = model.Activo,
-                FechaCreacion = DateTime.Now
-            };
+                ModelState.AddModelError("",
+                    "Ya existe un usuario con ese correo");
 
-            var passwordHasher = new PasswordHasher<Usuario>();
-            usuario.PasswordHash = passwordHasher.HashPassword(usuario, model.Password);
+                return View(model);
+            }
 
-            _context.Usuario.Add(usuario);
-            _context.SaveChanges();
+            try
+            {
+                // CREAR USUARIO
+                var usuario = new Usuario
+                {
+                    Nombre = model.Nombre,
 
-            TempData["Success"] = "Usuario registrado correctamente";
-            return RedirectToAction("Registrar");
+                    Email = model.Email,
+
+                    PasswordHash = "",
+
+                    Rol = string.IsNullOrEmpty(model.Rol)
+                        ? "Usuario"
+                        : model.Rol,
+
+                    Activo = true,
+
+                    FechaCreacion = DateTime.Now
+                };
+
+                // HASH PASSWORD
+                var passwordHasher =
+                    new PasswordHasher<Usuario>();
+
+                usuario.PasswordHash =
+                    passwordHasher.HashPassword(
+                        usuario,
+                        model.Password
+                    );
+
+                // GUARDAR
+                _context.Usuario.Add(usuario);
+
+                _context.SaveChanges();
+
+                Console.WriteLine(
+                    "USUARIO GUARDADO CORRECTAMENTE"
+                );
+
+                TempData["Success"] =
+                    "Usuario registrado correctamente";
+
+                // QUEDARSE EN REGISTRAR
+                return RedirectToAction("Registrar");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    "ERROR AL GUARDAR:"
+                );
+
+                Console.WriteLine(ex.ToString());
+
+                ModelState.AddModelError("",
+                    "Ocurrió un error al registrar el usuario");
+
+                return View(model);
+            }
         }
     }
 }

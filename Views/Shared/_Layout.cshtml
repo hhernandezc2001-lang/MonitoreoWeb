@@ -3,38 +3,69 @@
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
     var isAdmin = User.IsInRole("Admin");
+
+    var isTecnico = User.IsInRole("Tecnico");
 
     string Active(string controller, string action = "")
     {
-        var controllerOk = currentController.Equals(controller, StringComparison.OrdinalIgnoreCase);
-        var actionOk = string.IsNullOrEmpty(action) || currentAction.Equals(action, StringComparison.OrdinalIgnoreCase);
+        var controllerOk =
+            currentController.Equals(
+                controller,
+                StringComparison.OrdinalIgnoreCase
+            );
 
-        return controllerOk && actionOk ? "active" : "";
+        var actionOk =
+            string.IsNullOrEmpty(action) ||
+            currentAction.Equals(
+                action,
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        return controllerOk && actionOk
+            ? "active"
+            : "";
     }
 }
 
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MonitoreoWeb</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - MonitoreoWeb
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
 </head>
 
 <body>
+
+    <!------------ INICIO DE LA PARTE DEL LOGEO DEL ADMINISTRADOR  -------->
     @if (isAuthenticated && isAdmin)
     {
         <div class="admin-layout">
 
-            <!-- Barra lateral -->
+            <!--------- SIDEBAR ADMINISTRADOR ----------->
             <aside class="admin-sidebar">
+
                 <div class="admin-sidebar-title">
-                    MonitoreoWeb
+                    Monitoreo Web
                 </div>
 
                 <nav class="admin-menu">
@@ -63,9 +94,9 @@
                         Técnicos dados de alta
                     </a>
 
-                    <a class="admin-menu-link @Active("Admin", "RegistrarUsuario")"
-                       asp-controller="Admin"
-                       asp-action="RegistrarUsuario">
+                    <a class="admin-menu-link @Active("Auth", "Registrar")"
+                       asp-controller="Auth"
+                       asp-action="Registrar">
                         Registrar nuevos usuarios
                     </a>
 
@@ -73,6 +104,12 @@
                        asp-controller="Clientes"
                        asp-action="Registrar">
                         Registrar clientes
+                    </a>
+
+                    <a class="admin-menu-link @Active("Clientes", "Index")"
+                       asp-controller="Clientes"
+                       asp-action="Index">
+                        Clientes registrados
                     </a>
 
                     <a class="admin-menu-link @Active("Admin", "GenerarToken")"
@@ -89,34 +126,100 @@
 
                 </nav>
 
-                <!-- Footer de la barra lateral -->
+                <!-- FOOTER ADMIN -->
                 <div class="admin-sidebar-footer">
+
                     <div class="admin-user-name">
                         @User.Identity?.Name
                     </div>
 
                     <div class="admin-user-role">
-                        Rol: @User.FindFirst(ClaimTypes.Role)?.Value
+                        Rol:
+                        @User.FindFirst(ClaimTypes.Role)?.Value
                     </div>
 
-                    <!-- Botón de Cerrar sesión -->
                     <a class="admin-logout"
                        asp-controller="Auth"
                        asp-action="Logout">
                         Cerrar sesión
                     </a>
+
                 </div>
+
             </aside>
 
-            <!-- Contenido principal -->
+            <!-- CONTENIDO ADMIN -->
             <main class="admin-main">
+
                 <div class="admin-content">
                     @RenderBody()
                 </div>
+
             </main>
 
         </div>
     }
+
+    else if (isAuthenticated && isTecnico)
+    {
+        <div class="admin-layout">
+
+            <!----------------- SIDEBAR TECNICO -------------------->
+            <aside class="admin-sidebar">
+
+                <div class="admin-sidebar-title">
+                    Panel Técnico
+                </div>
+
+                <nav class="admin-menu">
+
+                    <a class="admin-menu-link"
+                       asp-controller="Tecnico"
+                       asp-action="Index">
+                        Inicio técnico
+                    </a>
+
+                    <a class="admin-menu-link"
+                       asp-controller="Admin"
+                       asp-action="DispositivosReparacion">
+                        Equipos asignados
+                    </a>
+
+                </nav>
+
+                <!-- FOOTER TECNICO -->
+                <div class="admin-sidebar-footer">
+
+                    <div class="admin-user-name">
+                        @User.Identity?.Name
+                    </div>
+
+                    <div class="admin-user-role">
+                        Rol: Técnico
+                    </div>
+
+                    <a class="admin-logout"
+                       asp-controller="Auth"
+                       asp-action="Logout">
+                        Cerrar sesión
+                    </a>
+
+                </div>
+
+            </aside>
+
+            <!-- CONTENIDO TECNICO -->
+            <main class="admin-main">
+
+                <div class="admin-content">
+                    @RenderBody()
+                </div>
+
+            </main>
+
+        </div>
+    }
+
     else
     {
         <main>
@@ -125,9 +228,18 @@
     }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false
+        )
+
 </body>
+
 </html>
