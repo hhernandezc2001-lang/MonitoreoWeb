@@ -1,0 +1,358 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+@{
+    ViewData["Title"] = "Detalle de reparación";
+
+    string estado = Model.IdEstado switch
+    {
+        1 => "Pendiente",
+        2 => "Aceptada",
+        3 => "En diagnóstico",
+        4 => "Esperando refacción",
+        5 => "En reparación",
+        6 => "En pruebas",
+        7 => "Terminada",
+        _ => "Desconocido"
+    };
+}
+
+<div class="container-fluid">
+
+    <!-- ========================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================== -->
+
+    <div class="mb-4">
+
+        <span class="text-muted">
+            GESTIÓN DE REPARACIONES
+        </span>
+
+        <h1>
+            Reparación @Model.TokenConsulta
+        </h1>
+
+        <p class="text-muted">
+            Detalle y seguimiento de la reparación.
+        </p>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- ESTADO -->
+    <!-- ========================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5 class="card-title">
+                Estado actual
+            </h5>
+
+            <h2>
+                @estado
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <!-- ====================================== -->
+        <!-- CLIENTE -->
+        <!-- ====================================== -->
+
+        <div class="col-md-6 mb-4">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <h5 class="card-title mb-4">
+                        Cliente
+                    </h5>
+
+                    <p>
+                        <strong>
+                            Nombre:
+                        </strong>
+
+                        @Model.Dispositivo?.Cliente?.Nombre
+                        @Model.Dispositivo?.Cliente?.Apellido
+                    </p>
+
+                    <p>
+                        <strong>
+                            Teléfono:
+                        </strong>
+
+                        @Model.Dispositivo?.Cliente?.Telefono
+                    </p>
+
+                    <p>
+                        <strong>
+                            Correo:
+                        </strong>
+
+                        @Model.Dispositivo?.Cliente?.Email
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ====================================== -->
+        <!-- DISPOSITIVO -->
+        <!-- ====================================== -->
+
+        <div class="col-md-6 mb-4">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <h5 class="card-title mb-4">
+                        Dispositivo
+                    </h5>
+
+                    <p>
+                        <strong>
+                            Marca:
+                        </strong>
+
+                        @Model.Dispositivo?.Marca
+                    </p>
+
+                    <p>
+                        <strong>
+                            Modelo:
+                        </strong>
+
+                        @Model.Dispositivo?.Modelo
+                    </p>
+
+                    <p>
+                        <strong>
+                            IMEI:
+                        </strong>
+
+                        @(string.IsNullOrWhiteSpace(
+                                                Model.Dispositivo?.IMEI)
+                                                ? "No registrado"
+                                                : Model.Dispositivo.IMEI)
+                    </p>
+
+                    <p>
+                        <strong>
+                            Color:
+                        </strong>
+
+                        @(string.IsNullOrWhiteSpace(
+                                                Model.Dispositivo?.Color)
+                                                ? "No registrado"
+                                                : Model.Dispositivo.Color)
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- INFORMACIÓN DE LA REPARACIÓN -->
+    <!-- ========================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5 class="card-title mb-4">
+                Información de la reparación
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <p>
+                        <strong>
+                            Código:
+                        </strong>
+
+                        @Model.TokenConsulta
+                    </p>
+
+                    <p>
+                        <strong>
+                            Fecha de ingreso:
+                        </strong>
+
+                        @Model.FechaIngreso
+                        .ToString("dd/MM/yyyy HH:mm")
+                    </p>
+
+                    <p>
+                        <strong>
+                            Entrega estimada:
+                        </strong>
+
+                        @(Model.FechaEntregaEstimada.HasValue
+                                                ? Model.FechaEntregaEstimada.Value
+                                                .ToString("dd/MM/yyyy")
+                                                : "Sin definir")
+
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <p>
+                        <strong>
+                            Técnico asignado:
+                        </strong>
+
+                        @(Model.Tecnico?.Nombre
+                                                ?? "Sin asignar")
+                    </p>
+
+                    <p>
+                        <strong>
+                            Costo estimado:
+                        </strong>
+
+                        @(Model.CostoEstimado.HasValue
+                                                ? $"${Model.CostoEstimado:N2}"
+                                                : "No definido")
+                    </p>
+
+                    <p>
+                        <strong>
+                            Costo final:
+                        </strong>
+
+                        @(Model.CostoFinal.HasValue
+                                                ? $"${Model.CostoFinal:N2}"
+                                                : "No definido")
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- PROBLEMA -->
+    <!-- ========================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5 class="card-title">
+                Problema reportado
+            </h5>
+
+            <p>
+                @Model.ProblemaReportado
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- DIAGNÓSTICO -->
+    <!-- ========================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5 class="card-title">
+                Diagnóstico
+            </h5>
+
+            @if (string.IsNullOrWhiteSpace(Model.Diagnostico))
+            {
+                <p class="text-muted">
+                    El técnico todavía no ha registrado un diagnóstico.
+                </p>
+            }
+            else
+            {
+                <p>
+                    @Model.Diagnostico
+                </p>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FECHA DE TERMINACIÓN -->
+    <!-- ========================================== -->
+    @if (Model.FechaEntregaReal.HasValue)
+    {
+        <div class="card mb-4">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Terminación
+                </h5>
+
+                <p>
+
+                    <strong>
+                        Fecha de terminación:
+                    </strong>
+
+                    @Model.FechaEntregaReal.Value
+                    .ToString("dd/MM/yyyy HH:mm")
+
+                </p>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ========================================== -->
+    <!-- VOLVER -->
+    <!-- ========================================== -->
+
+    <div class="mt-4">
+
+        <a asp-controller="Admin"
+           asp-action="Reparaciones"
+           class="btn btn-secondary">
+
+            ← Volver a reparaciones
+
+        </a>
+
+    </div>
+
+</div>

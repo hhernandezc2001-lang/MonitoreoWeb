@@ -1,0 +1,46 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+<h2>Nueva Reparación</h2>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label>Dispositivo</label>
+
+        <select asp-for="IdDispositivo"
+                asp-items="ViewBag.Dispositivos"
+                class="form-control">
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Problema Reportado</label>
+
+        <textarea asp-for="ProblemaReportado"
+                  class="form-control">
+        </textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Costo Estimado</label>
+
+        <input asp-for="CostoEstimado"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha Estimada de Entrega</label>
+
+        <input asp-for="FechaEntregaEstimada"
+               type="date"
+               class="form-control" />
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Guardar
+    </button>
+
+</form>
+
+       

@@ -1,0 +1,259 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+@{
+    ViewData["Title"] = "Estado de reparación";
+
+    string estado = Model.IdEstado switch
+    {
+        1 => "Pendiente",
+        2 => "Aceptada",
+        3 => "En diagnóstico",
+        4 => "Esperando refacción",
+        5 => "En reparación",
+        6 => "En pruebas",
+        7 => "Terminada",
+        _ => "Estado desconocido"
+    };
+}
+
+<div class="container mt-5">
+
+    <!-- ========================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================== -->
+
+    <div class="text-center mb-4">
+
+        <h1>
+            Seguimiento de reparación
+        </h1>
+
+        <p>
+            Consulta el estado actual de tu dispositivo.
+        </p>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- INFORMACIÓN PRINCIPAL -->
+    <!-- ========================================== -->
+
+    <div class="card mx-auto"
+         style="max-width: 700px;">
+
+        <div class="card-body">
+
+
+            <!-- TOKEN -->
+
+            <div class="mb-4">
+
+                <span class="text-muted">
+                    Código de reparación
+                </span>
+
+                <h3>
+                    @Model.TokenConsulta
+                </h3>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="mb-4">
+
+                <span class="text-muted">
+                    Estado actual
+                </span>
+
+                <h2>
+                    @estado
+                </h2>
+
+            </div>
+
+
+            <!-- ================================== -->
+            <!-- DISPOSITIVO -->
+            <!-- ================================== -->
+
+            <hr />
+
+            <h4 class="mb-3">
+                Dispositivo
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Marca
+                    </span>
+
+                    <strong class="d-block">
+                        @Model.Dispositivo?.Marca
+                    </strong>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Modelo
+                    </span>
+
+                    <strong class="d-block">
+                        @Model.Dispositivo?.Modelo
+                    </strong>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Color
+                    </span>
+
+                    <strong class="d-block">
+
+                        @(string.IsNullOrWhiteSpace(
+                                                Model.Dispositivo?.Color)
+                                                ? "No registrado"
+                                                : Model.Dispositivo.Color)
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================== -->
+            <!-- FECHAS -->
+            <!-- ================================== -->
+
+            <hr />
+
+            <h4 class="mb-3">
+                Información de la reparación
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Fecha de ingreso
+                    </span>
+
+                    <strong class="d-block">
+
+                        @Model.FechaIngreso.ToString(
+                                                "dd/MM/yyyy HH:mm")
+
+                    </strong>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Entrega estimada
+                    </span>
+
+                    <strong class="d-block">
+
+                        @(Model.FechaEntregaEstimada.HasValue
+                                                ? Model.FechaEntregaEstimada.Value
+                                                .ToString("dd/MM/yyyy")
+                                                : "Sin definir")
+
+                    </strong>
+
+                </div>
+
+
+                @if (Model.FechaEntregaReal.HasValue)
+                {
+                    <div class="col-md-6 mb-3">
+
+                        <span class="text-muted">
+                            Fecha de terminación
+                        </span>
+
+                        <strong class="d-block">
+
+                            @(Model.FechaEntregaReal.Value
+                            .ToString("dd/MM/yyyy HH:mm"))
+
+                        </strong>
+
+                    </div>
+                }
+
+            </div>
+
+
+            <!-- ================================== -->
+            <!-- DIAGNÓSTICO -->
+            <!-- ================================== -->
+            @if (!string.IsNullOrWhiteSpace(Model.Diagnostico))
+            {
+                <hr />
+
+                <h4 class="mb-3">
+                    Diagnóstico
+                </h4>
+
+                <div class="alert alert-light">
+
+                    @Model.Diagnostico
+
+                </div>
+            }
+
+
+            <!-- ================================== -->
+            <!-- PROBLEMA REPORTADO -->
+            <!-- ================================== -->
+
+            <hr />
+
+            <h4 class="mb-3">
+                Problema reportado
+            </h4>
+
+            <div class="alert alert-light">
+
+                @Model.ProblemaReportado
+
+            </div>
+
+
+            <!-- ================================== -->
+            <!-- VOLVER -->
+            <!-- ================================== -->
+
+            <div class="text-center mt-4">
+
+                <a asp-controller="Portal"
+                   asp-action="Consultar"
+                   class="btn btn-primary">
+
+                    Consultar otra reparación
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

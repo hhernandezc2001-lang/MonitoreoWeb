@@ -1,0 +1,13 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+<h2>Reparación registrada correctamente</h2>
+
+<p>El token de consulta generado es:</p>
+
+<h3>@Model.TokenConsulta</h3>
+
+<p>Entregue este token al cliente para que pueda consultar el estado de su reparación.</p>
+
+<a asp-action="Index" class="btn btn-primary">
+    Continuar
+</a>

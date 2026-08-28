@@ -1,9 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// Relacionamos las variables
-// Modelo de la tabla de "Clientes" en la base de datos "TallerReparaciones".
-
 namespace MonitoreoWeb.Models
 {
     [Table("Cliente")]
@@ -26,6 +23,14 @@ namespace MonitoreoWeb.Models
         public string Email { get; set; } = string.Empty;
 
         public DateTime FechaRegistro { get; set; }
+
         public bool Activo { get; set; }
+
+        // --- Campos para verificación de email ---
+        public bool EmailVerificado { get; set; } = false;
+
+        public string? TokenVerificacion { get; set; }
+
+        public DateTime? TokenExpira { get; set; }
     }
 }

@@ -1,0 +1,300 @@
+﻿@model IEnumerable<MonitoreoWeb.Models.Reparacion>
+
+@{
+    var reparaciones = Model.ToList();
+}
+
+<div class="tecnico-solicitudes-page">
+
+    <div class="tecnico-solicitudes-header">
+
+        <div>
+
+            <span class="tecnico-subtitulo">
+                PANEL DEL TÉCNICO
+            </span>
+
+            <h1>
+                Mis reparaciones
+            </h1>
+
+            <p>
+                Consulta las reparaciones que tienes asignadas
+                actualmente.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- RESUMEN -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-resumen">
+
+        <div class="tecnico-resumen-card">
+
+            <span>
+                Reparaciones asignadas
+            </span>
+
+            <strong>
+                @reparaciones.Count
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- LISTADO -->
+    <!-- ========================================== -->
+    @if (!reparaciones.Any())
+    {
+        <div class="tecnico-solicitudes-vacio">
+
+            <div class="tecnico-vacio-icono">
+                ✓
+            </div>
+
+            <h2>
+                No tienes reparaciones asignadas
+            </h2>
+
+            <p>
+                Actualmente no tienes reparaciones
+                asignadas para trabajar.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="tecnico-solicitudes-grid">
+
+            @foreach (var reparacion in reparaciones)
+            {
+                <article class="tecnico-solicitud-card">
+
+                    <div class="tecnico-card-header">
+
+                        <div>
+
+                            <span class="tecnico-solicitud-id">
+                                REPARACIÓN #@reparacion.IdReparacion
+                            </span>
+
+                            <h2>
+                                @reparacion.Dispositivo?.Marca
+                                @reparacion.Dispositivo?.Modelo
+                            </h2>
+
+                        </div>
+
+                        <span class="tecnico-estado">
+                            Estado @reparacion.IdEstado
+                        </span>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- DISPOSITIVO -->
+                    <!-- ================================= -->
+
+                    <div class="tecnico-card-seccion">
+
+                        <span class="tecnico-seccion-titulo">
+                            DISPOSITIVO
+                        </span>
+
+                        <div class="tecnico-datos">
+
+                            <div>
+
+                                <span>
+                                    Marca
+                                </span>
+
+                                <strong>
+                                    @reparacion.Dispositivo?.Marca
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Modelo
+                                </span>
+
+                                <strong>
+                                    @reparacion.Dispositivo?.Modelo
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    IMEI
+                                </span>
+
+                                <strong>
+                                    @(string.IsNullOrWhiteSpace(
+                                                                reparacion.Dispositivo?.IMEI)
+                                                                ? "No registrado"
+                                                                : reparacion.Dispositivo.IMEI)
+                                                                                          </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Color
+                                </span>
+
+                                <strong>
+                                    @(string.IsNullOrWhiteSpace(
+                                                                reparacion.Dispositivo?.Color)
+                                                                ? "No registrado"
+                                                                : reparacion.Dispositivo.Color)
+                                                                                           </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- CLIENTE -->
+                    <!-- ================================= -->
+
+                    <div class="tecnico-card-seccion">
+
+                        <span class="tecnico-seccion-titulo">
+                            CLIENTE
+                        </span>
+
+                        <div class="tecnico-cliente">
+
+                            <div class="tecnico-avatar">
+
+                                @(reparacion.Dispositivo?.Cliente?.Nombre?
+                                                        .Substring(0, 1)
+                                                        .ToUpper() ?? "?")
+
+                            </div>
+
+                            <div>
+
+                                <strong>
+
+                                    @reparacion.Dispositivo?.Cliente?.Nombre
+                                    @reparacion.Dispositivo?.Cliente?.Apellido
+
+                                </strong>
+
+                                <span>
+                                    📞
+                                    @reparacion.Dispositivo?.Cliente?.Telefono
+                                </span>
+
+                                <span>
+                                    ✉
+                                    @reparacion.Dispositivo?.Cliente?.Email
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- PROBLEMA -->
+                    <!-- ================================= -->
+
+                    <div class="tecnico-card-seccion">
+
+                        <span class="tecnico-seccion-titulo">
+                            PROBLEMA REPORTADO
+                        </span>
+
+                        <div class="tecnico-problema">
+
+                            @reparacion.ProblemaReportado
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================= -->
+                    <!-- FECHAS -->
+                    <!-- ================================= -->
+
+                    <div class="tecnico-card-fechas">
+
+                        <div>
+
+                            <span>
+                                Fecha de ingreso
+                            </span>
+
+                            <strong>
+                                @(reparacion.FechaIngreso.ToString("dd/MM/yyyy HH:mm"))
+                            </strong>
+
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Entrega estimada
+                            </span>
+
+                            <strong>
+
+                                @(reparacion.FechaEntregaEstimada.HasValue
+                                                        ? reparacion.FechaEntregaEstimada.Value
+                                                        .ToString("dd/MM/yyyy")
+                                                        : "Sin definir")
+
+                    </strong>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================= -->
+                    <!-- ACCIÓN -->
+                    <!-- ================================= -->
+
+                    <div class="tecnico-card-footer">
+
+                        <a asp-controller="Tecnico"
+                           asp-action="Detalle"
+                           asp-route-id="@reparacion.IdReparacion"
+                           class="btn-aceptar-reparacion">
+
+                            Ver reparación
+
+                        </a>
+
+                    </div>
+
+                </article>
+                }
+
+        </div>
+    }
+
+</div>

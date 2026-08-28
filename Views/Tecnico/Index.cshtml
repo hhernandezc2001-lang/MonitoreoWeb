@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Panel Técnico";
+}
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+
+            <h2 class="mb-3">
+                Bienvenido, @User.Identity?.Name
+            </h2>
+
+            <p class="text-muted">
+                Desde este panel podrás gestionar las reparaciones asignadas,
+                consultar solicitudes disponibles y actualizar avances de los equipos.
+            </p>
+
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5>Solicitudes disponibles</h5>
+
+                    <p>
+                        Consulta los equipos pendientes y acepta nuevas reparaciones.
+                    </p>
+
+                    <a asp-controller="Tecnico"
+                       asp-action="Solicitudes"
+                       class="btn btn-primary">
+                        Ver solicitudes
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5>Mis reparaciones</h5>
+
+                    <p>
+                        Consulta los equipos que tienes asignados actualmente.
+                    </p>
+
+                    <a asp-controller="Tecnico"
+                       asp-action="MisReparaciones"
+                       class="btn btn-success">
+                        Ver reparaciones
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5>Historial de avances</h5>
+
+                    <p>
+                        Revisa y actualiza el progreso de las reparaciones.
+                    </p>
+
+                    <a asp-controller="Tecnico"
+                       asp-action="Historial"
+                       class="btn btn-warning">
+                        Ver historial
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -6,7 +6,7 @@
     <div class="card shadow p-4"
          style="border-radius:15px;">
         <h2 class="mb-4">
-            Clientes registrados
+            Clientes registrados  
         </h2>
 
         <!-- FILTROS -->
@@ -89,7 +89,7 @@
                 }
 
                 const nombreCoincide = tdNombre.includes(nombre) || tdApellido.includes(nombre);
-                const estadoCoincide = estado === '' || tdEstado.includes(estado);
+                const estadoCoincide = estado === '' || tdEstado === estado;
 
                 fila.style.display = (nombreCoincide && fechaCoincide && estadoCoincide) ? '' : 'none';
             });

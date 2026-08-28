@@ -1,0 +1,925 @@
+﻿@model MonitoreoWeb.Models.ViewModels.NuevoServicioViewModel
+
+<form asp-action="Create" method="post">
+
+    <h2>Nuevo servicio</h2>
+
+    <hr />
+
+    <!-- ========================= -->
+    <!-- DATOS DEL CLIENTE -->
+    <!-- ========================= -->
+
+    <h4>Datos del cliente</h4>
+
+    <div class="mb-3">
+
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   name="tipoCliente"
+                   id="clienteExistente"
+                   value="existente"
+                   checked />
+
+            <label class="form-check-label"
+                   for="clienteExistente">
+                Cliente existente
+            </label>
+        </div>
+
+
+        <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   name="tipoCliente"
+                   id="clienteNuevo"
+                   value="nuevo" />
+
+            <label class="form-check-label"
+                   for="clienteNuevo">
+                Nuevo cliente
+            </label>
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- CLIENTE EXISTENTE -->
+    <!-- ========================= -->
+
+    <div id="seccionClienteExistente">
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Buscar cliente
+            </label>
+
+            <input type="text"
+                   id="buscadorCliente"
+                   class="form-control"
+                   placeholder="Escribe nombre, apellido, teléfono o correo..."
+                   autocomplete="off" />
+
+
+            <!-- Resultados de búsqueda -->
+            <div id="resultadosClientes"
+                 class="list-group mt-2">
+            </div>
+
+
+            <!-- Id del cliente seleccionado -->
+            <input type="hidden"
+                   asp-for="Cliente.IdCliente"
+                   id="clienteSelect" />
+
+
+            <!-- Cliente seleccionado visualmente -->
+            <div id="clienteSeleccionado"
+                 class="alert alert-success mt-3"
+                 style="display: none;">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- CLIENTE NUEVO -->
+    <!-- ========================= -->
+
+    <div id="seccionClienteNuevo"
+         style="display: none;">
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Cliente.Nombre"
+                       class="form-label">
+                    Nombre
+                </label>
+
+                <input asp-for="Cliente.Nombre"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Cliente.Apellido"
+                       class="form-label">
+                    Apellido
+                </label>
+
+                <input asp-for="Cliente.Apellido"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Cliente.Telefono"
+                       class="form-label">
+                    Teléfono
+                </label>
+
+                <input asp-for="Cliente.Telefono"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Cliente.Email"
+                       class="form-label">
+                    Correo electrónico
+                </label>
+
+                <input asp-for="Cliente.Email"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <hr />
+
+
+    <!-- ========================= -->
+    <!-- DATOS DEL DISPOSITIVO -->
+    <!-- ========================= -->
+
+    <h4>Datos del dispositivo</h4>
+
+    <div class="mb-3">
+
+        <div class="form-check">
+
+            <input class="form-check-input"
+                   type="radio"
+                   name="tipoDispositivo"
+                   id="dispositivoExistente"
+                   value="existente"
+                   checked />
+
+            <label class="form-check-label"
+                   for="dispositivoExistente">
+                Dispositivo existente
+            </label>
+
+        </div>
+
+
+        <div class="form-check">
+
+            <input class="form-check-input"
+                   type="radio"
+                   name="tipoDispositivo"
+                   id="dispositivoNuevo"
+                   value="nuevo" />
+
+            <label class="form-check-label"
+                   for="dispositivoNuevo">
+                Nuevo dispositivo
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- DISPOSITIVO EXISTENTE -->
+    <!-- ========================= -->
+
+    <div id="seccionDispositivoExistente">
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Buscar dispositivo
+            </label>
+
+            <input type="text"
+                   id="buscadorDispositivo"
+                   class="form-control"
+                   placeholder="Escribe marca, modelo o IMEI..."
+                   autocomplete="off" />
+
+
+            <!-- Resultados de búsqueda -->
+            <div id="resultadosDispositivos"
+                 class="list-group mt-2">
+            </div>
+
+
+            <!-- Id del dispositivo seleccionado -->
+            <input type="hidden"
+                   asp-for="Dispositivo.IdDispositivo"
+                   id="dispositivoSelect" />
+
+
+            <!-- Dispositivo seleccionado visualmente -->
+            <div id="dispositivoSeleccionado"
+                 class="alert alert-success mt-3"
+                 style="display: none;">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- DISPOSITIVO NUEVO -->
+    <!-- ========================= -->
+
+    <div id="seccionDispositivoNuevo"
+         style="display: none;">
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Dispositivo.Marca"
+                       class="form-label">
+                    Marca
+                </label>
+
+                <input asp-for="Dispositivo.Marca"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Dispositivo.Modelo"
+                       class="form-label">
+                    Modelo
+                </label>
+
+                <input asp-for="Dispositivo.Modelo"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Dispositivo.IMEI"
+                       class="form-label">
+                    IMEI
+                </label>
+
+                <input asp-for="Dispositivo.IMEI"
+                       class="form-control" />
+
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+
+                <label asp-for="Dispositivo.Color"
+                       class="form-label">
+                    Color
+                </label>
+
+                <input asp-for="Dispositivo.Color"
+                       class="form-control" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <hr />
+
+
+    <!-- ========================= -->
+    <!-- DATOS DE LA REPARACIÓN -->
+    <!-- ========================= -->
+
+    <h4>Datos de la reparación</h4>
+
+    <div class="mb-3">
+
+        <label asp-for="Reparacion.ProblemaReportado"
+               class="form-label">
+            Problema reportado
+        </label>
+
+        <textarea asp-for="Reparacion.ProblemaReportado"
+                  class="form-control"
+                  rows="4"
+                  placeholder="Describe el problema que presenta el dispositivo"></textarea>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+
+            <label asp-for="Reparacion.CostoEstimado"
+                   class="form-label">
+                Costo estimado
+            </label>
+
+            <input asp-for="Reparacion.CostoEstimado"
+                   type="number"
+                   step="0.01"
+                   class="form-control"
+                   placeholder="Ej. 1500.00" />
+
+        </div>
+
+
+        <div class="col-md-6 mb-3">
+
+            <label asp-for="Reparacion.FechaEntregaEstimada"
+                   class="form-label">
+                Fecha estimada de entrega
+            </label>
+
+            <input asp-for="Reparacion.FechaEntregaEstimada"
+                   type="date"
+                   class="form-control" />
+
+        </div>
+
+    </div>
+
+
+    <div class="mt-4 mb-5">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Registrar servicio
+        </button>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================= -->
+
+    <script>
+
+        // ==========================================
+        // ELEMENTOS DEL CLIENTE
+        // ==========================================
+
+        const clienteExistente =
+            document.getElementById("clienteExistente");
+
+        const clienteNuevo =
+            document.getElementById("clienteNuevo");
+
+        const seccionClienteExistente =
+            document.getElementById("seccionClienteExistente");
+
+        const seccionClienteNuevo =
+            document.getElementById("seccionClienteNuevo");
+
+        const buscadorCliente =
+            document.getElementById("buscadorCliente");
+
+        const resultadosClientes =
+            document.getElementById("resultadosClientes");
+
+        const clienteSelect =
+            document.getElementById("clienteSelect");
+
+        const clienteSeleccionado =
+            document.getElementById("clienteSeleccionado");
+
+
+        // ==========================================
+        // ELEMENTOS DEL DISPOSITIVO
+        // ==========================================
+
+        const dispositivoExistente =
+            document.getElementById("dispositivoExistente");
+
+        const dispositivoNuevo =
+            document.getElementById("dispositivoNuevo");
+
+        const seccionDispositivoExistente =
+            document.getElementById("seccionDispositivoExistente");
+
+        const seccionDispositivoNuevo =
+            document.getElementById("seccionDispositivoNuevo");
+
+        const buscadorDispositivo =
+            document.getElementById("buscadorDispositivo");
+
+        const resultadosDispositivos =
+            document.getElementById("resultadosDispositivos");
+
+        const dispositivoSelect =
+            document.getElementById("dispositivoSelect");
+
+        const dispositivoSeleccionado =
+            document.getElementById("dispositivoSeleccionado");
+
+
+        // ==========================================
+        // CLIENTE SELECCIONADO ACTUALMENTE
+        // ==========================================
+
+        let idClienteSeleccionado = null;
+
+
+        // ==========================================
+        // CLIENTE EXISTENTE
+        // ==========================================
+
+        clienteExistente.addEventListener("change", function () {
+
+            // Mostrar sección de cliente existente
+            seccionClienteExistente.style.display = "block";
+
+            // Ocultar sección de cliente nuevo
+            seccionClienteNuevo.style.display = "none";
+
+
+            // Limpiar datos de cliente existente
+            clienteSelect.value = "";
+
+            buscadorCliente.value = "";
+
+            resultadosClientes.innerHTML = "";
+
+            clienteSeleccionado.innerHTML = "";
+
+            clienteSeleccionado.style.display = "none";
+
+
+            // Limpiar cliente seleccionado
+            idClienteSeleccionado = null;
+
+
+            // Limpiar dispositivo
+            dispositivoSelect.value = "";
+
+            buscadorDispositivo.value = "";
+
+            resultadosDispositivos.innerHTML = "";
+
+            dispositivoSeleccionado.innerHTML = "";
+
+            dispositivoSeleccionado.style.display = "none";
+
+        });
+
+
+        // ==========================================
+        // CLIENTE NUEVO
+        // ==========================================
+
+        clienteNuevo.addEventListener("change", function () {
+
+            // Ocultar sección de cliente existente
+            seccionClienteExistente.style.display = "none";
+
+            // Mostrar sección de cliente nuevo
+            seccionClienteNuevo.style.display = "block";
+
+
+            // Limpiar cliente existente seleccionado
+            clienteSelect.value = "";
+
+            buscadorCliente.value = "";
+
+            resultadosClientes.innerHTML = "";
+
+            clienteSeleccionado.innerHTML = "";
+
+            clienteSeleccionado.style.display = "none";
+
+
+            // Limpiar cliente seleccionado
+            idClienteSeleccionado = null;
+
+
+            // Limpiar dispositivo existente
+            dispositivoSelect.value = "";
+
+            buscadorDispositivo.value = "";
+
+            resultadosDispositivos.innerHTML = "";
+
+            dispositivoSeleccionado.innerHTML = "";
+
+            dispositivoSeleccionado.style.display = "none";
+
+        });
+
+
+        // ==========================================
+        // DISPOSITIVO EXISTENTE
+        // ==========================================
+
+        dispositivoExistente.addEventListener("change", function () {
+
+            // Mostrar dispositivo existente
+            seccionDispositivoExistente.style.display = "block";
+
+            // Ocultar dispositivo nuevo
+            seccionDispositivoNuevo.style.display = "none";
+
+
+            // Limpiar dispositivo nuevo
+            document.getElementById("Dispositivo_Marca").value = "";
+            document.getElementById("Dispositivo_Modelo").value = "";
+            document.getElementById("Dispositivo_IMEI").value = "";
+            document.getElementById("Dispositivo_Color").value = "";
+
+        });
+
+
+        // ==========================================
+        // DISPOSITIVO NUEVO
+        // ==========================================
+
+        dispositivoNuevo.addEventListener("change", function () {
+
+            // Ocultar dispositivo existente
+            seccionDispositivoExistente.style.display = "none";
+
+            // Mostrar dispositivo nuevo
+            seccionDispositivoNuevo.style.display = "block";
+
+
+            // Limpiar dispositivo existente seleccionado
+            dispositivoSelect.value = "";
+
+            buscadorDispositivo.value = "";
+
+            resultadosDispositivos.innerHTML = "";
+
+            dispositivoSeleccionado.innerHTML = "";
+
+            dispositivoSeleccionado.style.display = "none";
+
+        });
+
+
+        // ==========================================
+        // BUSCADOR DINÁMICO DE CLIENTES
+        // ==========================================
+
+        buscadorCliente.addEventListener("input", function () {
+
+            const termino =
+                this.value.trim();
+
+
+            // Limpiar resultados anteriores
+            resultadosClientes.innerHTML = "";
+
+
+            // Si hay menos de 2 caracteres,
+            // no realizar búsqueda
+            if (termino.length < 2) {
+
+                return;
+
+            }
+
+
+            // Consultar servidor
+            fetch(
+                `/Servicio/BuscarClientes?termino=${encodeURIComponent(termino)}`
+            )
+
+                .then(response => response.json())
+
+                .then(clientes => {
+
+                    // Limpiar resultados
+                    resultadosClientes.innerHTML = "";
+
+
+                    // ==========================================
+                    // SIN RESULTADOS
+                    // ==========================================
+
+                    if (clientes.length === 0) {
+
+                        const mensaje =
+                            document.createElement("div");
+
+                        mensaje.className =
+                            "list-group-item text-muted";
+
+                        mensaje.textContent =
+                            "No se encontraron clientes.";
+
+                        resultadosClientes.appendChild(
+                            mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    // ==========================================
+                    // MOSTRAR CLIENTES
+                    // ==========================================
+
+                    clientes.forEach(cliente => {
+
+                        const elemento =
+                            document.createElement("button");
+
+                        elemento.type =
+                            "button";
+
+                        elemento.className =
+                            "list-group-item list-group-item-action";
+
+
+                        elemento.innerHTML = `
+                            <strong>${cliente.nombre}</strong><br>
+                            <small>
+                                Tel: ${cliente.telefono || "Sin teléfono"}
+                                &nbsp; | &nbsp;
+                                Email: ${cliente.email || "Sin correo"}
+                            </small>
+                        `;
+
+
+                        // ==========================================
+                        // SELECCIONAR CLIENTE
+                        // ==========================================
+
+                        elemento.addEventListener(
+                            "click",
+                            function () {
+
+                                // Guardar IdCliente
+                                clienteSelect.value =
+                                    cliente.id;
+
+
+                                // Guardar cliente actual
+                                idClienteSeleccionado =
+                                    cliente.id;
+
+
+                                // Mostrar cliente seleccionado
+                                clienteSeleccionado.innerHTML = `
+                                    <strong>Cliente seleccionado:</strong><br>
+                                    ${cliente.nombre}<br>
+                                    <small>
+                                        Tel: ${cliente.telefono || "Sin teléfono"}
+                                        &nbsp; | &nbsp;
+                                        Email: ${cliente.email || "Sin correo"}
+                                    </small>
+                                `;
+
+
+                                clienteSeleccionado.style.display =
+                                    "block";
+
+
+                                // Mostrar nombre en buscador
+                                buscadorCliente.value =
+                                    cliente.nombre;
+
+
+                                // Ocultar resultados
+                                resultadosClientes.innerHTML =
+                                    "";
+
+
+                                // ==========================================
+                                // LIMPIAR DISPOSITIVO ANTERIOR
+                                // ==========================================
+
+                                dispositivoSelect.value = "";
+
+                                buscadorDispositivo.value = "";
+
+                                resultadosDispositivos.innerHTML = "";
+
+                                dispositivoSeleccionado.innerHTML = "";
+
+                                dispositivoSeleccionado.style.display =
+                                    "none";
+
+                            }
+                        );
+
+
+                        resultadosClientes.appendChild(
+                            elemento
+                        );
+
+                    });
+
+                })
+
+                .catch(error => {
+
+                    console.error(
+                        "Error al buscar clientes:",
+                        error
+                    );
+
+                });
+
+        });
+
+
+        // ==========================================
+        // BUSCADOR DINÁMICO DE DISPOSITIVOS
+        // ==========================================
+
+        buscadorDispositivo.addEventListener("input", function () {
+
+            const termino =
+                this.value.trim();
+
+
+            // Limpiar resultados anteriores
+            resultadosDispositivos.innerHTML = "";
+
+
+            // ==========================================
+            // VALIDAR CLIENTE
+            // ==========================================
+
+            if (!idClienteSeleccionado) {
+
+                return;
+
+            }
+
+
+            // Si hay menos de 2 caracteres,
+            // no realizar búsqueda
+            if (termino.length < 2) {
+
+                return;
+
+            }
+
+
+            // ==========================================
+            // CONSULTAR SERVIDOR
+            // ==========================================
+
+            fetch(
+                `/Servicio/BuscarDispositivos?idCliente=${idClienteSeleccionado}&termino=${encodeURIComponent(termino)}`
+            )
+
+                .then(response => response.json())
+
+                .then(dispositivos => {
+
+                    // Limpiar resultados
+                    resultadosDispositivos.innerHTML = "";
+
+
+                    // ==========================================
+                    // SIN RESULTADOS
+                    // ==========================================
+
+                    if (dispositivos.length === 0) {
+
+                        const mensaje =
+                            document.createElement("div");
+
+                        mensaje.className =
+                            "list-group-item text-muted";
+
+                        mensaje.textContent =
+                            "No se encontraron dispositivos.";
+
+                        resultadosDispositivos.appendChild(
+                            mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    // ==========================================
+                    // MOSTRAR DISPOSITIVOS
+                    // ==========================================
+
+                    dispositivos.forEach(dispositivo => {
+
+                        const elemento =
+                            document.createElement("button");
+
+                        elemento.type =
+                            "button";
+
+                        elemento.className =
+                            "list-group-item list-group-item-action";
+
+
+                        elemento.innerHTML = `
+                            <strong>
+                                ${dispositivo.marca}
+                                ${dispositivo.modelo}
+                            </strong>
+                            <br>
+                            <small>
+                                IMEI:
+                                ${dispositivo.imei || "Sin IMEI"}
+                            </small>
+                        `;
+
+
+                        // ==========================================
+                        // SELECCIONAR DISPOSITIVO
+                        // ==========================================
+
+                        elemento.addEventListener(
+                            "click",
+                            function () {
+
+                                // Guardar IdDispositivo
+                                dispositivoSelect.value =
+                                    dispositivo.id;
+
+
+                                // Mostrar dispositivo seleccionado
+                                dispositivoSeleccionado.innerHTML = `
+                                    <strong>Dispositivo seleccionado:</strong><br>
+                                    ${dispositivo.marca}
+                                    ${dispositivo.modelo}<br>
+                                    <small>
+                                        IMEI:
+                                        ${dispositivo.imei || "Sin IMEI"}
+                                    </small>
+                                `;
+
+
+                                dispositivoSeleccionado.style.display =
+                                    "block";
+
+
+                                // Mostrar dispositivo en buscador
+                                buscadorDispositivo.value =
+                                    `${dispositivo.marca} ${dispositivo.modelo}`;
+
+
+                                // Ocultar resultados
+                                resultadosDispositivos.innerHTML =
+                                    "";
+
+                            }
+                        );
+
+
+                        resultadosDispositivos.appendChild(
+                            elemento
+                        );
+
+                    });
+
+                })
+
+                .catch(error => {
+
+                    console.error(
+                        "Error al buscar dispositivos:",
+                        error
+                    );
+
+                });
+
+        });
+
+    </script>
+
+</form>

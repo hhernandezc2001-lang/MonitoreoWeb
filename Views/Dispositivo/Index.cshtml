@@ -1,0 +1,583 @@
+﻿@model IEnumerable<MonitoreoWeb.Models.ViewModels.DispositivoRegistradoViewModel>
+
+@{
+    var gruposPorMarca = Model
+        .GroupBy(d => d.Marca)
+        .OrderBy(g => g.Key)
+        .ToList();
+}
+
+<div class="dispositivos-page">
+
+    <!-- ========================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================== -->
+
+    <div class="dispositivos-header">
+
+        <div>
+
+            <h1>
+                Dispositivos registrados
+            </h1>
+
+            <p>
+                Dispositivos asociados a clientes registrados.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- BUSCADOR -->
+    <!-- ========================================== -->
+
+    <div class="dispositivos-filtros">
+
+        <div class="buscador-dispositivos">
+
+            <span class="buscador-icono">
+                🔍
+            </span>
+
+            <input type="text"
+                   id="buscadorDispositivos"
+                   class="buscador-input"
+                   placeholder="Buscar por marca, modelo, IMEI o cliente..."
+                   autocomplete="off" />
+
+        </div>
+
+
+        <!-- ====================================== -->
+        <!-- FILTROS POR MARCA -->
+        <!-- ====================================== -->
+
+        <div class="filtros-marcas">
+
+            <button type="button"
+                    class="filtro-marca active"
+                    data-marca="todas">
+
+                Todas
+
+            </button>
+
+
+            @foreach (var grupo in gruposPorMarca)
+            {
+                <button type="button"
+                        class="filtro-marca"
+                        data-marca="@grupo.Key.ToLowerInvariant()">
+
+                    @grupo.Key
+
+                </button>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- RESUMEN -->
+    <!-- ========================================== -->
+
+    <div class="dispositivos-resumen">
+
+        <div class="resumen-card">
+
+            <span class="resumen-titulo">
+                Total de dispositivos
+            </span>
+
+            <strong id="contadorDispositivos">
+                @Model.Count()
+            </strong>
+
+        </div>
+
+
+        <div class="resumen-card">
+
+            <span class="resumen-titulo">
+                Marcas registradas
+            </span>
+
+            <strong id="contadorMarcas">
+                @gruposPorMarca.Count()
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MENSAJE SIN RESULTADOS -->
+    <!-- ========================================== -->
+
+    <div id="sinResultados"
+         class="sin-resultados"
+         style="display: none;">
+
+        <div class="sin-resultados-icono">
+            🔍
+        </div>
+
+        <h3>
+            No se encontraron dispositivos
+        </h3>
+
+        <p>
+            Intenta buscar con otro término o selecciona otra marca.
+        </p>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- DISPOSITIVOS AGRUPADOS POR MARCA -->
+    <!-- ========================================== -->
+
+    <div id="contenedorDispositivos">
+
+        @foreach (var grupo in gruposPorMarca)
+        {
+            <section class="marca-section"
+                     data-marca-seccion="@grupo.Key.ToLowerInvariant()">
+
+                <!-- ====================================== -->
+                <!-- ENCABEZADO DE MARCA -->
+                <!-- ====================================== -->
+
+                <div class="marca-header">
+
+                    <div>
+
+                        <h2>
+                            @grupo.Key
+                        </h2>
+
+                        <span class="contador-marca">
+                            @grupo.Count()
+                            @(grupo.Count() == 1
+                                                    ? "dispositivo"
+                                                    : "dispositivos")
+                    </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ====================================== -->
+                <!-- TARJETAS -->
+                <!-- ====================================== -->
+
+                <div class="dispositivos-grid">
+
+                @foreach (var dispositivo in grupo)
+                    {
+                        <!--
+                            Guardamos toda la información que queremos
+                            utilizar para realizar la búsqueda.
+                        -->
+
+                        <div class="dispositivo-card"
+                             data-marca="@dispositivo.Marca.ToLowerInvariant()"
+                             data-busqueda="
+                                         @dispositivo.Marca
+                                         @dispositivo.Modelo
+                                         @dispositivo.IMEI
+                                         @dispositivo.NombreCliente
+                                         @dispositivo.ApellidoCliente
+                                         @dispositivo.TelefonoCliente
+                                         @dispositivo.EmailCliente
+                                     ">
+
+
+                            <!-- ================================== -->
+                            <!-- ENCABEZADO DEL DISPOSITIVO -->
+                            <!-- ================================== -->
+
+                            <div class="dispositivo-card-header">
+
+                                <div>
+
+                                    <span class="dispositivo-marca">
+                                        @dispositivo.Marca
+                                    </span>
+
+                                    <h3>
+                                        @dispositivo.Modelo
+                                    </h3>
+
+                                </div>
+
+
+                                <span class="dispositivo-id">
+                                    ID #@dispositivo.IdDispositivo
+                                </span>
+
+                            </div>
+
+
+                            <!-- ================================== -->
+                            <!-- DATOS DEL DISPOSITIVO -->
+                            <!-- ================================== -->
+
+                            <div class="dispositivo-datos">
+
+                                <!-- IMEI -->
+
+                                <div class="dato">
+
+                                    <span>
+                                        IMEI
+                                    </span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(dispositivo.IMEI)
+                                                                        ? "No registrado"
+                                                                        : dispositivo.IMEI)
+                                                                                       </strong>
+
+                                </div>
+
+
+                                <!-- COLOR -->
+
+                                <div class="dato">
+
+                                    <span>
+                                        Color
+                                    </span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(dispositivo.Color)
+                                                                        ? "No registrado"
+                                                                        : dispositivo.Color)
+                            </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ================================== -->
+                            <!-- INFORMACIÓN DEL CLIENTE -->
+                            <!-- ================================== -->
+
+                            <div class="cliente-dispositivo">
+
+                                <div class="cliente-titulo">
+                                    Cliente
+                                </div>
+
+
+                                <!-- NOMBRE -->
+
+                                <div class="cliente-nombre">
+
+                                    @dispositivo.NombreCliente
+                                    @dispositivo.ApellidoCliente
+
+                                </div>
+
+
+                                <!-- TELÉFONO -->
+
+                                <div class="cliente-dato">
+
+                                    📞
+                                    @dispositivo.TelefonoCliente
+
+                                </div>
+
+
+                                <!-- CORREO -->
+
+                                <div class="cliente-dato">
+
+                                    ✉
+                                    @dispositivo.EmailCliente
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ================================== -->
+                            <!-- ACCIONES -->
+                            <!-- ================================== -->
+
+                            <div class="dispositivo-acciones">
+
+                                <form asp-controller="Dispositivo"
+                                      asp-action="Desactivar"
+                                      method="post"
+                                      onsubmit="return confirm('¿Estás seguro de que deseas desactivar este dispositivo?');">
+
+                                    @Html.AntiForgeryToken()
+
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@dispositivo.IdDispositivo" />
+
+
+                                    <button type="submit"
+                                            class="btn-desactivar">
+
+                                        Desactivar dispositivo
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+
+                        </div>
+                                }
+
+                </div>
+
+            </section>
+        }
+
+    </div>
+
+</div>
+
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT DEL FILTRO -->
+<!-- ========================================== -->
+@section Scripts {
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // ==========================================
+            // ELEMENTOS
+            // ==========================================
+
+            const buscador =
+                document.getElementById("buscadorDispositivos");
+
+            const botonesMarca =
+                document.querySelectorAll(".filtro-marca");
+
+            const tarjetas =
+                document.querySelectorAll(".dispositivo-card");
+
+            const seccionesMarca =
+                document.querySelectorAll(".marca-section");
+
+            const contadorDispositivos =
+                document.getElementById("contadorDispositivos");
+
+            const contadorMarcas =
+                document.getElementById("contadorMarcas");
+
+            const sinResultados =
+                document.getElementById("sinResultados");
+
+
+            // ==========================================
+            // MARCA SELECCIONADA
+            // ==========================================
+
+            let marcaSeleccionada = "todas";
+
+
+            // ==========================================
+            // FUNCIÓN PRINCIPAL DE FILTRADO
+            // ==========================================
+
+            function aplicarFiltros() {
+
+                const textoBuscado =
+                    buscador.value
+                        .toLowerCase()
+                        .trim();
+
+
+                let dispositivosVisibles = 0;
+
+                let marcasVisibles = 0;
+
+
+                // ======================================
+                // RECORRER TARJETAS
+                // ======================================
+
+                tarjetas.forEach(function (tarjeta) {
+
+                    const texto =
+                        tarjeta.dataset.busqueda
+                            .toLowerCase();
+
+                    const marca =
+                        tarjeta.dataset.marca
+                            .toLowerCase();
+
+
+                    // Coincidencia de texto
+
+                    const coincideTexto =
+                        texto.includes(textoBuscado);
+
+
+                    // Coincidencia de marca
+
+                    const coincideMarca =
+                        marcaSeleccionada === "todas" ||
+                        marca === marcaSeleccionada;
+
+
+                    // Mostrar / ocultar
+
+                    if (coincideTexto && coincideMarca) {
+
+                        tarjeta.style.display = "";
+
+                        dispositivosVisibles++;
+
+                    }
+                    else {
+
+                        tarjeta.style.display = "none";
+
+                    }
+
+                });
+
+
+                // ======================================
+                // MOSTRAR / OCULTAR SECCIONES
+                // ======================================
+
+                seccionesMarca.forEach(function (seccion) {
+
+                    const tarjetasDeSeccion =
+                        seccion.querySelectorAll(".dispositivo-card");
+
+                    let tarjetasVisiblesEnSeccion = 0;
+
+
+                    tarjetasDeSeccion.forEach(function (tarjeta) {
+
+                        if (tarjeta.style.display !== "none") {
+
+                            tarjetasVisiblesEnSeccion++;
+
+                        }
+
+                    });
+
+
+                    if (tarjetasVisiblesEnSeccion > 0) {
+
+                        seccion.style.display = "";
+
+                        marcasVisibles++;
+
+                    }
+                    else {
+
+                        seccion.style.display = "none";
+
+                    }
+
+                });
+
+
+                // ======================================
+                // ACTUALIZAR CONTADORES
+                // ======================================
+
+                contadorDispositivos.textContent =
+                    dispositivosVisibles;
+
+                contadorMarcas.textContent =
+                    marcasVisibles;
+
+
+                // ======================================
+                // MENSAJE SIN RESULTADOS
+                // ======================================
+
+                if (dispositivosVisibles === 0) {
+
+                    sinResultados.style.display = "block";
+
+                }
+                else {
+
+                    sinResultados.style.display = "none";
+
+                }
+
+            }
+
+
+            // ==========================================
+            // BUSCADOR
+            // ==========================================
+
+            buscador.addEventListener("input", function () {
+
+                aplicarFiltros();
+
+            });
+
+
+            // ==========================================
+            // BOTONES DE MARCA
+            // ==========================================
+
+            botonesMarca.forEach(function (boton) {
+
+                boton.addEventListener("click", function () {
+
+                    // Quitar active de todos
+
+                    botonesMarca.forEach(function (otroBoton) {
+
+                        otroBoton.classList.remove("active");
+
+                    });
+
+
+                    // Activar botón seleccionado
+
+                    boton.classList.add("active");
+
+
+                    // Obtener marca
+
+                    marcaSeleccionada =
+                        boton.dataset.marca;
+
+
+                    // Aplicar filtros
+
+                    aplicarFiltros();
+
+                });
+
+            });
+
+
+        });
+
+    </script>
+
+}

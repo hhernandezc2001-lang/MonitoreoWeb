@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Consultar reparación";
+}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+
+        <h1>
+            Consultar reparación
+        </h1>
+
+        <p>
+            Ingresa el código de consulta que recibiste
+            para conocer el estado de tu reparación.
+        </p>
+
+    </div>
+
+
+    <div class="card mx-auto"
+         style="max-width: 500px;">
+
+        <div class="card-body">
+
+            <h4 class="card-title mb-3">
+                Código de consulta
+            </h4>
+
+
+            <form asp-controller="Portal"
+                  asp-action="Consultar"
+                  method="post">
+
+                <div class="mb-3">
+
+                    <input type="text"
+                           name="token"
+                           class="form-control"
+                           placeholder="Ejemplo: REP-123456" />
+
+                </div>
+
+
+                <button type="submit"
+                        class="btn btn-primary w-100">
+
+                    Consultar reparación
+
+                </button>
+
+            </form>
+
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger mt-3">
+
+                    @foreach (var error in ViewData.ModelState.Values
+                                    .SelectMany(v => v.Errors))
+                    {
+                        <div>
+                            @error.ErrorMessage
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

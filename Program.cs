@@ -1,8 +1,11 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using MonitoreoWeb.Data;
+using MonitoreoWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

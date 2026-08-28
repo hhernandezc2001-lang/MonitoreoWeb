@@ -70,28 +70,22 @@
 
                 <nav class="admin-menu">
 
-                    <a class="admin-menu-link @Active("Admin", "Inicio")"
-                       asp-controller="Admin"
-                       asp-action="Inicio">
-                        
-                    </a>
-
                     <a class="admin-menu-link @Active("Dashboard", "Index")"
                        asp-controller="Dashboard"
                        asp-action="Index">
                         Dashboards
                     </a>
 
-                    <a class="admin-menu-link @Active("Admin", "DispositivosReparacion")"
-                       asp-controller="Admin"
-                       asp-action="DispositivosReparacion">
-                        Dispositivos en reparación
-                    </a>
-
                     <a class="admin-menu-link @Active("Admin", "Tecnicos")"
                        asp-controller="Admin"
                        asp-action="Tecnicos">
-                        Técnicos dados de alta
+                        Técnicos registrados
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "Administradores")"
+                       asp-controller="Admin"
+                       asp-action="Administradores">
+                        Administradores dados de alta
                     </a>
 
                     <a class="admin-menu-link @Active("Auth", "Registrar")"
@@ -112,16 +106,41 @@
                         Clientes registrados
                     </a>
 
-                    <a class="admin-menu-link @Active("Admin", "GenerarToken")"
-                       asp-controller="Admin"
-                       asp-action="GenerarToken">
-                        Generación de token único
+                    <!-- NUEVO -->
+
+                    <a class="admin-menu-link @Active("Dispositivo", "Create")"
+                       asp-controller="Dispositivo"
+                       asp-action="Create">
+                        Registrar dispositivo
                     </a>
 
-                    <a class="admin-menu-link @Active("Admin", "Activaciones")"
+                    <a class="admin-menu-link @Active("Dispositivo", "Index")"
+                       asp-controller="Dispositivo"
+                       asp-action="Index">
+                        Dispositivos registrados
+                    </a>
+
+                    <!-- FIN NUEVO -->
+
+                    <a class="admin-menu-link @Active("Reparacion", "Index")"
+                       asp-controller="Reparacion"
+                       asp-action="Index">
+                        Solicitudes de reparación
+                    </a>
+
+                    <a class="admin-menu-link @Active("Admin", "Reparaciones")"
                        asp-controller="Admin"
-                       asp-action="Activaciones">
-                        Activar/Desactivar Tokens y Técnicos
+                       asp-action="Reparaciones">
+                        Ver reparaciones
+                    </a>
+
+                    <!-- APARTADO PARA EL  ---- NUEVO SERVICIO ---- -->
+
+                    <a class="admin-new-service"
+                       asp-controller="Servicio"
+                       asp-action="Create">
+                        <span class="admin-new-service-icon">+</span>
+                        <span>Nuevo servicio</span>
                     </a>
 
                 </nav>
@@ -195,6 +214,12 @@
                        asp-controller="Admin"
                        asp-action="DispositivosReparacion">
                         Equipos asignados
+                    </a>
+
+                    <a class="admin-menu-link"
+                       asp-controller="Tecnico"
+                       asp-action="Solicitudes">
+                        Solicitudes disponibles
                     </a>
 
                 </nav>

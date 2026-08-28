@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<MonitoreoWeb.Models.Usuario>
 @{
-    ViewData["Title"] = "Técnicos dados de alta";
+    ViewData["Title"] = "Administradores dados de alta";
 }
 <div class="admin-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">Técnicos dados de alta</h2>
+            <h2 class="mb-1">Administradores dados de alta</h2>
             <p class="text-muted mb-0">
-                Lista de técnicos activos registrados en el sistema.
+                Lista de administradores registrados en el sistema.
             </p>
         </div>
     </div>
@@ -45,19 +45,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var tecnico in Model)
+                    @foreach (var admin in Model)
                     {
                         <tr>
-                            <td>@tecnico.IdUsuario</td>
-                            <td>@tecnico.Nombre</td>
-                            <td>@tecnico.Email</td>
+                            <td>@admin.IdUsuario</td>
+                            <td>@admin.Nombre</td>
+                            <td>@admin.Email</td>
                             <td>
-                                <span class="badge bg-info text-dark">
-                                    @tecnico.Rol
+                                <span class="badge bg-warning text-dark">
+                                    @admin.Rol
                                 </span>
                             </td>
                             <td>
-                                @if (tecnico.Activo)
+                                @if (admin.Activo)
                                 {
                                     <span class="badge bg-success">Activo</span>
                                 }
@@ -66,7 +66,7 @@
                                     <span class="badge bg-danger">Inactivo</span>
                                 }
                             </td>
-                            <td>@tecnico.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                            <td>@admin.FechaCreacion.ToString("dd/MM/yyyy")</td>
                         </tr>
                     }
                 </tbody>
@@ -76,7 +76,7 @@
     else
     {
         <div class="alert alert-warning">
-            No hay técnicos activos registrados.
+            No hay administradores registrados.
         </div>
     }
 </div>
@@ -94,7 +94,6 @@
                 const tdFecha  = fila.cells[5].textContent.trim();
                 const tdEstado = fila.cells[4].textContent.toLowerCase().trim();
 
-                // Convertir fecha de tabla (dd/MM/yyyy) a yyyy-MM-dd para comparar
                 let fechaCoincide = true;
                 if (fecha) {
                     const partes = tdFecha.split('/');

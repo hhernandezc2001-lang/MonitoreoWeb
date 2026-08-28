@@ -1,0 +1,551 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+<div class="tecnico-solicitudes-page">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="tecnico-solicitudes-header">
+
+        <div>
+
+            <span class="tecnico-subtitulo">
+                PANEL DEL TÉCNICO
+            </span>
+
+            <h1>
+                Reparación #@Model.IdReparacion
+            </h1>
+
+            <p>
+                Detalle de la reparación asignada.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- ESTADO -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-seccion">
+
+        <span class="tecnico-seccion-titulo">
+            ESTADO ACTUAL
+        </span>
+
+        @if (Model.IdEstado == 2)
+        {
+            <h2>
+                Aceptada
+            </h2>
+
+            <p>
+                La reparación ha sido aceptada por el técnico.
+            </p>
+
+            <form asp-controller="Tecnico"
+                  asp-action="IniciarDiagnostico"
+                  asp-route-id="@Model.IdReparacion"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn-aceptar-reparacion">
+
+                    Iniciar diagnóstico
+
+                </button>
+
+            </form>
+        }
+        else if (Model.IdEstado == 3)
+        {
+            <h2>
+                Diagnóstico
+            </h2>
+
+            <p>
+                Registra el diagnóstico encontrado durante la revisión
+                del dispositivo.
+            </p>
+
+            <form asp-controller="Tecnico"
+                  asp-action="GuardarDiagnostico"
+                  asp-route-id="@Model.IdReparacion"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Diagnóstico
+                    </label>
+
+                    <textarea name="diagnostico"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Describe el diagnóstico realizado...">@Model.Diagnostico</textarea>
+
+                </div>
+
+                <button type="submit"
+                        class="btn-aceptar-reparacion">
+
+                    Guardar diagnóstico
+
+                </button>
+
+            </form>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Diagnostico))
+            {
+                <div class="mt-4">
+
+                    <h3>
+                        ¿Qué procede?
+                    </h3>
+
+                    <p>
+                        Selecciona el siguiente paso para esta reparación.
+                    </p>
+
+
+                    <div class="d-flex gap-2">
+
+                        <!-- ============================== -->
+                        <!-- ESPERANDO REFACCIÓN -->
+                        <!-- ============================== -->
+
+                        <form asp-controller="Tecnico"
+                              asp-action="EsperarRefaccion"
+                              asp-route-id="@Model.IdReparacion"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-warning">
+
+                                Requiere refacción
+
+                            </button>
+
+                        </form>
+
+
+                        <!-- ============================== -->
+                        <!-- EN REPARACIÓN -->
+                        <!-- ============================== -->
+
+                        <form asp-controller="Tecnico"
+                              asp-action="IniciarReparacion"
+                              asp-route-id="@Model.IdReparacion"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-success">
+
+                                Continuar con reparación
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+            }
+        }
+        else if (Model.IdEstado == 4)
+        {
+            <h2>
+                Esperando Refacción
+            </h2>
+
+            <p>
+                Esta reparación se encuentra detenida
+                a la espera de una refacción.
+            </p>
+
+            <form asp-controller="Tecnico"
+                  asp-action="RefaccionRecibida"
+                  asp-route-id="@Model.IdReparacion"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-success">
+
+                    Refacción recibida
+
+                </button>
+
+            </form>
+        }
+        else if (Model.IdEstado == 5)
+        {
+            <h2>
+                En Reparación
+            </h2>
+
+            <p>
+                El técnico se encuentra trabajando
+                actualmente en el dispositivo.
+            </p>
+
+            <form asp-controller="Tecnico"
+                  asp-action="EnviarAPruebas"
+                  asp-route-id="@Model.IdReparacion"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Descripción del trabajo realizado
+                    </label>
+
+                    <textarea name="descripcionAvance"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Describe el trabajo realizado antes de enviar a pruebas...">
+            </textarea>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Fotos de evidencia
+                    </label>
+
+                    <input type="file"
+                           name="fotos"
+                           class="form-control"
+                           multiple
+                           accept="image/*" />
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    Enviar a pruebas
+
+                </button>
+
+            </form>
+        }
+        else if (Model.IdEstado == 6)
+        {
+            <h2>
+                En Pruebas
+            </h2>
+
+            <p>
+                La reparación ha sido realizada.
+                Realiza las pruebas necesarias para comprobar
+                el correcto funcionamiento del dispositivo.
+            </p>
+
+            <div class="mt-4">
+
+                <h3>
+                    Resultado de las pruebas
+                </h3>
+
+                <p>
+                    Selecciona el resultado correspondiente.
+                </p>
+
+
+                <div class="d-flex gap-2">
+
+                    <!-- ============================== -->
+                    <!-- PRUEBAS SATISFACTORIAS -->
+                    <!-- ============================== -->
+
+                    <form asp-controller="Tecnico"
+                          asp-action="PruebasSatisfactorias"
+                          asp-route-id="@Model.IdReparacion"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-success">
+
+                            Pruebas satisfactorias
+
+                        </button>
+
+                    </form>
+
+
+                    <!-- ============================== -->
+                    <!-- PRUEBAS NO SATISFACTORIAS -->
+                    <!-- ============================== -->
+
+                    <form asp-controller="Tecnico"
+                          asp-action="PruebasNoSatisfactorias"
+                          asp-route-id="@Model.IdReparacion"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-danger">
+
+                            Pruebas no satisfactorias
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        }
+        else if (Model.IdEstado == 7)
+        {
+            <h2>
+                Reparación Terminada
+            </h2>
+
+            <p>
+                Las pruebas fueron satisfactorias y la reparación
+                ha sido concluida correctamente.
+            </p>
+
+            <div class="mt-3">
+
+                <strong>
+                    Fecha de terminación:
+                </strong>
+
+                <span>
+                    @(Model.FechaEntregaReal.HasValue
+                                    ? Model.FechaEntregaReal.Value
+                                    .ToString("dd/MM/yyyy HH:mm")
+                                    : "No registrada")
+            </span>
+
+            </div>
+                }
+        else
+        {
+            <h2>
+                Estado @Model.IdEstado
+            </h2>
+        }
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- DISPOSITIVO -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-seccion">
+
+        <span class="tecnico-seccion-titulo">
+            DISPOSITIVO
+        </span>
+
+        <div class="tecnico-datos">
+
+            <div>
+
+                <span>
+                    Marca
+                </span>
+
+                <strong>
+                    @Model.Dispositivo?.Marca
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Modelo
+                </span>
+
+                <strong>
+                    @Model.Dispositivo?.Modelo
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    IMEI
+                </span>
+
+                <strong>
+                    @(string.IsNullOrWhiteSpace(Model.Dispositivo?.IMEI)
+                                        ? "No registrado"
+                                        : Model.Dispositivo.IMEI)
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Color
+                </span>
+
+                <strong>
+                    @(string.IsNullOrWhiteSpace(Model.Dispositivo?.Color)
+                                        ? "No registrado"
+                                        : Model.Dispositivo.Color)
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- CLIENTE -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-seccion">
+
+        <span class="tecnico-seccion-titulo">
+            CLIENTE
+        </span>
+
+        <div class="tecnico-cliente">
+
+            <div class="tecnico-avatar">
+
+                @(Model.Dispositivo?.Cliente?.Nombre?
+                                .Substring(0, 1)
+                                .ToUpper() ?? "?")
+
+            </div>
+
+            <div>
+
+                <strong>
+
+                    @Model.Dispositivo?.Cliente?.Nombre
+                    @Model.Dispositivo?.Cliente?.Apellido
+
+                </strong>
+
+                <span>
+                    📞 @Model.Dispositivo?.Cliente?.Telefono
+                </span>
+
+                <span>
+                    ✉ @Model.Dispositivo?.Cliente?.Email
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- PROBLEMA -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-seccion">
+
+        <span class="tecnico-seccion-titulo">
+            PROBLEMA REPORTADO
+        </span>
+
+        <div class="tecnico-problema">
+
+            @Model.ProblemaReportado
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FECHAS -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-fechas">
+
+        <div>
+
+            <span>
+                Fecha de ingreso
+            </span>
+
+            <strong>
+                @Model.FechaIngreso.ToString("dd/MM/yyyy HH:mm")
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+                Entrega estimada
+            </span>
+
+            <strong>
+
+                @(Model.FechaEntregaEstimada.HasValue
+                                ? Model.FechaEntregaEstimada.Value
+                                .ToString("dd/MM/yyyy")
+                                : "Sin definir")
+
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- VOLVER -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-footer">
+
+        <a asp-controller="Tecnico"
+           asp-action="MisReparaciones"
+           class="btn-aceptar-reparacion">
+
+            Volver a mis reparaciones
+
+        </a>
+
+    </div>
+
+</div>

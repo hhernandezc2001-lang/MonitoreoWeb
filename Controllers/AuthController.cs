@@ -100,9 +100,8 @@ namespace MonitoreoWeb.Controllers
             }
             else if (usuario.Rol == "Tecnico")
             {
-                return RedirectToAction("Inicio", "Tecnico");
+                return RedirectToAction("Index", "Tecnico");
             }
-
             return RedirectToAction("Login");
         }
 
@@ -185,17 +184,10 @@ namespace MonitoreoWeb.Controllers
                 var usuario = new Usuario
                 {
                     Nombre = model.Nombre,
-
                     Email = model.Email,
-
                     PasswordHash = "",
-
-                    Rol = string.IsNullOrEmpty(model.Rol)
-                        ? "Usuario"
-                        : model.Rol,
-
-                    Activo = true,
-
+                    Rol = string.IsNullOrEmpty(model.Rol) ? "Usuario" : model.Rol,
+                    Activo = model.Activo, // ← este es el cambio
                     FechaCreacion = DateTime.Now
                 };
 
