@@ -147,8 +147,12 @@
 
         @foreach (var grupo in gruposPorMarca)
         {
+            var dispositivosDelGrupo = grupo.ToList();
+
             <section class="marca-section"
-                     data-marca-seccion="@grupo.Key.ToLowerInvariant()">
+                     data-marca-seccion="@grupo.Key.ToLowerInvariant()"
+                     data-total="@dispositivosDelGrupo.Count"
+                     data-expandida="false">
 
                 <!-- ====================================== -->
                 <!-- ENCABEZADO DE MARCA -->
@@ -163,13 +167,19 @@
                         </h2>
 
                         <span class="contador-marca">
-                            @grupo.Count()
-                            @(grupo.Count() == 1
+                            @dispositivosDelGrupo.Count
+                            @(dispositivosDelGrupo.Count == 1
                                                     ? "dispositivo"
                                                     : "dispositivos")
                     </span>
 
                     </div>
+
+
+                    <button type="button"
+                            class="btn-ver-dispositivos">
+                        Ver dispositivos
+                    </button>
 
                 </div>
 
@@ -178,9 +188,10 @@
                 <!-- TARJETAS -->
                 <!-- ====================================== -->
 
-                <div class="dispositivos-grid">
+                <div class="dispositivos-grid"
+                     style="display: none;">
 
-                @foreach (var dispositivo in grupo)
+                @foreach (var dispositivo in dispositivosDelGrupo)
                     {
                         <!--
                             Guardamos toda la información que queremos
@@ -190,14 +201,14 @@
                         <div class="dispositivo-card"
                              data-marca="@dispositivo.Marca.ToLowerInvariant()"
                              data-busqueda="
-                                         @dispositivo.Marca
-                                         @dispositivo.Modelo
-                                         @dispositivo.IMEI
-                                         @dispositivo.NombreCliente
-                                         @dispositivo.ApellidoCliente
-                                         @dispositivo.TelefonoCliente
-                                         @dispositivo.EmailCliente
-                                     ">
+                                                 @dispositivo.Marca
+                                                 @dispositivo.Modelo
+                                                 @dispositivo.IMEI
+                                                 @dispositivo.NombreCliente
+                                                 @dispositivo.ApellidoCliente
+                                                 @dispositivo.TelefonoCliente
+                                                 @dispositivo.EmailCliente
+                                             ">
 
 
                             <!-- ================================== -->
@@ -356,7 +367,7 @@
 
 
 <!-- ========================================== -->
-<!-- JAVASCRIPT DEL FILTRO -->
+<!-- JAVASCRIPT DEL FILTRO Y COLAPSO -->
 <!-- ========================================== -->
 @section Scripts {
 
@@ -373,9 +384,6 @@
 
             const botonesMarca =
                 document.querySelectorAll(".filtro-marca");
-
-            const tarjetas =
-                document.querySelectorAll(".dispositivo-card");
 
             const seccionesMarca =
                 document.querySelectorAll(".marca-section");
@@ -398,15 +406,19 @@
 
 
             // ==========================================
-            // FUNCIÓN PRINCIPAL DE FILTRADO
+            // FUNCIÓN PRINCIPAL: FILTRO + COLAPSO
             // ==========================================
 
-            function aplicarFiltros() {
+            function aplicarVisibilidad() {
 
                 const textoBuscado =
                     buscador.value
                         .toLowerCase()
                         .trim();
+
+                const filtroActivo =
+                    marcaSeleccionada !== "todas" ||
+                    textoBuscado !== "";
 
 
                 let dispositivosVisibles = 0;
@@ -414,76 +426,112 @@
                 let marcasVisibles = 0;
 
 
-                // ======================================
-                // RECORRER TARJETAS
-                // ======================================
-
-                tarjetas.forEach(function (tarjeta) {
-
-                    const texto =
-                        tarjeta.dataset.busqueda
-                            .toLowerCase();
-
-                    const marca =
-                        tarjeta.dataset.marca
-                            .toLowerCase();
-
-
-                    // Coincidencia de texto
-
-                    const coincideTexto =
-                        texto.includes(textoBuscado);
-
-
-                    // Coincidencia de marca
-
-                    const coincideMarca =
-                        marcaSeleccionada === "todas" ||
-                        marca === marcaSeleccionada;
-
-
-                    // Mostrar / ocultar
-
-                    if (coincideTexto && coincideMarca) {
-
-                        tarjeta.style.display = "";
-
-                        dispositivosVisibles++;
-
-                    }
-                    else {
-
-                        tarjeta.style.display = "none";
-
-                    }
-
-                });
-
-
-                // ======================================
-                // MOSTRAR / OCULTAR SECCIONES
-                // ======================================
-
                 seccionesMarca.forEach(function (seccion) {
 
-                    const tarjetasDeSeccion =
+                    const marcaSeccion =
+                        seccion.dataset.marcaSeccion;
+
+                    const grid =
+                        seccion.querySelector(".dispositivos-grid");
+
+                    const boton =
+                        seccion.querySelector(".btn-ver-dispositivos");
+
+                    const tarjetas =
                         seccion.querySelectorAll(".dispositivo-card");
 
-                    let tarjetasVisiblesEnSeccion = 0;
+                    const expandidaManualmente =
+                        seccion.dataset.expandida === "true";
 
 
-                    tarjetasDeSeccion.forEach(function (tarjeta) {
+                    // ======================================
+                    // ¿ESTA SECCIÓN COINCIDE CON EL FILTRO DE MARCA?
+                    // ======================================
 
-                        if (tarjeta.style.display !== "none") {
+                    const marcaCoincide =
+                        marcaSeleccionada === "todas" ||
+                        marcaSeccion === marcaSeleccionada;
 
-                            tarjetasVisiblesEnSeccion++;
+
+                    if (!marcaCoincide) {
+
+                        seccion.style.display = "none";
+
+                        return;
+
+                    }
+
+
+                    let visiblesEnSeccion = 0;
+
+
+                    tarjetas.forEach(function (tarjeta) {
+
+                        const texto =
+                            tarjeta.dataset.busqueda
+                                .toLowerCase();
+
+                        const coincideTexto =
+                            texto.includes(textoBuscado);
+
+                        tarjeta.style.display =
+                            coincideTexto ? "" : "none";
+
+                        if (coincideTexto) {
+
+                            visiblesEnSeccion++;
+
+                            dispositivosVisibles++;
 
                         }
 
                     });
 
 
-                    if (tarjetasVisiblesEnSeccion > 0) {
+                    // ======================================
+                    // MOSTRAR U OCULTAR EL GRID (COLAPSO)
+                    // ======================================
+
+                    const debeMostrarGrid =
+                        filtroActivo || expandidaManualmente;
+
+                    if (grid) {
+
+                        grid.style.display =
+                            debeMostrarGrid ? "" : "none";
+
+                    }
+
+
+                    // ======================================
+                    // TEXTO DEL BOTÓN
+                    // ======================================
+
+                    if (boton) {
+
+                        if (filtroActivo) {
+
+                            boton.style.display = "none";
+
+                        }
+                        else {
+
+                            boton.style.display = "";
+
+                            boton.textContent = expandidaManualmente
+                                ? "Ocultar dispositivos"
+                                : "Ver dispositivos";
+
+                        }
+
+                    }
+
+
+                    // ======================================
+                    // MOSTRAR / OCULTAR SECCIÓN COMPLETA
+                    // ======================================
+
+                    if (visiblesEnSeccion > 0) {
 
                         seccion.style.display = "";
 
@@ -514,16 +562,8 @@
                 // MENSAJE SIN RESULTADOS
                 // ======================================
 
-                if (dispositivosVisibles === 0) {
-
-                    sinResultados.style.display = "block";
-
-                }
-                else {
-
-                    sinResultados.style.display = "none";
-
-                }
+                sinResultados.style.display =
+                    dispositivosVisibles === 0 ? "block" : "none";
 
             }
 
@@ -534,7 +574,7 @@
 
             buscador.addEventListener("input", function () {
 
-                aplicarFiltros();
+                aplicarVisibilidad();
 
             });
 
@@ -547,34 +587,54 @@
 
                 boton.addEventListener("click", function () {
 
-                    // Quitar active de todos
-
                     botonesMarca.forEach(function (otroBoton) {
 
                         otroBoton.classList.remove("active");
 
                     });
 
-
-                    // Activar botón seleccionado
-
                     boton.classList.add("active");
-
-
-                    // Obtener marca
 
                     marcaSeleccionada =
                         boton.dataset.marca;
 
-
-                    // Aplicar filtros
-
-                    aplicarFiltros();
+                    aplicarVisibilidad();
 
                 });
 
             });
 
+
+            // ==========================================
+            // BOTÓN "VER DISPOSITIVOS" / "OCULTAR"
+            // ==========================================
+
+            document.querySelectorAll(".btn-ver-dispositivos")
+                .forEach(function (boton) {
+
+                    boton.addEventListener("click", function () {
+
+                        const seccion =
+                            boton.closest(".marca-section");
+
+                        const expandidaActual =
+                            seccion.dataset.expandida === "true";
+
+                        seccion.dataset.expandida =
+                            expandidaActual ? "false" : "true";
+
+                        aplicarVisibilidad();
+
+                    });
+
+                });
+
+
+            // ==========================================
+            // ESTADO INICIAL
+            // ==========================================
+
+            aplicarVisibilidad();
 
         });
 

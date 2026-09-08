@@ -2,6 +2,17 @@
 
 @{
     var reparaciones = Model.ToList();
+
+    string TextoEstado(int idEstado) => idEstado switch
+    {
+        2 => "Aceptada",
+        3 => "En diagnóstico",
+        4 => "Esperando refacción",
+        5 => "En reparación",
+        6 => "En pruebas",
+        7 => "Terminada",
+        _ => "Estado desconocido"
+    };
 }
 
 <div class="tecnico-solicitudes-page">
@@ -19,8 +30,7 @@
             </h1>
 
             <p>
-                Consulta las reparaciones que tienes asignadas
-                actualmente.
+                Consulta las reparaciones que tienes asignadas.
             </p>
 
         </div>
@@ -29,22 +39,26 @@
 
 
     <!-- ========================================== -->
-    <!-- RESUMEN -->
+    <!-- PESTAÑAS -->
     <!-- ========================================== -->
 
-    <div class="tecnico-resumen">
+    <div class="solicitudes-tabs">
 
-        <div class="tecnico-resumen-card">
+        <a asp-controller="Tecnico"
+           asp-action="MisReparaciones"
+           asp-route-vista="curso"
+           class="solicitudes-tab @(ViewBag.Vista == "curso" ? "activa" : "")">
+            En curso
+            <span class="tab-contador">@ViewBag.EnCursoCount</span>
+        </a>
 
-            <span>
-                Reparaciones asignadas
-            </span>
-
-            <strong>
-                @reparaciones.Count
-            </strong>
-
-        </div>
+        <a asp-controller="Tecnico"
+           asp-action="MisReparaciones"
+           asp-route-vista="finalizadas"
+           class="solicitudes-tab @(ViewBag.Vista == "finalizadas" ? "activa" : "")">
+            Finalizadas
+            <span class="tab-contador">@ViewBag.FinalizadasCount</span>
+        </a>
 
     </div>
 
@@ -61,16 +75,19 @@
             </div>
 
             <h2>
-                No tienes reparaciones asignadas
-            </h2>
+                @(ViewBag.Vista == "finalizadas"
+                            ? "Aún no tienes reparaciones finalizadas"
+                            : "No tienes reparaciones en curso")
+                                                            </h2>
 
             <p>
-                Actualmente no tienes reparaciones
-                asignadas para trabajar.
-            </p>
+                @(ViewBag.Vista == "finalizadas"
+                            ? "Las reparaciones que completes aparecerán aquí."
+                            : "Actualmente no tienes reparaciones activas para trabajar.")
+        </p>
 
         </div>
-    }
+        }
     else
     {
         <div class="tecnico-solicitudes-grid">
@@ -94,8 +111,8 @@
 
                         </div>
 
-                        <span class="tecnico-estado">
-                            Estado @reparacion.IdEstado
+                        <span class="tecnico-estado @(reparacion.IdEstado == 7 ? "tecnico-estado-terminada" : "")">
+                            @TextoEstado(reparacion.IdEstado)
                         </span>
 
                     </div>

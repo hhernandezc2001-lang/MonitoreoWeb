@@ -29,15 +29,72 @@ namespace MonitoreoWeb.Controllers
         [HttpGet]
         public IActionResult Registrar()
         {
+
             return View();
         }
 
+
+
         // POST REGISTRAR
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Registrar(Cliente model)
         {
             if (!ModelState.IsValid)
             {
+                return View(model);
+            }
+
+            // ==========================================
+            // NORMALIZAR DATOS (quitar espacios)
+            // ==========================================
+
+            var email = model.Email?.Trim() ?? "";
+            var telefono = model.Telefono?.Trim() ?? "";
+            var nombre = model.Nombre?.Trim() ?? "";
+            var apellido = model.Apellido?.Trim() ?? "";
+
+            // Guardamos los valores ya normalizados en el modelo
+            // para que lo que se guarde en la BD también quede limpio
+            model.Email = email;
+            model.Telefono = telefono;
+            model.Nombre = nombre;
+            model.Apellido = apellido;
+
+            // ==========================================
+            // VALIDAR DUPLICADOS
+            // (usamos Trim() también sobre lo ya guardado,
+            // por si hay registros viejos con espacios)
+            // ==========================================
+
+            var duplicado = _context.Cliente.FirstOrDefault(c =>
+                c.Activo &&
+                (
+                    c.Email.Trim().ToLower() == email.ToLower() ||
+                    c.Telefono.Trim() == telefono ||
+                    (c.Nombre.Trim().ToLower() == nombre.ToLower() &&
+                     c.Apellido.Trim().ToLower() == apellido.ToLower())
+                ));
+
+            if (duplicado != null)
+            {
+                string motivo;
+
+                if (duplicado.Email.Trim().ToLower() == email.ToLower())
+                {
+                    motivo = "Ya existe un cliente registrado con ese correo electrónico.";
+                }
+                else if (duplicado.Telefono.Trim() == telefono)
+                {
+                    motivo = "Ya existe un cliente registrado con ese teléfono.";
+                }
+                else
+                {
+                    motivo = "Ya existe un cliente registrado con ese nombre y apellido.";
+                }
+
+                ModelState.AddModelError("", motivo);
+
                 return View(model);
             }
 

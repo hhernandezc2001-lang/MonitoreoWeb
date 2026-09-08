@@ -19,55 +19,34 @@
             </span>
 
             <h1>
-                Solicitudes pendientes
+                Solicitudes pendientes de aceptar
             </h1>
 
             <p>
-                Supervisa las solicitudes de reparación mientras
-                esperan ser aceptadas por un técnico.
+                Reparaciones que aún no han sido tomadas
+                por ningún técnico.
             </p>
 
         </div>
-
-
-        <!-- NUEVA REPARACIÓN -->
-
-        <div>
-
-            <a asp-controller="Reparacion"
-               asp-action="Create"
-               class="btn-nueva-reparacion">
-
-                + Nueva reparación
-
-            </a>
-
-        </div>
-
     </div>
 
 
     <!-- ========================================== -->
-    <!-- PESTAÑAS -->
+    <!-- CONTADOR -->
     <!-- ========================================== -->
 
-    <div class="solicitudes-tabs">
+    <div class="solicitudes-contador">
 
-        <a asp-controller="Reparacion"
-           asp-action="Index"
-           asp-route-vista="pendientes"
-           class="solicitudes-tab @(ViewBag.Vista == "pendientes" ? "activa" : "")">
-            Pendientes de aceptar
-            <span class="tab-contador">@ViewBag.PendientesCount</span>
-        </a>
+        <span class="contador-icono">
+            ⏳
+        </span>
 
-        <a asp-controller="Reparacion"
-           asp-action="Index"
-           asp-route-vista="aceptadas"
-           class="solicitudes-tab @(ViewBag.Vista == "aceptadas" ? "activa" : "")">
-            Aceptadas
-            <span class="tab-contador">@ViewBag.AceptadasCount</span>
-        </a>
+        <span>
+            @solicitudes.Count
+            @(solicitudes.Count == 1
+                        ? "solicitud esperando técnico"
+                        : "solicitudes esperando técnico")
+        </span>
 
     </div>
 
@@ -93,28 +72,17 @@
                 </div>
 
                 <h2>
-                    @(ViewBag.Vista == "aceptadas"
-                                    ? "Aún no hay solicitudes aceptadas"
-                                    : "No hay solicitudes pendientes")
-                                                                  </h2>
+                    No hay solicitudes pendientes
+                </h2>
 
                 <p>
-                    @(ViewBag.Vista == "aceptadas"
-                                    ? "Ningún técnico ha aceptado solicitudes por el momento."
-                                    : "Actualmente no existen reparaciones pendientes de atención.")
-            </p>
-
-                <a asp-controller="Reparacion"
-                   asp-action="Create"
-                   class="btn-nueva-reparacion">
-
-                    Registrar una reparación
-
-                </a>
+                    Todas las solicitudes registradas ya fueron
+                    tomadas por un técnico.
+                </p>
 
             </div>
 
-                }
+        }
         else
         {
 
@@ -150,187 +118,182 @@
                             </div>
 
 
-                            @{
-                                string estadoTexto = solicitud.IdEstado == 2 ? "Aceptada" : "Pendiente";
-                                string estadoClase = solicitud.IdEstado == 2 ? "estado-aceptada" : "estado-pendiente";
-                            }
-
-                        <span class="@estadoClase">
-                            @estadoTexto
-                        </span>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- INFORMACIÓN DEL DISPOSITIVO -->
-                    <!-- ================================= -->
-
-                    <div class="solicitud-seccion">
-
-                        <div class="seccion-titulo">
-                            DISPOSITIVO
-                        </div>
-
-
-                        <div class="solicitud-datos-grid">
-
-
-                            <div class="solicitud-dato">
-
-                                <span>
-                                    Marca
-                                </span>
-
-                                <strong>
-                                    @solicitud.Marca
-                                </strong>
-
-                            </div>
-
-
-                            <div class="solicitud-dato">
-
-                                <span>
-                                    Modelo
-                                </span>
-
-                                <strong>
-                                    @solicitud.Modelo
-                                </strong>
-
-                            </div>
-
-
-                            <div class="solicitud-dato">
-
-                                <span>
-                                    IMEI
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(solicitud.IMEI)
-                                                                    ? "No registrado"
-                                                                    : solicitud.IMEI)
-                                                                                 </strong>
-
-                            </div>
-
-
-                            <div class="solicitud-dato">
-
-                                <span>
-                                    Color
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(solicitud.Color)
-                                                                    ? "No registrado"
-                                                                    : solicitud.Color)
-                                                                                  </strong>
-
-                            </div>
-
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- CLIENTE -->
-                    <!-- ================================= -->
-
-                    <div class="solicitud-seccion">
-
-                        <div class="seccion-titulo">
-                            CLIENTE
-                        </div>
-
-
-                        <div class="cliente-solicitud">
-
-                            <div class="cliente-avatar">
-                                @solicitud.NombreCliente.Substring(0, 1).ToUpper()
-                            </div>
-
-
-                            <div class="cliente-info">
-
-                                <strong>
-
-                                    @solicitud.NombreCliente
-                                    @solicitud.ApellidoCliente
-
-                                </strong>
-
-
-                                <span>
-                                    📞 @solicitud.TelefonoCliente
-                                </span>
-
-
-                                <span>
-                                    ✉ @solicitud.EmailCliente
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- PROBLEMA -->
-                    <!-- ================================= -->
-
-                    <div class="solicitud-seccion">
-
-                        <div class="seccion-titulo">
-                            PROBLEMA REPORTADO
-                        </div>
-
-
-                        <div class="problema-reportado">
-
-                            @solicitud.ProblemaReportado
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- FECHAS -->
-                    <!-- ================================= -->
-
-                    <div class="solicitud-fechas">
-
-                        <div>
-
-                            <span>
-                                Fecha de ingreso
+                            <span class="estado-pendiente">
+                                Pendiente
                             </span>
 
-                            <strong>
-                                @solicitud.FechaIngreso.ToString("dd/MM/yyyy HH:mm")
-                            </strong>
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- INFORMACIÓN DEL DISPOSITIVO -->
+                        <!-- ================================= -->
+
+                        <div class="solicitud-seccion">
+
+                            <div class="seccion-titulo">
+                                DISPOSITIVO
+                            </div>
+
+
+                            <div class="solicitud-datos-grid">
+
+
+                                <div class="solicitud-dato">
+
+                                    <span>
+                                        Marca
+                                    </span>
+
+                                    <strong>
+                                        @solicitud.Marca
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="solicitud-dato">
+
+                                    <span>
+                                        Modelo
+                                    </span>
+
+                                    <strong>
+                                        @solicitud.Modelo
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="solicitud-dato">
+
+                                    <span>
+                                        IMEI
+                                    </span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(solicitud.IMEI)
+                                                                        ? "No registrado"
+                                                                        : solicitud.IMEI)
+                                                                                     </strong>
+
+                                </div>
+
+
+                                <div class="solicitud-dato">
+
+                                    <span>
+                                        Color
+                                    </span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(solicitud.Color)
+                                                                        ? "No registrado"
+                                                                        : solicitud.Color)
+                                                                                      </strong>
+
+                                </div>
+
+
+                            </div>
 
                         </div>
 
 
-                        <div>
+                        <!-- ================================= -->
+                        <!-- CLIENTE -->
+                        <!-- ================================= -->
 
-                            <span>
-                                Entrega estimada
-                            </span>
+                        <div class="solicitud-seccion">
 
-                            <strong>
+                            <div class="seccion-titulo">
+                                CLIENTE
+                            </div>
 
-                                @(solicitud.FechaEntregaEstimada.HasValue
-                                                            ? solicitud.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy")
-                                                            : "Sin definir")
+
+                            <div class="cliente-solicitud">
+
+                                <div class="cliente-avatar">
+                                    @solicitud.NombreCliente.Substring(0, 1).ToUpper()
+                                </div>
+
+
+                                <div class="cliente-info">
+
+                                    <strong>
+
+                                        @solicitud.NombreCliente
+                                        @solicitud.ApellidoCliente
+
+                                    </strong>
+
+
+                                    <span>
+                                        📞 @solicitud.TelefonoCliente
+                                    </span>
+
+
+                                    <span>
+                                        ✉ @solicitud.EmailCliente
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- PROBLEMA -->
+                        <!-- ================================= -->
+
+                        <div class="solicitud-seccion">
+
+                            <div class="seccion-titulo">
+                                PROBLEMA REPORTADO
+                            </div>
+
+
+                            <div class="problema-reportado">
+
+                                @solicitud.ProblemaReportado
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- FECHAS -->
+                        <!-- ================================= -->
+
+                        <div class="solicitud-fechas">
+
+                            <div>
+
+                                <span>
+                                    Fecha de ingreso
+                                </span>
+
+                                <strong>
+                                    @solicitud.FechaIngreso.ToString("dd/MM/yyyy HH:mm")
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Entrega estimada
+                                </span>
+
+                                <strong>
+
+                                    @(solicitud.FechaEntregaEstimada.HasValue
+                                                                ? solicitud.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy")
+                                                                : "Sin definir")
 
                         </strong>
 
@@ -351,22 +314,9 @@
 
                             <div class="tecnico-info">
 
-                        @if (solicitud.IdTecnico.HasValue)
-                                {
-                                    <span class="tecnico-nombre">
-                                        @solicitud.NombreTecnico
-                                    </span>
-
-                                    <span class="badge-aceptada">
-                                        Aceptada
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge-pendiente-aceptacion">
-                                        Pendiente de aceptación
-                                    </span>
-                                }
+                                <span class="badge-pendiente-aceptacion">
+                                    Pendiente de aceptación
+                                </span>
 
                             </div>
 
@@ -375,7 +325,7 @@
 
                     </article>
 
-                }
+                        }
 
             </div>
 

@@ -44,6 +44,8 @@ namespace MonitoreoWeb.Models
 
         [ForeignKey("IdTecnico")]
         public Usuario? Tecnico { get; set; }
+
+        public ICollection<Pago> Pagos { get; set; } = new List<Pago>();
     }
 }
 

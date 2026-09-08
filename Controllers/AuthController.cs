@@ -26,6 +26,18 @@ namespace MonitoreoWeb.Controllers
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public IActionResult Login()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Inicio", "Admin");
+                }
+                else if (User.IsInRole("Tecnico"))
+                {
+                    return RedirectToAction("Index", "Tecnico");
+                }
+            }
+
             return View();
         }
 

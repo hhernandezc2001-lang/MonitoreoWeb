@@ -1,0 +1,91 @@
+﻿@model int
+
+@{
+    var pasos = new List<(int Numero, string Titulo)>
+    {
+        (1, "Pendiente"),
+        (2, "Aceptada"),
+        (3, "Diagnóstico"),
+        (5, "En reparación"),
+        (6, "Pruebas"),
+        (7, "Terminada")
+    };
+
+    int estadoEfectivo = Model == 4 ? 5 : Model;
+
+    int totalPasos = pasos.Count;
+    int pasoActualIndex = pasos.FindIndex(p => p.Numero == estadoEfectivo) + 1;
+
+    if (pasoActualIndex <= 0)
+    {
+        pasoActualIndex = 1;
+    }
+}
+
+<div class="barra-estado-seccion">
+
+    <div class="barra-estado-track">
+
+        @for (int i = 0; i < pasos.Count; i++)
+        {
+            var paso = pasos[i];
+
+            string estadoPaso = paso.Numero < estadoEfectivo || (Model == 7 && paso.Numero == estadoEfectivo)
+            ? "completado"
+            : paso.Numero == estadoEfectivo
+            ? "actual"
+            : "pendiente";
+
+            <div class="barra-estado-paso @estadoPaso">
+
+                <div class="barra-estado-circulo">
+                    @if (estadoPaso == "completado")
+                    {
+                        <text>&#10003;</text>
+                    }
+                    else
+                    {
+                        @((i + 1).ToString())
+                    }
+                </div>
+
+                <span class="barra-estado-titulo">
+                    @paso.Titulo
+                </span>
+
+            </div>
+
+            if (i < pasos.Count - 1)
+            {
+                <div class="barra-estado-linea @(paso.Numero < estadoEfectivo ? "completado" : "")"></div>
+            }
+        }
+
+    </div>
+
+    @if (Model == 4)
+    {
+        <div class="barra-estado-aviso">
+            ⏸ En pausa: esperando refacción
+        </div>
+    }
+
+    <div class="barra-estado-resumen">
+
+        @if (Model == 7)
+        {
+            <span>
+                ✓ Reparación finalizada
+            </span>
+        }
+        else
+        {
+            <span>
+                Paso @pasoActualIndex de @totalPasos
+                &middot; Faltan @(totalPasos - pasoActualIndex) pasos para terminar
+            </span>
+        }
+
+    </div>
+
+</div>

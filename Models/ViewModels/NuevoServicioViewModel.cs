@@ -9,5 +9,7 @@ namespace MonitoreoWeb.Models.ViewModels
         public Dispositivo Dispositivo { get; set; } = new Dispositivo();
 
         public Reparacion Reparacion { get; set; } = new Reparacion();
+        public decimal? PagoInicial { get; set; }
+
     }
 }

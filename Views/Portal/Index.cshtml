@@ -19,34 +19,38 @@
 
     <!-- Tarjetas -->
     <div class="row g-4">
-
         <!-- Consultar reparación -->
         <div class="col-md-6">
-
             <div class="card shadow h-100">
-
                 <div class="card-body">
-
                     <h3 class="card-title">
                         Consultar reparación
                     </h3>
-
                     <p class="text-muted">
                         Ingrese el token proporcionado al momento de registrar su equipo.
                     </p>
 
-                    <input type="text"
-                           class="form-control mb-3"
-                           placeholder="Ingrese su token">
+                    <form asp-controller="Portal"
+                          asp-action="Consultar"
+                          method="post">
 
-                    <button class="btn btn-primary w-100">
-                        Consultar
-                    </button>
+                        @Html.AntiForgeryToken()
+
+                        <input type="text"
+                               name="token"
+                               class="form-control mb-3"
+                               placeholder="Ingrese su token"
+                               required>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Consultar
+                        </button>
+
+                    </form>
 
                 </div>
-
             </div>
-
         </div>
 
         <!-- Chatbot -->

@@ -14,9 +14,27 @@
         7 => "Terminada",
         _ => "Desconocido"
     };
+
+    decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
+    decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+    decimal saldoPendiente = costoBase - totalPagado;
 }
 
 <div class="container-fluid">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
 
     <!-- ========================================== -->
     <!-- ENCABEZADO -->
@@ -38,6 +56,7 @@
 
     </div>
 
+    @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
 
     <!-- ========================================== -->
     <!-- ESTADO -->
@@ -199,8 +218,8 @@
                             Fecha de ingreso:
                         </strong>
 
-                        @Model.FechaIngreso
-                        .ToString("dd/MM/yyyy HH:mm")
+                        @(Model.FechaIngreso
+                                                .ToString("dd/MM/yyyy HH:mm"))
                     </p>
 
                     <p>
@@ -252,6 +271,123 @@
                 </div>
 
             </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- PAGOS -->
+    <!-- ========================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5 class="card-title mb-4">
+                Pagos
+            </h5>
+
+            @if (Model.Pagos == null || !Model.Pagos.Any())
+            {
+                <p class="text-muted">
+                    Aún no se ha registrado ningún pago para esta reparación.
+                </p>
+            }
+            else
+            {
+                <table class="table table-sm">
+
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var pago in Model.Pagos.OrderBy(p => p.FechaPago))
+                        {
+                            <tr>
+                                <td>@pago.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@($"${pago.Monto:N2}")</td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            }
+
+            <hr />
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <p>
+                        <strong>Costo a cubrir:</strong>
+                        @($"${costoBase:N2}")
+                        <span class="text-muted">
+                            (@(Model.CostoFinal.HasValue ? "costo final" : "costo estimado"))
+                        </span>
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <p>
+                        <strong>Total pagado:</strong>
+                        @($"${totalPagado:N2}")
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <p>
+                        <strong>Saldo pendiente:</strong>
+                        @($"${saldoPendiente:N2}")
+                    </p>
+                </div>
+
+            </div>
+
+            @if (saldoPendiente > 0 && Model.Activo)
+            {
+                <form asp-controller="Admin"
+                      asp-action="RegistrarPago"
+                      asp-route-id="@Model.IdReparacion"
+                      method="post"
+                      class="d-flex gap-2 align-items-end mt-3">
+
+                    @Html.AntiForgeryToken()
+
+                    <div>
+                        <label class="form-label">
+                            Registrar nuevo pago
+                        </label>
+
+                        <input type="number"
+                               name="monto"
+                               step="0.01"
+                               min="0.01"
+                               max="@saldoPendiente"
+                               class="form-control"
+                               placeholder="Ej. @saldoPendiente.ToString("0.00")" />
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Registrar pago
+                    </button>
+
+                </form>
+            }
+            else if (saldoPendiente <= 0)
+            {
+                <div class="alert alert-success mt-3 mb-0">
+                    ✅ Esta reparación ya está completamente pagada.
+                </div>
+            }
 
         </div>
 
@@ -328,28 +464,45 @@
                         Fecha de terminación:
                     </strong>
 
-                    @Model.FechaEntregaReal.Value
-                    .ToString("dd/MM/yyyy HH:mm")
+                    @(Model.FechaEntregaReal.Value
+                                    .ToString("dd/MM/yyyy HH:mm"))
 
-                </p>
+            </p>
 
             </div>
 
         </div>
-    }
+        }
 
 
     <!-- ========================================== -->
-    <!-- VOLVER -->
+    <!-- BITÁCORA -->
+    <!-- ========================================== -->
+    @await Html.PartialAsync(
+    "_BitacoraAvances",
+        (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
+
+    <!-- ========================================== -->
+    <!-- ACCIONES -->
     <!-- ========================================== -->
 
-    <div class="mt-4">
+    <div class="mt-4 d-flex gap-2">
 
         <a asp-controller="Admin"
            asp-action="Reparaciones"
            class="btn btn-secondary">
 
             ← Volver a reparaciones
+
+        </a>
+
+        <a asp-controller="Admin"
+           asp-action="Ticket"
+           asp-route-id="@Model.IdReparacion"
+           target="_blank"
+           class="btn btn-outline-primary">
+
+            🧾 Ver ticket
 
         </a>
 

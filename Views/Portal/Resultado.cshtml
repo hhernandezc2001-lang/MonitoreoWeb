@@ -14,6 +14,10 @@
         7 => "Terminada",
         _ => "Estado desconocido"
     };
+
+    decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
+    decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+    decimal saldoPendiente = costoBase - totalPagado;
 }
 
 <div class="container mt-5">
@@ -59,6 +63,7 @@
 
             </div>
 
+            @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
 
             <!-- ESTADO -->
 
@@ -73,6 +78,26 @@
                 </h2>
 
             </div>
+
+
+            @if (Model.IdEstado == 7)
+            {
+                <div class="alert alert-success d-flex align-items-center gap-2">
+
+                    <span style="font-size: 1.3rem;">
+                        ✅
+                    </span>
+
+                    <div>
+                        <strong>
+                            ¡Tu reparación está lista!
+                        </strong>
+                        <br />
+                        Ya puedes pasar a recoger tu dispositivo.
+                    </div>
+
+                </div>
+            }
 
 
             <!-- ================================== -->
@@ -178,6 +203,49 @@
 
                 </div>
 
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Técnico asignado
+                    </span>
+
+                    <strong class="d-block">
+
+                        @(Model.Tecnico != null
+                                                ? Model.Tecnico.Nombre
+                                                : "Aún sin asignar")
+
+                    </strong>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Total pagado
+                    </span>
+
+                    <strong class="d-block">
+
+                        @(totalPagado > 0
+                                                ? $"${totalPagado:N2}"
+                                                : "Sin pagos registrados")
+
+                    </strong>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <span class="text-muted">
+                        Saldo pendiente
+                    </span>
+
+                    <strong class="d-block">
+                        @($"${saldoPendiente:N2}")
+                    </strong>
+
+                </div>
 
                 @if (Model.FechaEntregaReal.HasValue)
                 {
@@ -190,12 +258,12 @@
                         <strong class="d-block">
 
                             @(Model.FechaEntregaReal.Value
-                            .ToString("dd/MM/yyyy HH:mm"))
+                                                    .ToString("dd/MM/yyyy HH:mm"))
 
-                        </strong>
+                    </strong>
 
                     </div>
-                }
+                                }
 
             </div>
 
@@ -235,6 +303,13 @@
 
             </div>
 
+
+            <!-- ========================================== -->
+            <!-- BITÁCORA -->
+            <!-- ========================================== -->
+            @await Html.PartialAsync(
+            "_BitacoraAvances",
+                        (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
 
             <!-- ================================== -->
             <!-- VOLVER -->

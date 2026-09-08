@@ -70,69 +70,139 @@
 
                 <nav class="admin-menu">
 
-                    <a class="admin-menu-link @Active("Dashboard", "Index")"
+                    <a class="admin-menu-link admin-menu-top @Active("Admin", "Inicio")"
+                       asp-controller="Admin"
+                       asp-action="Inicio">
+                        <span class="admin-menu-icon"></span>
+                        Inicio
+                    </a>
+
+                    <a class="admin-menu-link admin-menu-top @Active("Dashboard", "Index")"
                        asp-controller="Dashboard"
                        asp-action="Index">
+                        <span class="admin-menu-icon"></span>
                         Dashboards
                     </a>
 
-                    <a class="admin-menu-link @Active("Admin", "Tecnicos")"
-                       asp-controller="Admin"
-                       asp-action="Tecnicos">
-                        Técnicos registrados
-                    </a>
 
-                    <a class="admin-menu-link @Active("Admin", "Administradores")"
-                       asp-controller="Admin"
-                       asp-action="Administradores">
-                        Administradores dados de alta
-                    </a>
+                    <!-- ========================================== -->
+                    <!-- USUARIOS -->
+                    <!-- ========================================== -->
 
-                    <a class="admin-menu-link @Active("Auth", "Registrar")"
-                       asp-controller="Auth"
-                       asp-action="Registrar">
-                        Registrar nuevos usuarios
-                    </a>
+                    <details class="admin-menu-group" id="grupo-usuarios">
 
-                    <a class="admin-menu-link @Active("Clientes", "Registrar")"
-                       asp-controller="Clientes"
-                       asp-action="Registrar">
-                        Registrar clientes
-                    </a>
+                        <summary class="admin-menu-group-title">
+                            Usuarios
+                        </summary>
 
-                    <a class="admin-menu-link @Active("Clientes", "Index")"
-                       asp-controller="Clientes"
-                       asp-action="Index">
-                        Clientes registrados
-                    </a>
+                        <div class="admin-menu-group-items">
 
-                    <!-- NUEVO -->
+                            <a class="admin-menu-link @Active("Admin", "Tecnicos")"
+                               asp-controller="Admin"
+                               asp-action="Tecnicos">
+                                Técnicos registrados
+                            </a>
 
-                    <a class="admin-menu-link @Active("Dispositivo", "Create")"
-                       asp-controller="Dispositivo"
-                       asp-action="Create">
-                        Registrar dispositivo
-                    </a>
+                            <a class="admin-menu-link @Active("Admin", "Administradores")"
+                               asp-controller="Admin"
+                               asp-action="Administradores">
+                                Administradores dados de alta
+                            </a>
 
-                    <a class="admin-menu-link @Active("Dispositivo", "Index")"
-                       asp-controller="Dispositivo"
-                       asp-action="Index">
-                        Dispositivos registrados
-                    </a>
+                            <a class="admin-menu-link @Active("Auth", "Registrar")"
+                               asp-controller="Auth"
+                               asp-action="Registrar">
+                                Registrar nuevos usuarios
+                            </a>
 
-                    <!-- FIN NUEVO -->
+                        </div>
 
-                    <a class="admin-menu-link @Active("Reparacion", "Index")"
-                       asp-controller="Reparacion"
-                       asp-action="Index">
-                        Solicitudes de reparación
-                    </a>
+                    </details>
 
-                    <a class="admin-menu-link @Active("Admin", "Reparaciones")"
-                       asp-controller="Admin"
-                       asp-action="Reparaciones">
-                        Ver reparaciones
-                    </a>
+
+                    <!-- ========================================== -->
+                    <!-- CLIENTES -->
+                    <!-- ========================================== -->
+
+                    <details class="admin-menu-group" id="grupo-clientes">
+                        <summary class="admin-menu-group-title">
+                            Clientes
+                        </summary>
+
+                        <div class="admin-menu-group-items">
+
+                            <a class="admin-menu-link @Active("Clientes", "Registrar")"
+                               asp-controller="Clientes"
+                               asp-action="Registrar">
+                                Registrar clientes
+                            </a>
+
+                            <a class="admin-menu-link @Active("Clientes", "Index")"
+                               asp-controller="Clientes"
+                               asp-action="Index">
+                                Clientes registrados
+                            </a>
+
+                        </div>
+
+                    </details>
+
+
+                    <!-- ========================================== -->
+                    <!-- DISPOSITIVOS -->
+                    <!-- ========================================== -->
+
+                    <details class="admin-menu-group" id="grupo-dispositivos">
+                        <summary class="admin-menu-group-title">
+                            Dispositivos
+                        </summary>
+
+                        <div class="admin-menu-group-items">
+
+                            <a class="admin-menu-link @Active("Dispositivo", "Create")"
+                               asp-controller="Dispositivo"
+                               asp-action="Create">
+                                Registrar dispositivo
+                            </a>
+
+                            <a class="admin-menu-link @Active("Dispositivo", "Index")"
+                               asp-controller="Dispositivo"
+                               asp-action="Index">
+                                Dispositivos registrados
+                            </a>
+
+                        </div>
+
+                    </details>
+
+
+                    <!-- ========================================== -->
+                    <!-- REPARACIONES -->
+                    <!-- ========================================== -->
+
+                    <details class="admin-menu-group" id="grupo-reparaciones">
+                        <summary class="admin-menu-group-title">
+                            Reparaciones
+                        </summary>
+
+                        <div class="admin-menu-group-items">
+
+                            <a class="admin-menu-link @Active("Reparacion", "Index")"
+                               asp-controller="Reparacion"
+                               asp-action="Index">
+                                Solicitudes de reparación
+                            </a>
+
+                            <a class="admin-menu-link @Active("Admin", "Reparaciones")"
+                               asp-controller="Admin"
+                               asp-action="Reparaciones">
+                                Ver reparaciones
+                            </a>
+
+                        </div>
+
+                    </details>
+
 
                     <!-- APARTADO PARA EL  ---- NUEVO SERVICIO ---- -->
 
@@ -196,30 +266,6 @@
                        asp-controller="Tecnico"
                        asp-action="Index">
                         Menú inicial
-                    </a>
-
-                    <a class="admin-menu-link"
-                       asp-controller="Admin"
-                       asp-action="DispositivosReparacion">
-                        Equipos asignados
-                    </a>
-
-                    <a class="admin-menu-link"
-                       asp-controller="Admin"
-                       asp-action="">
-                        Consultar dispositivos
-                    </a>
-
-                    <a class="admin-menu-link"
-                       asp-controller="Admin"
-                       asp-action="DispositivosReparacion">
-                        Equipos asignados
-                    </a>
-
-                    <a class="admin-menu-link"
-                       asp-controller="Tecnico"
-                       asp-action="Solicitudes">
-                        Solicitudes disponibles
                     </a>
 
                 </nav>

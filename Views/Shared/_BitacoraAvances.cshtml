@@ -1,0 +1,128 @@
+﻿@model MonitoreoWeb.Models.ViewModels.BitacoraViewModel
+
+<div class="bitacora-seccion">
+
+    <div class="bitacora-header">
+
+        <span class="seccion-titulo">
+            BITÁCORA DE AVANCES
+        </span>
+
+        <p class="bitacora-subtitulo">
+            Historial de actualizaciones y evidencia de la reparación.
+        </p>
+
+    </div>
+
+
+    @if (Model.PuedeAgregar)
+    {
+        <form asp-controller="@Model.ControladorDestino"
+              asp-action="AgregarAvance"
+              asp-route-id="@Model.IdReparacion"
+              method="post"
+              enctype="multipart/form-data"
+              class="bitacora-form">
+
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Descripción de la actualización
+                </label>
+
+                <textarea name="descripcionAvance"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Describe lo que hiciste o el estado actual del dispositivo...">
+                </textarea>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Fotos (opcional)
+                </label>
+
+                <input type="file"
+                       name="fotos"
+                       class="form-control"
+                       multiple
+                       accept="image/*" />
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+
+                Agregar a la bitácora
+
+            </button>
+
+        </form>
+    }
+
+
+    @if (!Model.Avances.Any())
+    {
+        <p class="bitacora-vacio">
+            Aún no hay actualizaciones registradas para esta reparación.
+        </p>
+    }
+    else
+    {
+        <div class="bitacora-lista">
+
+            @foreach (var avance in Model.Avances)
+            {
+                var fotosVisibles = Model.EsVistaCliente
+                ? avance.Fotos.Where(f => f.Activo && f.VisibleCliente).ToList()
+                : avance.Fotos.Where(f => f.Activo).ToList();
+
+                <div class="bitacora-item">
+
+                    <div class="bitacora-item-fecha">
+
+                        @avance.Fecha.ToString("dd/MM/yyyy HH:mm")
+
+                        @if (avance.Usuario != null)
+                        {
+                            <span>
+                                &middot; @avance.Usuario.Nombre
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="bitacora-item-texto">
+                        @avance.Descripcion
+                    </div>
+
+                    @if (fotosVisibles.Any())
+                    {
+                        <div class="bitacora-item-fotos">
+
+                            @foreach (var foto in fotosVisibles)
+                            {
+                                <a href="@foto.RutaArchivo"
+                                   target="_blank">
+
+                                    <img src="@foto.RutaArchivo"
+                                         alt="@foto.NombreArchivo"
+                                         class="bitacora-foto-thumb" />
+
+                                </a>
+                            }
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

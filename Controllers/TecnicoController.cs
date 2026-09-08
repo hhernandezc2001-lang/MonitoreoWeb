@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MonitoreoWeb.Data;
 using MonitoreoWeb.Models;
+using MonitoreoWeb.Models.ViewModels;
+using System.IO;
 using System.Security.Claims;
 
 namespace MonitoreoWeb.Controllers
@@ -53,21 +55,12 @@ namespace MonitoreoWeb.Controllers
         // ==========================================================
         // ACEPTAR REPARACIÓN
         // ==========================================================
-        // POR AHORA SOLO DEJAMOS LA ACCIÓN PREPARADA.
-        // TODAVÍA NO ASIGNA LA REPARACIÓN.
-        // ==========================================================
-        // ACEPTAR REPARACIÓN
-        // ==========================================================
 
         [Authorize(Roles = "Tecnico")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Aceptar(int id)
         {
-            // ==========================================
-            // 1. OBTENER EL ID DEL TÉCNICO AUTENTICADO
-            // ==========================================
-
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
             if (idUsuarioClaim == null)
@@ -77,26 +70,15 @@ namespace MonitoreoWeb.Controllers
 
             int idTecnico = int.Parse(idUsuarioClaim.Value);
 
-
-            // ==========================================
-            // 2. BUSCAR LA REPARACIÓN
-            // ==========================================
-
             var reparacion = _context.Reparacion
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.Activo);
 
-
             if (reparacion == null)
             {
                 return NotFound();
             }
-
-
-            // ==========================================
-            // 3. VERIFICAR QUE SIGA DISPONIBLE
-            // ==========================================
 
             if (reparacion.IdTecnico != null ||
                 reparacion.IdEstado != 1)
@@ -107,41 +89,15 @@ namespace MonitoreoWeb.Controllers
                 return RedirectToAction("Solicitudes");
             }
 
-
-            // ==========================================
-            // 4. ASIGNAR EL TÉCNICO
-            // ==========================================
-
             reparacion.IdTecnico = idTecnico;
-
-
-            // ==========================================
-            // 5. CAMBIAR ESTADO
-            // ==========================================
-
             reparacion.IdEstado = 2;
-
-
-            // ==========================================
-            // 6. GUARDAR CAMBIOS
-            // ==========================================
 
             _context.SaveChanges();
 
-
-            // ==========================================
-            // 7. MENSAJE DE CONFIRMACIÓN
-            // ==========================================
-
             TempData["Success"] =
-                "La reparación fue aceptada correctamente.";
+                "La reparación fue aceptada. Ya puedes comenzar a trabajar en ella.";
 
-
-            // ==========================================
-            // 8. REGRESAR A SOLICITUDES
-            // ==========================================
-
-            return RedirectToAction("Solicitudes");
+            return RedirectToAction("Detalle", new { id = id });
         }
 
         // ==========================================================
@@ -149,9 +105,8 @@ namespace MonitoreoWeb.Controllers
         // ==========================================================
 
         [Authorize(Roles = "Tecnico")]
-        public IActionResult MisReparaciones()
+        public IActionResult MisReparaciones(string vista = "curso")
         {
-            // Obtener el IdUsuario del técnico autenticado
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
             if (idUsuarioClaim == null)
@@ -164,10 +119,7 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
-            // Buscar solamente las reparaciones
-            // asignadas al técnico actual
-            var reparaciones = _context.Reparacion
+            var todas = _context.Reparacion
                 .Include(r => r.Dispositivo)
                     .ThenInclude(d => d.Cliente)
                 .Where(r =>
@@ -177,6 +129,14 @@ namespace MonitoreoWeb.Controllers
                 .OrderByDescending(r => r.FechaIngreso)
                 .ToList();
 
+            var enCurso = todas.Where(r => r.IdEstado >= 2 && r.IdEstado <= 6).ToList();
+            var finalizadas = todas.Where(r => r.IdEstado == 7).ToList();
+
+            ViewBag.Vista = vista;
+            ViewBag.EnCursoCount = enCurso.Count;
+            ViewBag.FinalizadasCount = finalizadas.Count;
+
+            var reparaciones = vista == "finalizadas" ? finalizadas : enCurso;
 
             return View(reparaciones);
         }
@@ -188,7 +148,6 @@ namespace MonitoreoWeb.Controllers
         [Authorize(Roles = "Tecnico")]
         public IActionResult Detalle(int id)
         {
-            // Obtener el técnico que está conectado
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
             if (idUsuarioClaim == null)
@@ -201,26 +160,169 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
-            // Buscar la reparación
-            // pero solamente si pertenece
-            // al técnico actual
             var reparacion = _context.Reparacion
                 .Include(r => r.Dispositivo)
                     .ThenInclude(d => d.Cliente)
+                .Include(r => r.Pagos)
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
                     r.Activo);
-
 
             if (reparacion == null)
             {
                 return NotFound();
             }
 
+            var avances = _context.HistorialAvance
+                .Include(a => a.Fotos)
+                .Include(a => a.Usuario)
+                .Where(a => a.IdReparacion == id)
+                .OrderByDescending(a => a.Fecha)
+                .ToList();
+
+            bool puedeAgregar =
+                reparacion.IdEstado >= 2 &&
+                reparacion.IdEstado <= 6;
+
+            ViewBag.Bitacora = new BitacoraViewModel
+            {
+                IdReparacion = id,
+                Avances = avances,
+                EsVistaCliente = false,
+                PuedeAgregar = puedeAgregar,
+                ControladorDestino = "Tecnico"
+            };
 
             return View(reparacion);
+        }
+
+        // ==========================================================
+        // AGREGAR AVANCE (BITÁCORA)
+        // ==========================================================
+
+        [Authorize(Roles = "Tecnico")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AgregarAvance(
+            int id,
+            string descripcionAvance,
+            List<IFormFile> fotos)
+        {
+            var idUsuarioClaim = User.FindFirst("IdUsuario");
+
+            if (idUsuarioClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!int.TryParse(idUsuarioClaim.Value, out int idTecnico))
+            {
+                return Unauthorized();
+            }
+
+            var reparacion = _context.Reparacion
+                .FirstOrDefault(r =>
+                    r.IdReparacion == id &&
+                    r.IdTecnico == idTecnico &&
+                    r.Activo);
+
+            if (reparacion == null)
+            {
+                return NotFound();
+            }
+
+            // Solo se puede documentar mientras está activa
+            // (desde que fue aceptada hasta que entra a pruebas)
+            if (reparacion.IdEstado < 2 || reparacion.IdEstado > 6)
+            {
+                TempData["Error"] =
+                    "No se puede agregar una actualización en el estado actual de la reparación.";
+
+                return RedirectToAction("Detalle", new { id = id });
+            }
+
+            if (string.IsNullOrWhiteSpace(descripcionAvance))
+            {
+                TempData["Error"] =
+                    "Debes escribir una descripción para la actualización.";
+
+                return RedirectToAction("Detalle", new { id = id });
+            }
+
+            // ==========================================
+            // 1. REGISTRAR EL AVANCE
+            // ==========================================
+
+            var avance = new HistorialAvance
+            {
+                IdReparacion = id,
+                IdUsuario = idTecnico,
+                Fecha = DateTime.Now,
+                Descripcion = descripcionAvance.Trim()
+            };
+
+            _context.HistorialAvance.Add(avance);
+            _context.SaveChanges();
+
+            // ==========================================
+            // 2. GUARDAR LAS FOTOS (SI LAS HAY)
+            // ==========================================
+
+            if (fotos != null && fotos.Count > 0)
+            {
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+                var carpeta = Path.Combine(
+                    _env.WebRootPath,
+                    "uploads",
+                    "reparaciones",
+                    id.ToString());
+
+                Directory.CreateDirectory(carpeta);
+
+                foreach (var foto in fotos)
+                {
+                    if (foto == null || foto.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var extension = Path.GetExtension(foto.FileName).ToLower();
+
+                    if (!extensionesPermitidas.Contains(extension))
+                    {
+                        continue;
+                    }
+
+                    var nombreUnico = $"{Guid.NewGuid()}{extension}";
+                    var rutaFisica = Path.Combine(carpeta, nombreUnico);
+
+                    using (var stream = new FileStream(rutaFisica, FileMode.Create))
+                    {
+                        await foto.CopyToAsync(stream);
+                    }
+
+                    _context.FotoAvance.Add(new FotoAvance
+                    {
+                        IdReparacion = id,
+                        IdAvance = avance.IdAvance,
+                        IdUsuario = idTecnico,
+                        RutaArchivo = $"/uploads/reparaciones/{id}/{nombreUnico}",
+                        NombreArchivo = foto.FileName,
+                        FechaSubida = DateTime.Now,
+                        VisibleCliente = true,
+                        Activo = true
+                    });
+                }
+
+                _context.SaveChanges();
+            }
+
+            TempData["Success"] =
+                "La actualización se agregó correctamente a la bitácora.";
+
+            return RedirectToAction("Detalle", new { id = id });
         }
 
         // ==========================================================
@@ -232,7 +334,6 @@ namespace MonitoreoWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult IniciarDiagnostico(int id)
         {
-            // Obtener el técnico autenticado
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
             if (idUsuarioClaim == null)
@@ -245,23 +346,17 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
-            // Buscar la reparación
-            // solamente si pertenece al técnico actual
             var reparacion = _context.Reparacion
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
                     r.Activo);
 
-
             if (reparacion == null)
             {
                 return NotFound();
             }
 
-
-            // Verificar que esté en estado "Aceptada"
             if (reparacion.IdEstado != 2)
             {
                 TempData["Error"] =
@@ -273,18 +368,12 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-
-            // Cambiar:
-            // Aceptada (2) → Diagnóstico (3)
             reparacion.IdEstado = 3;
-
 
             _context.SaveChanges();
 
-
             TempData["Success"] =
                 "La reparación pasó a la etapa de diagnóstico.";
-
 
             return RedirectToAction(
                 "Detalle",
@@ -303,7 +392,6 @@ namespace MonitoreoWeb.Controllers
             int id,
             string diagnostico)
         {
-            // Obtener el técnico autenticado
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
             if (idUsuarioClaim == null)
@@ -318,23 +406,17 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
-            // Buscar la reparación
-            // solamente si pertenece al técnico actual
             var reparacion = _context.Reparacion
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
                     r.Activo);
 
-
             if (reparacion == null)
             {
                 return NotFound();
             }
 
-
-            // Verificar que esté en diagnóstico
             if (reparacion.IdEstado != 3)
             {
                 TempData["Error"] =
@@ -346,8 +428,6 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-
-            // Validar que exista información
             if (string.IsNullOrWhiteSpace(diagnostico))
             {
                 TempData["Error"] =
@@ -359,17 +439,12 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-
-            // Guardar diagnóstico
             reparacion.Diagnostico = diagnostico.Trim();
-
 
             _context.SaveChanges();
 
-
             TempData["Success"] =
                 "El diagnóstico se guardó correctamente.";
-
 
             return RedirectToAction(
                 "Detalle",
@@ -400,22 +475,17 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
             var reparacion = _context.Reparacion
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
                     r.Activo);
 
-
             if (reparacion == null)
             {
                 return NotFound();
             }
 
-
-            // Solo se puede pasar a este estado
-            // desde Diagnóstico
             if (reparacion.IdEstado != 3)
             {
                 TempData["Error"] =
@@ -427,15 +497,12 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-
             reparacion.IdEstado = 4;
 
             _context.SaveChanges();
 
-
             TempData["Success"] =
                 "La reparación pasó a Esperando Refacción.";
-
 
             return RedirectToAction(
                 "Detalle",
@@ -466,22 +533,17 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-
             var reparacion = _context.Reparacion
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
                     r.Activo);
 
-
             if (reparacion == null)
             {
                 return NotFound();
             }
 
-
-            // Solo se puede iniciar la reparación
-            // desde Diagnóstico
             if (reparacion.IdEstado != 3)
             {
                 TempData["Error"] =
@@ -493,21 +555,19 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-
             reparacion.IdEstado = 5;
 
             _context.SaveChanges();
 
-
             TempData["Success"] =
                 "La reparación pasó a En Reparación.";
-
 
             return RedirectToAction(
                 "Detalle",
                 new { id = id }
             );
         }
+
         // ==========================================================
         // REFACCIÓN RECIBIDA
         // ==========================================================
@@ -542,7 +602,6 @@ namespace MonitoreoWeb.Controllers
                 return NotFound();
             }
 
-            // Solo puede avanzar desde Esperando Refacción
             if (reparacion.IdEstado != 4)
             {
                 TempData["Error"] =
@@ -554,7 +613,6 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-            // 4 → 5
             reparacion.IdEstado = 5;
 
             _context.SaveChanges();
@@ -575,10 +633,7 @@ namespace MonitoreoWeb.Controllers
         [Authorize(Roles = "Tecnico")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EnviarAPruebas(
-            int id,
-            string descripcionAvance,
-            List<IFormFile> fotos)
+        public IActionResult EnviarAPruebas(int id)
         {
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
@@ -603,7 +658,6 @@ namespace MonitoreoWeb.Controllers
                 return NotFound();
             }
 
-            // Solo puede avanzar desde En Reparación
             if (reparacion.IdEstado != 5)
             {
                 TempData["Error"] =
@@ -612,95 +666,11 @@ namespace MonitoreoWeb.Controllers
                 return RedirectToAction("Detalle", new { id = id });
             }
 
-            if (string.IsNullOrWhiteSpace(descripcionAvance))
-            {
-                TempData["Error"] =
-                    "Debes describir el trabajo realizado antes de enviar a pruebas.";
-
-                return RedirectToAction("Detalle", new { id = id });
-            }
-
-            // ==========================================
-            // 1. REGISTRAR EL AVANCE
-            // ==========================================
-
-            var avance = new HistorialAvance
-            {
-                IdReparacion = id,
-                IdUsuario = idTecnico,
-                Fecha = DateTime.Now,
-                Descripcion = descripcionAvance.Trim()
-            };
-
-            _context.HistorialAvance.Add(avance);
-            _context.SaveChanges(); // Necesario para obtener el IdAvance generado
-
-
-            // ==========================================
-            // 2. GUARDAR LAS FOTOS (SI LAS HAY)
-            // ==========================================
-
-            if (fotos != null && fotos.Count > 0)
-            {
-                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-
-                var carpeta = Path.Combine(
-                    _env.WebRootPath,
-                    "uploads",
-                    "reparaciones",
-                    id.ToString());
-
-                Directory.CreateDirectory(carpeta);
-
-                foreach (var foto in fotos)
-                {
-                    if (foto.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    var extension = Path.GetExtension(foto.FileName).ToLower();
-
-                    if (!extensionesPermitidas.Contains(extension))
-                    {
-                        continue; // Ignora archivos que no sean imágenes
-                    }
-
-                    var nombreUnico = $"{Guid.NewGuid()}{extension}";
-                    var rutaFisica = Path.Combine(carpeta, nombreUnico);
-
-                    using (var stream = new FileStream(rutaFisica, FileMode.Create))
-                    {
-                        await foto.CopyToAsync(stream);
-                    }
-
-                    _context.FotoAvance.Add(new FotoAvance
-                    {
-                        IdReparacion = id,
-                        IdAvance = avance.IdAvance,
-                        IdUsuario = idTecnico,
-                        RutaArchivo = $"/uploads/reparaciones/{id}/{nombreUnico}",
-                        NombreArchivo = foto.FileName,
-                        FechaSubida = DateTime.Now,
-                        VisibleCliente = true,
-                        Activo = true
-                    });
-                }
-
-                _context.SaveChanges();
-            }
-
-
-            // ==========================================
-            // 3. CAMBIAR ESTADO: En Reparación → Pruebas
-            // ==========================================
-
             reparacion.IdEstado = 6;
-
             _context.SaveChanges();
 
             TempData["Success"] =
-                "La reparación fue enviada a pruebas junto con la evidencia adjunta.";
+                "La reparación fue enviada a pruebas.";
 
             return RedirectToAction("Detalle", new { id = id });
         }
@@ -708,11 +678,10 @@ namespace MonitoreoWeb.Controllers
         // ==========================================================
         // PRUEBAS SATISFACTORIAS
         // ==========================================================
-
         [Authorize(Roles = "Tecnico")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult PruebasSatisfactorias(int id)
+        public IActionResult PruebasSatisfactorias(int id, decimal? costoFinal)
         {
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
@@ -739,8 +708,6 @@ namespace MonitoreoWeb.Controllers
                 return NotFound();
             }
 
-            // Solo puede pasar a Terminada
-            // si actualmente está En Pruebas
             if (reparacion.IdEstado != 6)
             {
                 TempData["Error"] =
@@ -752,12 +719,13 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-            // 6 → 7
-            // 6 → 7
             reparacion.IdEstado = 7;
-
-            // Registrar fecha real de terminación
             reparacion.FechaEntregaReal = DateTime.Now;
+
+            if (costoFinal.HasValue)
+            {
+                reparacion.CostoFinal = costoFinal.Value;
+            }
 
             _context.SaveChanges();
 
@@ -769,6 +737,7 @@ namespace MonitoreoWeb.Controllers
                 new { id = id }
             );
         }
+
         // ==========================================================
         // PRUEBAS NO SATISFACTORIAS
         // ==========================================================
@@ -803,8 +772,6 @@ namespace MonitoreoWeb.Controllers
                 return NotFound();
             }
 
-            // Solo puede regresar a reparación
-            // si actualmente está En Pruebas
             if (reparacion.IdEstado != 6)
             {
                 TempData["Error"] =
@@ -816,7 +783,6 @@ namespace MonitoreoWeb.Controllers
                 );
             }
 
-            // 6 → 5
             reparacion.IdEstado = 5;
 
             _context.SaveChanges();

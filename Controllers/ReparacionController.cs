@@ -73,13 +73,16 @@ namespace MonitoreoWeb.Controllers
         // GET: Reparacion/Index
         // ==========================================
 
-        public IActionResult Index(string vista = "pendientes")
+        public IActionResult Index()
         {
-            var todas = _context.Reparacion
+            var solicitudes = _context.Reparacion
                 .Include(r => r.Dispositivo)
                     .ThenInclude(d => d.Cliente)
-                .Include(r => r.Tecnico)
-                .Where(r => r.Activo && (r.IdEstado == 1 || r.IdEstado == 2))
+                .Where(r =>
+                    r.Activo &&
+                    r.IdEstado == 1 &&
+                    r.IdTecnico == null
+                )
                 .Select(r => new SolicitudReparacionViewModel
                 {
                     IdReparacion = r.IdReparacion,
@@ -99,19 +102,10 @@ namespace MonitoreoWeb.Controllers
                     TelefonoCliente = r.Dispositivo.Cliente.Telefono,
                     EmailCliente = r.Dispositivo.Cliente.Email,
                     IdTecnico = r.IdTecnico,
-                    NombreTecnico = r.Tecnico != null ? r.Tecnico.Nombre : null
+                    NombreTecnico = null
                 })
                 .OrderByDescending(r => r.FechaIngreso)
                 .ToList();
-
-            var pendientes = todas.Where(s => s.IdEstado == 1).ToList();
-            var aceptadas = todas.Where(s => s.IdEstado == 2).ToList();
-
-            ViewBag.Vista = vista;
-            ViewBag.PendientesCount = pendientes.Count;
-            ViewBag.AceptadasCount = aceptadas.Count;
-
-            var solicitudes = vista == "aceptadas" ? aceptadas : pendientes;
 
             return View(solicitudes);
         }

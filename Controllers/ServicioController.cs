@@ -41,6 +41,33 @@ namespace MonitoreoWeb.Controllers
             string tipoCliente,
             string tipoDispositivo)
         {
+
+            // ==========================================
+            // VALIDAR PAGO INICIAL
+            // ==========================================
+
+            if (model.PagoInicial.HasValue && model.PagoInicial.Value > 0)
+            {
+                if (!model.Reparacion.CostoEstimado.HasValue)
+                {
+                    ModelState.AddModelError("",
+                        "Debes definir un costo estimado antes de registrar un pago inicial.");
+
+                    CargarClientes();
+                    return View(model);
+                }
+
+                if (model.PagoInicial.Value > model.Reparacion.CostoEstimado.Value)
+                {
+                    ModelState.AddModelError("",
+                        $"El pago inicial (${model.PagoInicial.Value:N2}) no puede ser mayor al costo estimado (${model.Reparacion.CostoEstimado.Value:N2}).");
+
+                    CargarClientes();
+                    return View(model);
+                }
+            }
+
+
             // OBTENER O CREAR CLIENTE
 
             Cliente cliente;
@@ -65,6 +92,48 @@ namespace MonitoreoWeb.Controllers
             }
             else
             {
+                // ==========================================
+                // VALIDAR DUPLICADOS
+                // ==========================================
+
+                var email = model.Cliente.Email?.Trim();
+                var telefono = model.Cliente.Telefono?.Trim();
+                var nombre = model.Cliente.Nombre?.Trim();
+                var apellido = model.Cliente.Apellido?.Trim();
+
+                var duplicado = _context.Cliente.FirstOrDefault(c =>
+                    c.Activo &&
+                    (
+                        c.Email.ToLower() == email.ToLower() ||
+                        c.Telefono == telefono ||
+                        (c.Nombre.ToLower() == nombre.ToLower() &&
+                         c.Apellido.ToLower() == apellido.ToLower())
+                    ));
+
+                if (duplicado != null)
+                {
+                    string motivo;
+
+                    if (duplicado.Email.ToLower() == email.ToLower())
+                    {
+                        motivo = "Ya existe un cliente registrado con ese correo electrónico. Búscalo como cliente existente.";
+                    }
+                    else if (duplicado.Telefono == telefono)
+                    {
+                        motivo = "Ya existe un cliente registrado con ese teléfono. Búscalo como cliente existente.";
+                    }
+                    else
+                    {
+                        motivo = "Ya existe un cliente registrado con ese nombre y apellido. Búscalo como cliente existente.";
+                    }
+
+                    ModelState.AddModelError("", motivo);
+
+                    CargarClientes();
+
+                    return View(model);
+                }
+
                 cliente = model.Cliente;
 
                 cliente.FechaRegistro = DateTime.Now;
@@ -148,12 +217,28 @@ namespace MonitoreoWeb.Controllers
 
             _context.SaveChanges();
 
+            // ==========================================
+            // REGISTRAR PAGO INICIAL (SI LO HAY)
+            // ==========================================
+
+            if (model.PagoInicial.HasValue && model.PagoInicial.Value > 0)
+            {
+                _context.Pago.Add(new Pago
+                {
+                    IdReparacion = reparacion.IdReparacion,
+                    Monto = model.PagoInicial.Value,
+                    FechaPago = DateTime.Now
+                });
+
+                _context.SaveChanges();
+            }
 
             // FINALIZAR
 
             return RedirectToAction(
-                "Index",
-                "Reparacion"
+                "DetalleReparacion",
+                "Admin",
+                new { id = reparacion.IdReparacion }
             );
         }
 

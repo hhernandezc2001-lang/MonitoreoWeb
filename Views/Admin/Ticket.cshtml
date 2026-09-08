@@ -1,0 +1,378 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+
+@{
+    Layout = null;
+
+    string estado = Model.IdEstado switch
+    {
+        1 => "Pendiente",
+        2 => "Aceptada",
+        3 => "En diagnóstico",
+        4 => "Esperando refacción",
+        5 => "En reparación",
+        6 => "En pruebas",
+        7 => "Terminada",
+        _ => "Desconocido"
+    };
+
+    decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
+    decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+    decimal saldoPendiente = costoBase - totalPagado;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>
+        Ticket @Model.TokenConsulta
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #212529;
+            max-width: 480px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .ticket-encabezado {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 2px dashed #adb5bd;
+        }
+
+            .ticket-encabezado h1 {
+                font-size: 1.3rem;
+                margin: 0 0 4px 0;
+            }
+
+        .ticket-token {
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .ticket-seccion {
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px dashed #dee2e6;
+        }
+
+            .ticket-seccion:last-of-type {
+                border-bottom: none;
+            }
+
+            .ticket-seccion h2 {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #6c757d;
+                margin: 0 0 8px 0;
+            }
+
+        .ticket-fila {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+            .ticket-fila span:first-child {
+                color: #495057;
+            }
+
+            .ticket-fila span:last-child {
+                font-weight: 600;
+                text-align: right;
+            }
+
+        .ticket-totales .ticket-fila {
+            font-size: 0.95rem;
+        }
+
+        .ticket-saldo {
+            font-size: 1.1rem !important;
+            font-weight: bold !important;
+        }
+
+        .ticket-footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 20px;
+        }
+
+        .ticket-acciones {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .ticket-acciones button {
+                background-color: #0d6efd;
+                color: #ffffff;
+                border: none;
+                padding: 10px 24px;
+                border-radius: 6px;
+                font-size: 0.95rem;
+                cursor: pointer;
+            }
+
+        @@media print {
+            .ticket-acciones {
+                display: none;
+            }
+
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- ========================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================== -->
+
+    <div class="ticket-encabezado">
+
+        <h1>
+            Comprobante de reparación
+        </h1>
+
+        <div class="ticket-token">
+            @Model.TokenConsulta
+        </div>
+
+        <div style="font-size: 0.8rem; color: #6c757d; margin-top: 4px;">
+            Estado actual: @estado
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- CLIENTE -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion">
+
+        <h2>
+            Cliente
+        </h2>
+
+        <div class="ticket-fila">
+            <span>Nombre</span>
+            <span>
+                @Model.Dispositivo?.Cliente?.Nombre
+                @Model.Dispositivo?.Cliente?.Apellido
+            </span>
+        </div>
+
+        <div class="ticket-fila">
+            <span>Teléfono</span>
+            <span>@Model.Dispositivo?.Cliente?.Telefono</span>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- DISPOSITIVO -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion">
+
+        <h2>
+            Dispositivo
+        </h2>
+
+        <div class="ticket-fila">
+            <span>Marca / Modelo</span>
+            <span>
+                @Model.Dispositivo?.Marca
+                @Model.Dispositivo?.Modelo
+            </span>
+        </div>
+
+        <div class="ticket-fila">
+            <span>IMEI</span>
+            <span>
+                @(string.IsNullOrWhiteSpace(Model.Dispositivo?.IMEI)
+                                ? "No registrado"
+                                : Model.Dispositivo.IMEI)
+            </span>
+        </div>
+
+        <div class="ticket-fila">
+            <span>Color</span>
+            <span>
+                @(string.IsNullOrWhiteSpace(Model.Dispositivo?.Color)
+                                ? "No registrado"
+                                : Model.Dispositivo.Color)
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- PROBLEMA -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion">
+
+        <h2>
+            Problema reportado
+        </h2>
+
+        <div style="font-size: 0.9rem;">
+            @Model.ProblemaReportado
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FECHAS -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion">
+
+        <h2>
+            Fechas
+        </h2>
+
+        <div class="ticket-fila">
+            <span>Fecha de ingreso</span>
+            <span>@Model.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</span>
+        </div>
+
+        <div class="ticket-fila">
+            <span>Entrega estimada</span>
+            <span>
+                @(Model.FechaEntregaEstimada.HasValue
+                                ? Model.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy")
+                                : "Sin definir")
+            </span>
+        </div>
+
+        @if (Model.Tecnico != null)
+        {
+            <div class="ticket-fila">
+                <span>Técnico asignado</span>
+                <span>@Model.Tecnico.Nombre</span>
+            </div>
+        }
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- COSTOS -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion ticket-totales">
+
+        <h2>
+            Costos
+        </h2>
+
+        <div class="ticket-fila">
+            <span>Costo estimado</span>
+            <span>
+                @(Model.CostoEstimado.HasValue
+                                ? $"${Model.CostoEstimado:N2}"
+                                : "No definido")
+            </span>
+        </div>
+
+        @if (Model.CostoFinal.HasValue)
+        {
+            <div class="ticket-fila">
+                <span>Costo final</span>
+                <span>@($"${Model.CostoFinal:N2}")</span>
+            </div>
+        }
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- PAGOS -->
+    <!-- ========================================== -->
+
+    <div class="ticket-seccion ticket-totales">
+
+        <h2>
+            Pagos
+        </h2>
+
+        @if (Model.Pagos == null || !Model.Pagos.Any())
+        {
+            <div class="ticket-fila">
+                <span>Sin pagos registrados</span>
+                <span></span>
+            </div>
+        }
+        else
+        {
+            @foreach (var pago in Model.Pagos.OrderBy(p => p.FechaPago))
+            {
+                <div class="ticket-fila">
+                    <span>@pago.FechaPago.ToString("dd/MM/yyyy")</span>
+                    <span>@($"${pago.Monto:N2}")</span>
+                </div>
+            }
+        }
+
+        <div class="ticket-fila">
+            <span>Total pagado</span>
+            <span>-@($"${totalPagado:N2}")</span>
+        </div>
+
+        <div class="ticket-fila ticket-saldo">
+            <span>Saldo pendiente</span>
+            <span>@($"${saldoPendiente:N2}")</span>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- ACCIONES -->
+    <!-- ========================================== -->
+
+    <div class="ticket-acciones">
+
+        <button type="button"
+                onclick="window.print()">
+
+            Imprimir / Guardar como PDF
+
+        </button>
+
+    </div>
+
+
+    <div class="ticket-footer">
+        Consulte el estado de su reparación con el código:
+        <strong>@Model.TokenConsulta</strong>
+    </div>
+
+</body>
+
+</html>

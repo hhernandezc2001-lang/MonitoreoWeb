@@ -35,6 +35,7 @@
 
     </div>
 
+    @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
 
     <!-- ========================================== -->
     <!-- ESTADO -->
@@ -72,6 +73,7 @@
 
             </form>
         }
+
         else if (Model.IdEstado == 3)
         {
             <h2>
@@ -173,6 +175,7 @@
                 </div>
             }
         }
+
         else if (Model.IdEstado == 4)
         {
             <h2>
@@ -200,6 +203,7 @@
 
             </form>
         }
+
         else if (Model.IdEstado == 5)
         {
             <h2>
@@ -214,38 +218,9 @@
             <form asp-controller="Tecnico"
                   asp-action="EnviarAPruebas"
                   asp-route-id="@Model.IdReparacion"
-                  method="post"
-                  enctype="multipart/form-data">
+                  method="post">
 
                 @Html.AntiForgeryToken()
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Descripción del trabajo realizado
-                    </label>
-
-                    <textarea name="descripcionAvance"
-                          class="form-control"
-                          rows="4"
-                          placeholder="Describe el trabajo realizado antes de enviar a pruebas...">
-            </textarea>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Fotos de evidencia
-                    </label>
-
-                    <input type="file"
-                           name="fotos"
-                           class="form-control"
-                           multiple
-                           accept="image/*" />
-
-                </div>
 
                 <button type="submit"
                         class="btn btn-primary">
@@ -256,6 +231,7 @@
 
             </form>
         }
+
         else if (Model.IdEstado == 6)
         {
             <h2>
@@ -280,7 +256,6 @@
 
 
                 <div class="d-flex gap-2">
-
                     <!-- ============================== -->
                     <!-- PRUEBAS SATISFACTORIAS -->
                     <!-- ============================== -->
@@ -288,9 +263,26 @@
                     <form asp-controller="Tecnico"
                           asp-action="PruebasSatisfactorias"
                           asp-route-id="@Model.IdReparacion"
-                          method="post">
+                          method="post"
+                          class="mb-2">
 
                         @Html.AntiForgeryToken()
+
+                        <div class="mb-2">
+
+                            <label class="form-label">
+                                Costo final (opcional)
+                            </label>
+
+                            <input type="number"
+                                   name="costoFinal"
+                                   step="0.01"
+                                   min="0"
+                                   class="form-control"
+                                   style="max-width: 220px;"
+                                   placeholder="Ej. 1800.00" />
+
+                        </div>
 
                         <button type="submit"
                                 class="btn btn-success">
@@ -300,7 +292,6 @@
                         </button>
 
                     </form>
-
 
                     <!-- ============================== -->
                     <!-- PRUEBAS NO SATISFACTORIAS -->
@@ -493,7 +484,6 @@
 
     </div>
 
-
     <!-- ========================================== -->
     <!-- FECHAS -->
     <!-- ========================================== -->
@@ -531,6 +521,67 @@
 
     </div>
 
+    <!-- ========================================== -->
+    <!-- PAGOS Y SALDO -->
+    <!-- ========================================== -->
+
+    <div class="tecnico-card-seccion">
+
+        <span class="tecnico-seccion-titulo">
+            PAGOS
+        </span>
+
+        @{
+            decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
+            decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+            decimal saldoPendiente = costoBase - totalPagado;
+        }
+
+        @if (Model.Pagos == null || !Model.Pagos.Any())
+        {
+            <p class="text-muted">
+                Aún no se ha registrado ningún pago para esta reparación.
+            </p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var pago in Model.Pagos.OrderBy(p => p.FechaPago))
+                {
+                    <li>
+                        @pago.FechaPago.ToString("dd/MM/yyyy HH:mm")
+                        &mdash;
+                        @($"${pago.Monto:N2}")
+                    </li>
+                }
+            </ul>
+        }
+
+        <p>
+            <strong>
+                Total pagado:
+            </strong>
+            @($"${totalPagado:N2}")
+        </p>
+
+        <p>
+            <strong>
+                Saldo pendiente:
+            </strong>
+            @($"${saldoPendiente:N2}")
+            <span class="text-muted">
+                (@(Model.CostoFinal.HasValue ? "sobre costo final" : "sobre costo estimado"))
+            </span>
+        </p>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BITÁCORA -->
+    <!-- ========================================== -->
+    @await Html.PartialAsync(
+    "_BitacoraAvances",
+        (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
 
     <!-- ========================================== -->
     <!-- VOLVER -->
