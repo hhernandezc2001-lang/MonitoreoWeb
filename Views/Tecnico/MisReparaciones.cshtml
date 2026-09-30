@@ -1,316 +1,162 @@
 ﻿@model IEnumerable<MonitoreoWeb.Models.Reparacion>
 
 @{
-    var reparaciones = Model.ToList();
-
-    string TextoEstado(int idEstado) => idEstado switch
-    {
-        2 => "Aceptada",
-        3 => "En diagnóstico",
-        4 => "Esperando refacción",
-        5 => "En reparación",
-        6 => "En pruebas",
-        7 => "Terminada",
-        _ => "Estado desconocido"
-    };
+    ViewData["Title"] = "Mis Reparaciones";
 }
 
-<div class="tecnico-solicitudes-page">
+<div class="container-fluid py-4 px-3 px-md-4">
 
-    <div class="tecnico-solicitudes-header">
-
+    <!-- ENCABEZADO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-
-            <span class="tecnico-subtitulo">
-                PANEL DEL TÉCNICO
-            </span>
-
-            <h1>
-                Mis reparaciones
-            </h1>
-
-            <p>
-                Consulta las reparaciones que tienes asignadas.
-            </p>
-
+            <span class="text-uppercase text-muted fw-bold small">PANEL DEL TÉCNICO</span>
+            <h2 class="fw-bold mb-0 text-dark">Mi Mesa de Trabajo</h2>
+            <p class="text-muted small mb-0">Consulta y da seguimiento rápido a los equipos asignados a tu nombre.</p>
         </div>
-
     </div>
 
+    <!-- PESTAÑAS / TABS MODERNAS -->
+    <ul class="nav nav-pills mb-4 gap-2" role="tablist">
+        <li class="nav-item">
+            <a asp-controller="Tecnico" asp-action="MisReparaciones" asp-route-vista="curso"
+               class="nav-link fw-bold px-4 py-2 rounded-pill shadow-sm @(ViewBag.Vista == "curso" ? "active bg-primary text-white" : "bg-white text-dark border")">
+                <i class="bi bi-tools me-2"></i> En Curso
+                <span class="badge @(ViewBag.Vista == "curso" ? "bg-white text-primary" : "bg-light text-dark border") ms-2 rounded-pill">@ViewBag.EnCursoCount</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a asp-controller="Tecnico" asp-action="MisReparaciones" asp-route-vista="finalizadas"
+               class="nav-link fw-bold px-4 py-2 rounded-pill shadow-sm @(ViewBag.Vista == "finalizadas" ? "active bg-success text-white" : "bg-white text-dark border")">
+                <i class="bi bi-check-circle-fill me-2"></i> Finalizadas / Entregadas
+                <span class="badge @(ViewBag.Vista == "finalizadas" ? "bg-white text-success" : "bg-light text-dark border") ms-2 rounded-pill">@ViewBag.FinalizadasCount</span>
+            </a>
+        </li>
+    </ul>
 
-    <!-- ========================================== -->
-    <!-- PESTAÑAS -->
-    <!-- ========================================== -->
-
-    <div class="solicitudes-tabs">
-
-        <a asp-controller="Tecnico"
-           asp-action="MisReparaciones"
-           asp-route-vista="curso"
-           class="solicitudes-tab @(ViewBag.Vista == "curso" ? "activa" : "")">
-            En curso
-            <span class="tab-contador">@ViewBag.EnCursoCount</span>
-        </a>
-
-        <a asp-controller="Tecnico"
-           asp-action="MisReparaciones"
-           asp-route-vista="finalizadas"
-           class="solicitudes-tab @(ViewBag.Vista == "finalizadas" ? "activa" : "")">
-            Finalizadas
-            <span class="tab-contador">@ViewBag.FinalizadasCount</span>
-        </a>
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- LISTADO -->
-    <!-- ========================================== -->
-    @if (!reparaciones.Any())
+    <!-- CONTENIDO: TABLA MODAL / MODERNA -->
+    @if (!Model.Any())
     {
-        <div class="tecnico-solicitudes-vacio">
-
-            <div class="tecnico-vacio-icono">
-                ✓
+        <div class="card border-0 shadow-sm text-center py-5 rounded-4 bg-white">
+            <div class="card-body">
+                <i class="bi bi-clipboard2-check text-muted display-4"></i>
+                <h5 class="fw-bold mt-3 text-secondary">
+                    @(ViewBag.Vista == "finalizadas" ? "No hay reparaciones finalizadas recientes" : "No tienes reparaciones activas en curso")
+                </h5>
+                <p class="text-muted small">
+                    @(ViewBag.Vista == "finalizadas" ? "Los servicios concluidos aparecerán archivados aquí." : "Revisa las solicitudes pendientes en el taller para aceptar nuevos equipos.")
+                </p>
+                @if (ViewBag.Vista != "finalizadas")
+                {
+                    <a asp-controller="Tecnico" asp-action="Solicitudes" class="btn btn-primary btn-sm fw-bold px-4 mt-2">
+                        Ver Pendientes de Taller
+                    </a>
+                }
             </div>
-
-            <h2>
-                @(ViewBag.Vista == "finalizadas"
-                            ? "Aún no tienes reparaciones finalizadas"
-                            : "No tienes reparaciones en curso")
-                                                            </h2>
-
-            <p>
-                @(ViewBag.Vista == "finalizadas"
-                            ? "Las reparaciones que completes aparecerán aquí."
-                            : "Actualmente no tienes reparaciones activas para trabajar.")
-        </p>
-
         </div>
-        }
+    }
     else
     {
-        <div class="tecnico-solicitudes-grid">
-
-            @foreach (var reparacion in reparaciones)
-            {
-                <article class="tecnico-solicitud-card">
-
-                    <div class="tecnico-card-header">
-
-                        <div>
-
-                            <span class="tecnico-solicitud-id">
-                                REPARACIÓN #@reparacion.IdReparacion
-                            </span>
-
-                            <h2>
-                                @reparacion.Dispositivo?.Marca
-                                @reparacion.Dispositivo?.Modelo
-                            </h2>
-
-                        </div>
-
-                        <span class="tecnico-estado @(reparacion.IdEstado == 7 ? "tecnico-estado-terminada" : "")">
-                            @TextoEstado(reparacion.IdEstado)
-                        </span>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- DISPOSITIVO -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            DISPOSITIVO
-                        </span>
-
-                        <div class="tecnico-datos">
-
-                            <div>
-
-                                <span>
-                                    Marca
-                                </span>
-
-                                <strong>
-                                    @reparacion.Dispositivo?.Marca
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Modelo
-                                </span>
-
-                                <strong>
-                                    @reparacion.Dispositivo?.Modelo
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    IMEI
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(
-                                                                reparacion.Dispositivo?.IMEI)
-                                                                ? "No registrado"
-                                                                : reparacion.Dispositivo.IMEI)
-                                                                                          </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Color
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(
-                                                                reparacion.Dispositivo?.Color)
-                                                                ? "No registrado"
-                                                                : reparacion.Dispositivo.Color)
-                                                                                           </strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- CLIENTE -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            CLIENTE
-                        </span>
-
-                        <div class="tecnico-cliente">
-
-                            <div class="tecnico-avatar">
-
-                                @(reparacion.Dispositivo?.Cliente?.Nombre?
-                                                        .Substring(0, 1)
-                                                        .ToUpper() ?? "?")
-
-                            </div>
-
-                            <div>
-
-                                <strong>
-
-                                    @reparacion.Dispositivo?.Cliente?.Nombre
-                                    @reparacion.Dispositivo?.Cliente?.Apellido
-
-                                </strong>
-
-                                <span>
-                                    📞
-                                    @reparacion.Dispositivo?.Cliente?.Telefono
-                                </span>
-
-                                <span>
-                                    ✉
-                                    @reparacion.Dispositivo?.Cliente?.Email
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- PROBLEMA -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            PROBLEMA REPORTADO
-                        </span>
-
-                        <div class="tecnico-problema">
-
-                            @reparacion.ProblemaReportado
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- FECHAS -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-fechas">
-
-                        <div>
-
-                            <span>
-                                Fecha de ingreso
-                            </span>
-
-                            <strong>
-                                @(reparacion.FechaIngreso.ToString("dd/MM/yyyy HH:mm"))
-                            </strong>
-
-                        </div>
-
-                        <div>
-
-                            <span>
-                                Entrega estimada
-                            </span>
-
-                            <strong>
-
-                                @(reparacion.FechaEntregaEstimada.HasValue
-                                                        ? reparacion.FechaEntregaEstimada.Value
-                                                        .ToString("dd/MM/yyyy")
-                                                        : "Sin definir")
-
-                    </strong>
-
-                        </div>
-
-                    </div>
-
-                    <!-- ================================= -->
-                    <!-- ACCIÓN -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-footer">
-
-                        <a asp-controller="Tecnico"
-                           asp-action="Detalle"
-                           asp-route-id="@reparacion.IdReparacion"
-                           class="btn-aceptar-reparacion">
-
-                            Ver reparación
-
-                        </a>
-
-                    </div>
-
-                </article>
-                }
-
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark text-uppercase small" style="letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="py-3 ps-4">Orden / Prioridad</th>
+                            <th class="py-3">Dispositivo</th>
+                            <th class="py-3">Cliente</th>
+                            <th class="py-3">Falla Reportada</th>
+                            <th class="py-3">Fechas</th>
+                            <th class="py-3">Estado Actual</th>
+                            <th class="py-3 text-end pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reparacion in Model)
+                        {
+                            // Lógica de colores para estados
+                            string badgeEstadoClass = reparacion.IdEstado switch
+                            {
+                                2 => "bg-info text-dark",
+                                3 => "bg-warning text-dark",
+                                4 => "bg-secondary",
+                                5 => "bg-primary",
+                                6 => "bg-info text-dark",
+                                7 => "bg-success",
+                                8 => "bg-success",
+                                _ => "bg-dark"
+                            };
+
+                            string nombreEstado = reparacion.IdEstado switch
+                            {
+                                1 => "Pendiente",
+                                2 => "Aceptada",
+                                3 => "En diagnóstico",
+                                4 => "Esperando refacción",
+                                5 => "En reparación",
+                                6 => "En pruebas",
+                                7 => "Terminada",
+                                8 => "Entregada",
+                                _ => "Desconocido"
+                            };
+
+                            // Prioridad
+                            string badgePrioridadClass = "bg-light text-dark border";
+                            if (reparacion.EsGarantia) { badgePrioridadClass = "bg-danger text-white"; }
+                            else if (reparacion.Prioridad == "Urgente") { badgePrioridadClass = "bg-danger text-white"; }
+                            else if (reparacion.Prioridad == "Alta") { badgePrioridadClass = "bg-warning text-dark"; }
+
+                            <tr>
+                                <!-- ORDEN Y PRIORIDAD -->
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark d-block">#@reparacion.IdReparacion</span>
+                                    <span class="badge @badgePrioridadClass px-2 py-1 mt-1" style="font-size: 0.7rem;">
+                                        @(reparacion.EsGarantia ? "GARANTÍA" : (reparacion.Prioridad ?? "NORMAL"))
+                                    </span>
+                                </td>
+
+                                <!-- DISPOSITIVO -->
+                                <td>
+                                    <div class="fw-bold text-dark">@reparacion.Dispositivo?.Marca @reparacion.Dispositivo?.Modelo</div>
+                                    <div class="small text-muted font-monospace">IMEI: @(string.IsNullOrWhiteSpace(reparacion.Dispositivo?.IMEI) ? "N/R" : reparacion.Dispositivo.IMEI)</div>
+                                </td>
+
+                                <!-- CLIENTE -->
+                                <td>
+                                    <div class="fw-bold text-dark">@reparacion.Dispositivo?.Cliente?.Nombre @reparacion.Dispositivo?.Cliente?.Apellido</div>
+                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i> @reparacion.Dispositivo?.Cliente?.Telefono</div>
+                                </td>
+
+                                <!-- PROBLEMA -->
+                                <td>
+                                    <span class="text-muted text-truncate d-inline-block" style="max-width: 200px;" title="@reparacion.ProblemaReportado">
+                                        @reparacion.ProblemaReportado
+                                    </span>
+                                </td>
+
+                                <!-- FECHAS -->
+                                <td>
+                                    <div class="small"><span class="text-muted">Ingreso:</span> @reparacion.FechaIngreso.ToString("dd/MM/yyyy")</div>
+                                    <div class="small"><span class="text-muted">Entrega:</span> @(reparacion.FechaEntregaEstimada.HasValue? reparacion.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy") : "Por definir")</div>
+                                </td>
+
+                                <!-- ESTADO -->
+                                <td>
+                                    <span class="badge @badgeEstadoClass px-3 py-2 rounded-pill fw-bold">
+                                        @nombreEstado
+                                    </span>
+                                </td>
+
+                                <!-- ACCIÓN -->
+                                <td class="text-end pe-4">
+                                    <a asp-controller="Tecnico" asp-action="Detalle" asp-route-id="@reparacion.IdReparacion" class="btn btn-sm btn-outline-primary fw-bold px-3 shadow-sm">
+                                        <i class="bi bi-eye-fill me-1"></i> Gestionar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     }
 

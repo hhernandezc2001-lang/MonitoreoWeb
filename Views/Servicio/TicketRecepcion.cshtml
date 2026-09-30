@@ -1,0 +1,145 @@
+﻿@model MonitoreoWeb.Models.Reparacion
+@{
+    Layout = null;
+    var checklist = ViewBag.Checklist as MonitoreoWeb.Models.ChecklistRecepcion;
+    var token = ViewBag.Token as string;
+
+    decimal costoEstimado = Model.CostoEstimado ?? 0;
+    decimal anticipo = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+    decimal pendiente = costoEstimado - anticipo;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Ticket Recepción - #@Model.IdReparacion</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            width: 80mm;
+            margin: 0 auto;
+            padding: 5px;
+            color: #000;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .fw-bold {
+            font-weight: bold;
+        }
+
+        .border-bottom {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 5px;
+            font-size: 10px;
+        }
+
+        .client-signature {
+            max-width: 100%;
+            max-height: 55px;
+            margin-top: 5px;
+        }
+
+        .signature-box {
+            border-bottom: 1px solid #000;
+            height: 35px;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body onload="window.print()">
+
+    <div class="text-center border-bottom">
+        <h2 style="margin: 0;">SIGER</h2>
+        <p style="margin: 2px 0;">TICKET DE RECEPCIÓN Y CUSTODIA</p>
+        <p style="margin: 2px 0;">Orden: #@Model.IdReparacion</p>
+        <p style="margin: 2px 0;">Fecha: @Model.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</p>
+    </div>
+
+    <div class="border-bottom">
+        <p class="fw-bold" style="margin: 5px 0;">CLIENTE Y DISPOSITIVO</p>
+        <p style="margin: 2px 0;">Cliente: @Model.Dispositivo?.Cliente?.Nombre @Model.Dispositivo?.Cliente?.Apellido</p>
+        <p style="margin: 2px 0;">Equipo: @Model.Dispositivo?.Marca @Model.Dispositivo?.Modelo</p>
+        <p style="margin: 2px 0;">Falla: @Model.ProblemaReportado</p>
+    </div>
+
+    <!-- SECCIÓN DE INSPECCIÓN FÍSICA (CHECKLIST) -->
+    <div class="border-bottom">
+        <p class="fw-bold" style="margin: 5px 0;">INSPECCIÓN FÍSICA</p>
+        @if (checklist != null)
+        {
+            <div class="checklist-grid">
+                <div>[ @(checklist.Enciende ? "X" : " ") ] Enciende</div>
+                <div>[ @(checklist.HumedadOAgua ? "X" : " ") ] Humedad/Agua</div>
+                <div>[ @(checklist.PantallaEstrellada ? "X" : " ") ] Pantalla Estrellada</div>
+                <div>[ @(checklist.CargaCorrectamente ? "X" : " ") ] Carga Correcta</div>
+                <div>[ @(checklist.TapaTraseraDañada ? "X" : " ") ] Tapa Dañada</div>
+                <div>[ @(checklist.BotonesFuncionan ? "X" : " ") ] Botones OK</div>
+                <div>[ @(checklist.RayonesVisibles ? "X" : " ") ] Rayones Visibles</div>
+                <div>[ @(checklist.LeeSIM ? "X" : " ") ] Lee SIM</div>
+                <div>[ @(checklist.CamaraFrontalOk ? "X" : " ") ] Cám. Frontal OK</div>
+                <div>[ @(checklist.CamaraTraseraOk ? "X" : " ") ] Cám. Trasera OK</div>
+                <div style="grid-column: span 2;">[ @(checklist.AltavozMicOk ? "X" : " ") ] Altavoz / Micrófono OK</div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(checklist.Observaciones))
+            {
+                <p style="margin: 4px 0 2px 0; font-size: 10px;"><strong>Obs:</strong> @checklist.Observaciones</p>
+            }
+        }
+        else
+        {
+            <p style="font-size: 10px; margin: 2px 0;">Sin checklist registrado.</p>
+        }
+    </div>
+
+    <div class="border-bottom">
+        <p class="fw-bold" style="margin: 5px 0;">PRESUPUESTO</p>
+        <div class="row"><span>Costo Estimado:</span><span>$@costoEstimado.ToString("N2")</span></div>
+        <div class="row"><span>Anticipo / Abono:</span><span>$@anticipo.ToString("N2")</span></div>
+        <div class="row fw-bold" style="font-size: 13px; margin-top: 3px;"><span>RESTA POR PAGAR:</span><span>$@pendiente.ToString("N2")</span></div>
+    </div>
+
+    <div class="border-bottom text-center">
+        <p class="fw-bold" style="margin: 5px 0;">CÓDIGO DE RASTREO</p>
+        <h3 style="margin: 3px 0;">@(token ?? "N/A")</h3>
+    </div>
+
+    <div class="text-center">
+        @if (checklist != null && !string.IsNullOrEmpty(checklist.FirmaClienteBase64))
+        {
+            <img src="@checklist.FirmaClienteBase64" class="client-signature" alt="Firma Cliente" />
+        }
+        else
+        {
+            <div class="signature-box"></div>
+        }
+        <p style="margin: 0; font-size: 10px;">Firma del Cliente (Conformidad Recepción)</p>
+        <p style="font-size: 8.5px; margin-top: 8px; text-align: justify;">
+            <strong>NOTA:</strong> Conserve este ticket para recoger su equipo. El taller no se hace responsable por equipos no reclamados después de 60 días.
+        </p>
+    </div>
+
+    <!-- BOTÓN DE VOLVER AL PANEL (OCULTO EN LA IMPRESIÓN FÍSICA) -->
+    <div class="text-center" style="margin-top: 40px; margin-bottom: 30px;">
+        <a href="/Admin/Inicio" style="display: inline-block; padding: 10px 20px; background: #0d6efd; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold;" class="d-print-none">← Volver al Menú Principal</a>
+    </div>
+
+</body>
+</html>

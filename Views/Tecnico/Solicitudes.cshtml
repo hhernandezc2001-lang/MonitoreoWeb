@@ -1,326 +1,253 @@
 ﻿@model IEnumerable<MonitoreoWeb.Models.Reparacion>
 
 @{
-    var solicitudes = Model.ToList();
+    ViewData["Title"] = "Solicitudes Disponibles";
 }
 
-<div class="tecnico-solicitudes-page">
+<style>
+    /* TARJETA PRINCIPAL CON BORDE SUPERIOR INTEGRADO */
+    .card-solicitud {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        background: #ffffff;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
 
-    <!-- ========================================== -->
-    <!-- ENCABEZADO -->
-    <!-- ========================================== -->
+        .card-solicitud:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07) !important;
+        }
 
-    <div class="tecnico-solicitudes-header">
+    .stripe-urgente {
+        border-top: 5px solid #ef4444 !important;
+    }
 
+    .stripe-alta {
+        border-top: 5px solid #f59e0b !important;
+    }
+
+    .stripe-normal {
+        border-top: 5px solid #3b82f6 !important;
+    }
+
+    .badge-urgente {
+        background-color: #ffffff;
+        color: #991b1b;
+        border: 1.5px solid #ef4444;
+    }
+
+    .badge-alta {
+        background-color: #ffffff;
+        color: #92400e;
+        border: 1.5px solid #f59e0b;
+    }
+
+    .badge-normal {
+        background-color: #ffffff;
+        color: #1e3a8a;
+        border: 1.5px solid #1e3a8a;
+    }
+
+    .orden-header {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+
+    .problema-box {
+        background-color: #f1f5f9;
+        border-left: 3.5px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+
+    .meta-label {
+        font-size: 0.73rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+    .meta-value {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    /* Cliente en azul oscuro distintivo */
+    .cliente-nombre {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Botón Aceptar Outline estilo imagen */
+    .btn-aceptar-outline {
+        background-color: #ffffff;
+        color: #1e3a8a;
+        border: 1.5px solid #1e3a8a;
+        border-radius: 8px;
+        padding: 6px 22px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-aceptar-outline:hover {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        }
+
+    /* Estilos especiales para Garantía (Púrpura / Violeta Pastel) */
+    .stripe-garantia {
+        border-top: 5px solid #a855f7 !important;
+    }
+
+    .badge-garantia {
+        background-color: #ffffff;
+        color: #6b21a8;
+        border: 1.5px solid #a855f7;
+    }
+</style>
+
+<div class="container-fluid py-4 px-3 px-md-4">
+
+    <!-- ENCABEZADO DE SECCIÓN -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-
-            <span class="tecnico-subtitulo">
-                PANEL DEL TÉCNICO
-            </span>
-
-            <h1>
-                Solicitudes disponibles
-            </h1>
-
-            <p>
-                Revisa las reparaciones pendientes y acepta
-                aquellas que estés disponible para realizar.
-            </p>
-
+            <h3 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Solicitudes en Taller</h3>
+            <p class="text-muted small mb-0">Selecciona los servicios pendientes para asignártelos.</p>
         </div>
-
+        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill font-monospace small">
+            @Model.Count() disponible(s)
+        </span>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- RESUMEN -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-resumen">
-
-        <div class="tecnico-resumen-card">
-
-            <span>
-                Solicitudes disponibles
-            </span>
-
-            <strong>
-                @solicitudes.Count
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- LISTADO -->
-    <!-- ========================================== -->
-    @if (!solicitudes.Any())
+    @if (TempData["Success"] != null)
     {
-        <div class="tecnico-solicitudes-vacio">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-            <div class="tecnico-vacio-icono">
-                ✓
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 rounded-4">
+            <div class="card-body">
+                <i class="bi bi-check2-all text-muted display-4"></i>
+                <h5 class="fw-bold mt-3 text-secondary">No hay tareas pendientes</h5>
+                <p class="text-muted small">Todas las reparaciones han sido aceptadas por el equipo técnico.</p>
             </div>
-
-            <h2>
-                No hay solicitudes disponibles
-            </h2>
-
-            <p>
-                Actualmente no existen reparaciones pendientes
-                de aceptar.
-            </p>
-
         </div>
     }
     else
     {
-        <div class="tecnico-solicitudes-grid">
-
-            @foreach (var reparacion in solicitudes)
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            @foreach (var item in Model)
             {
-                <article class="tecnico-solicitud-card">
+                string stripeClass = item.EsGarantia
+                ? "stripe-garantia"
+                : item.Prioridad switch
+                {
+                    "Urgente" => "stripe-urgente",
+                    "Alta" => "stripe-alta",
+                    _ => "stripe-normal"
+                };
 
-                    <!-- ================================= -->
-                    <!-- CABECERA -->
-                    <!-- ================================= -->
+                string badgeClass = item.EsGarantia
+                ? "badge-garantia"
+                : item.Prioridad switch
+                {
+                    "Urgente" => "badge-urgente",
+                    "Alta" => "badge-alta",
+                    _ => "badge-normal"
+                };
 
-                    <div class="tecnico-card-header">
+                string textoPrioridad = item.EsGarantia
+                ? "GARANTÍA"
+                : item.Prioridad.ToUpper();
 
-                        <div>
-
-                            <span class="tecnico-solicitud-id">
-                                SOLICITUD #@reparacion.IdReparacion
-                            </span>
-
-                            <h2>
-
-                                @reparacion.Dispositivo?.Marca
-                                @reparacion.Dispositivo?.Modelo
-
-                            </h2>
-
-                        </div>
-
-                        <span class="tecnico-estado">
-                            Pendiente
-                        </span>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- DISPOSITIVO -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            DISPOSITIVO
-                        </span>
-
-                        <div class="tecnico-datos">
+                <div class="col">
+                    <div class="card h-100 card-solicitud @stripeClass">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
 
                             <div>
+                                <!-- CABECERA SUPERIOR: FOLIO Y BADGE -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="orden-header">
+                                        ORDEN #@item.IdReparacion
+                                    </span>
+                                    <span class="badge @badgeClass rounded-pill px-3 py-1" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">
+                                        @textoPrioridad
+                                    </span>
+                                </div>
 
-                                <span>
-                                    Marca
-                                </span>
+                                <!-- DETALLES DEL DISPOSITIVO -->
+                                <h4 class="text-dark mb-1" style="font-size: 1.3rem; font-weight: 400; letter-spacing: -0.3px;">
+                                    @item.Dispositivo?.Marca @item.Dispositivo?.Modelo
+                                </h4>
 
-                                <strong>
-                                    @reparacion.Dispositivo?.Marca
-                                </strong>
+                                <div class="d-flex align-items-center gap-2 text-muted small mb-3" style="font-size: 0.88rem;">
+                                    <span>Color: <strong style="color: #0f172a;">@(string.IsNullOrWhiteSpace(item.Dispositivo?.Color) ? "N/A" : item.Dispositivo.Color)</strong></span>
+                                    <span>•</span>
+                                    <span>IMEI: <strong class="font-monospace" style="color: #0f172a;">@item.ImeiCensurado</strong></span>
+                                </div>
 
+                                <!-- CAJA DE PROBLEMA REPORTADO -->
+                                <div class="problema-box mb-4">
+                                    <span class="meta-label d-block mb-1">FALLA / MOTIVO:</span>
+                                    <p class="mb-0 small" style="line-height: 1.45; color: #475569; font-weight: 400;">
+                                        @item.ProblemaReportado
+                                    </p>
+                                </div>
                             </div>
 
+                            <!-- PIE DE TARJETA: FECHAS, USUARIO CREADOR Y ACCIÓN -->
                             <div>
+                                <div class="row g-2 mb-3 pt-2 border-top border-light">
+                                    <div class="col-6">
+                                        <span class="meta-label d-block">INGRESO:</span>
+                                        <span class="meta-value">@item.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span class="meta-label d-block">ENTREGA ESTIMADA:</span>
+                                        <span class="meta-value">@(item.FechaEntregaEstimada.HasValue? item.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy") : "Por definir")</span>
+                                    </div>
+                                </div>
 
-                                <span>
-                                    Modelo
-                                </span>
+                                <div class="d-flex justify-content-between align-items-center pt-2">
+                                    <!-- NOMBRE DEL CLIENTE Y QUIÉN LO REGISTRÓ -->
+                                    <div class="d-flex flex-column text-truncate me-2" style="max-width: 170px;">
+                                        <div class="cliente-nombre text-truncate" title="@item.Dispositivo?.Cliente?.Nombre @item.Dispositivo?.Cliente?.Apellido">
+                                            @item.Dispositivo?.Cliente?.Nombre @item.Dispositivo?.Cliente?.Apellido
+                                        </div>
+                                        <span class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="fas fa-user-circle me-1"></i> Recibió: @(item.UsuarioCrea != null ? item.UsuarioCrea.Nombre : "Admin")
+                                        </span>
+                                    </div>
 
-                                <strong>
-                                    @reparacion.Dispositivo?.Modelo
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    IMEI
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(
-                                                                reparacion.Dispositivo?.IMEI)
-                                                                ? "No registrado"
-                                                                : reparacion.Dispositivo.IMEI)
-                                                                                          </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Color
-                                </span>
-
-                                <strong>
-                                    @(string.IsNullOrWhiteSpace(
-                                                                reparacion.Dispositivo?.Color)
-                                                                ? "No registrado"
-                                                                : reparacion.Dispositivo.Color)
-                                                                                           </strong>
-
+                                    <!-- BOTÓN ACEPTAR OUTLINE -->
+                                    <form asp-controller="Tecnico" asp-action="Aceptar" asp-route-id="@item.IdReparacion" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-aceptar-outline shadow-sm">
+                                            Aceptar
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
 
                         </div>
-
                     </div>
-
-
-                    <!-- ================================= -->
-                    <!-- CLIENTE -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            CLIENTE
-                        </span>
-
-                        <div class="tecnico-cliente">
-
-                            <div class="tecnico-avatar">
-
-                                @(reparacion.Dispositivo?.Cliente?.Nombre?
-                                                        .Substring(0, 1)
-                                                        .ToUpper() ?? "?")
-
-                            </div>
-
-                            <div>
-
-                                <strong>
-
-                                    @reparacion.Dispositivo?.Cliente?.Nombre
-                                    @reparacion.Dispositivo?.Cliente?.Apellido
-
-                                </strong>
-
-                                <span>
-                                    📞
-                                    @reparacion.Dispositivo?.Cliente?.Telefono
-                                </span>
-
-                                <span>
-                                    ✉
-                                    @reparacion.Dispositivo?.Cliente?.Email
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- PROBLEMA -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-seccion">
-
-                        <span class="tecnico-seccion-titulo">
-                            PROBLEMA REPORTADO
-                        </span>
-
-                        <div class="tecnico-problema">
-
-                            @reparacion.ProblemaReportado
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- INFORMACIÓN -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-fechas">
-
-                        <div>
-
-                            <span>
-                                Fecha de ingreso
-                            </span>
-
-                            <strong>
-                                @(reparacion.FechaIngreso.ToString("dd/MM/yyyy HH:mm"))
-                            </strong>
-
-                        </div>
-
-                        <div>
-
-                            <span>
-                                Entrega estimada
-                            </span>
-
-                            <strong>
-
-                                @(reparacion.FechaEntregaEstimada.HasValue
-                                                        ? reparacion.FechaEntregaEstimada
-                                                        .Value
-                                                        .ToString("dd/MM/yyyy")
-                                                        : "Sin definir")
-
-                    </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================= -->
-                    <!-- ACCIÓN -->
-                    <!-- ================================= -->
-
-                    <div class="tecnico-card-footer">
-
-                        <div>
-
-                            <span>
-                                ¿Quieres realizar esta reparación?
-                            </span>
-
-                        </div>
-
-                        <form asp-controller="Tecnico"
-                              asp-action="Aceptar"
-                              asp-route-id="@reparacion.IdReparacion"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit"
-                                    class="btn-aceptar-reparacion">
-
-                                Aceptar reparación
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </article>
-                }
-
+                </div>
+            }
         </div>
     }
 

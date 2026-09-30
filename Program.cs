@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MonitoreoWeb.Data;
+using MonitoreoWeb.Hubs;
 using MonitoreoWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
+// ?? Registrar HttpClient y el servicio de Telegram
+builder.Services.AddHttpClient<MonitoreoWeb.Services.TelegramService>();
+
 
 var app = builder.Build();
 
@@ -57,4 +62,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
 
+app.MapHub<NotificacionHub>("/notificacionHub");
 app.Run();
+

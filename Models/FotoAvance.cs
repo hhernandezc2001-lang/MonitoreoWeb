@@ -24,8 +24,6 @@ namespace MonitoreoWeb.Models
         [Required]
         public string NombreArchivo { get; set; } = string.Empty;
 
-        public string? Descripcion { get; set; }
-
         [Required]
         public DateTime FechaSubida { get; set; }
 

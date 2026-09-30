@@ -5,304 +5,181 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-
     var isAdmin = User.IsInRole("Admin");
-
     var isTecnico = User.IsInRole("Tecnico");
 
     string Active(string controller, string action = "")
     {
-        var controllerOk =
-            currentController.Equals(
-                controller,
-                StringComparison.OrdinalIgnoreCase
-            );
+        var controllerOk = currentController.Equals(controller, StringComparison.OrdinalIgnoreCase);
+        var actionOk = string.IsNullOrEmpty(action) || currentAction.Equals(action, StringComparison.OrdinalIgnoreCase);
 
-        var actionOk =
-            string.IsNullOrEmpty(action) ||
-            currentAction.Equals(
-                action,
-                StringComparison.OrdinalIgnoreCase
-            );
-
-        return controllerOk && actionOk
-            ? "active"
-            : "";
+        return controllerOk && actionOk ? "active" : "";
     }
 }
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MonitoreoWeb</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-    <title>
-        @ViewData["Title"] - MonitoreoWeb
-    </title>
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
-
+    <!-- Librería cliente oficial de SignalR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 </head>
-
 <body>
 
-    <!------------ INICIO DE LA PARTE DEL LOGEO DEL ADMINISTRADOR  -------->
     @if (isAuthenticated && isAdmin)
     {
         <div class="admin-layout">
-
-            <!--------- SIDEBAR ADMINISTRADOR ----------->
             <aside class="admin-sidebar">
-
-                <div class="admin-sidebar-title">
-                    Monitoreo Web
-                </div>
-
+                <div class="admin-sidebar-title">Monitoreo Web</div>
                 <nav class="admin-menu">
-
-                    <a class="admin-menu-link admin-menu-top @Active("Admin", "Inicio")"
-                       asp-controller="Admin"
-                       asp-action="Inicio">
-                        <span class="admin-menu-icon"></span>
-                        Inicio
+                    <a class="admin-menu-link admin-menu-top @Active("Admin", "Inicio")" asp-controller="Admin" asp-action="Inicio">
+                        <i class="bi bi-house-door-fill me-2"></i> Inicio
+                    </a>
+                    <a class="admin-menu-link admin-menu-top @Active("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-bar-chart-line-fill me-2"></i> Dashboards
                     </a>
 
-                    <a class="admin-menu-link admin-menu-top @Active("Dashboard", "Index")"
-                       asp-controller="Dashboard"
-                       asp-action="Index">
-                        <span class="admin-menu-icon"></span>
-                        Dashboards
-                    </a>
-
-
-                    <!-- ========================================== -->
                     <!-- USUARIOS -->
-                    <!-- ========================================== -->
-
                     <details class="admin-menu-group" id="grupo-usuarios">
-
-                        <summary class="admin-menu-group-title">
-                            Usuarios
-                        </summary>
-
+                        <summary class="admin-menu-group-title">Usuarios</summary>
                         <div class="admin-menu-group-items">
-
-                            <a class="admin-menu-link @Active("Admin", "Tecnicos")"
-                               asp-controller="Admin"
-                               asp-action="Tecnicos">
-                                Técnicos registrados
-                            </a>
-
-                            <a class="admin-menu-link @Active("Admin", "Administradores")"
-                               asp-controller="Admin"
-                               asp-action="Administradores">
-                                Administradores dados de alta
-                            </a>
-
-                            <a class="admin-menu-link @Active("Auth", "Registrar")"
-                               asp-controller="Auth"
-                               asp-action="Registrar">
-                                Registrar nuevos usuarios
-                            </a>
-
+                            <a class="admin-menu-link @Active("Admin", "Tecnicos")" asp-controller="Admin" asp-action="Tecnicos">Técnicos registrados</a>
+                            <a class="admin-menu-link @Active("Admin", "Administradores")" asp-controller="Admin" asp-action="Administradores">Administradores dados de alta</a>
+                            <a class="admin-menu-link @Active("Auth", "Registrar")" asp-controller="Auth" asp-action="Registrar">Registrar nuevos usuarios</a>
                         </div>
-
                     </details>
 
-
-                    <!-- ========================================== -->
                     <!-- CLIENTES -->
-                    <!-- ========================================== -->
-
                     <details class="admin-menu-group" id="grupo-clientes">
-                        <summary class="admin-menu-group-title">
-                            Clientes
-                        </summary>
-
+                        <summary class="admin-menu-group-title">Clientes</summary>
                         <div class="admin-menu-group-items">
-
-                            <a class="admin-menu-link @Active("Clientes", "Registrar")"
-                               asp-controller="Clientes"
-                               asp-action="Registrar">
-                                Registrar clientes
-                            </a>
-
-                            <a class="admin-menu-link @Active("Clientes", "Index")"
-                               asp-controller="Clientes"
-                               asp-action="Index">
-                                Clientes registrados
-                            </a>
-
+                            <a class="admin-menu-link @Active("Clientes", "Registrar")" asp-controller="Clientes" asp-action="Registrar">Registrar clientes</a>
+                            <a class="admin-menu-link @Active("Clientes", "Index")" asp-controller="Clientes" asp-action="Index">Clientes registrados</a>
                         </div>
-
                     </details>
 
-
-                    <!-- ========================================== -->
                     <!-- DISPOSITIVOS -->
-                    <!-- ========================================== -->
-
                     <details class="admin-menu-group" id="grupo-dispositivos">
-                        <summary class="admin-menu-group-title">
-                            Dispositivos
-                        </summary>
-
+                        <summary class="admin-menu-group-title">Dispositivos</summary>
                         <div class="admin-menu-group-items">
-
-                            <a class="admin-menu-link @Active("Dispositivo", "Create")"
-                               asp-controller="Dispositivo"
-                               asp-action="Create">
-                                Registrar dispositivo
-                            </a>
-
-                            <a class="admin-menu-link @Active("Dispositivo", "Index")"
-                               asp-controller="Dispositivo"
-                               asp-action="Index">
-                                Dispositivos registrados
-                            </a>
-
+                            <a class="admin-menu-link @Active("Dispositivo", "Create")" asp-controller="Dispositivo" asp-action="Create">Registrar dispositivo</a>
+                            <a class="admin-menu-link @Active("Dispositivo", "Index")" asp-controller="Dispositivo" asp-action="Index">Dispositivos registrados</a>
                         </div>
-
                     </details>
 
-
-                    <!-- ========================================== -->
                     <!-- REPARACIONES -->
-                    <!-- ========================================== -->
-
                     <details class="admin-menu-group" id="grupo-reparaciones">
-                        <summary class="admin-menu-group-title">
-                            Reparaciones
-                        </summary>
-
+                        <summary class="admin-menu-group-title">Reparaciones</summary>
                         <div class="admin-menu-group-items">
-
-                            <a class="admin-menu-link @Active("Reparacion", "Index")"
-                               asp-controller="Reparacion"
-                               asp-action="Index">
-                                Solicitudes de reparación
-                            </a>
-
-                            <a class="admin-menu-link @Active("Admin", "Reparaciones")"
-                               asp-controller="Admin"
-                               asp-action="Reparaciones">
-                                Ver reparaciones
-                            </a>
-
+                            <a class="admin-menu-link @Active("Reparacion", "Index")" asp-controller="Reparacion" asp-action="Index">Solicitudes de reparación</a>
+                            <a class="admin-menu-link @Active("Admin", "Reparaciones")" asp-controller="Admin" asp-action="Reparaciones">Ver reparaciones</a>
                         </div>
-
                     </details>
 
-
-                    <!-- APARTADO PARA EL  ---- NUEVO SERVICIO ---- -->
-
-                    <a class="admin-new-service"
-                       asp-controller="Servicio"
-                       asp-action="Create">
+                    <a class="admin-new-service" asp-controller="Servicio" asp-action="Create">
                         <span class="admin-new-service-icon">+</span>
                         <span>Nuevo servicio</span>
                     </a>
-
                 </nav>
 
-                <!-- FOOTER ADMIN -->
                 <div class="admin-sidebar-footer">
-
-                    <div class="admin-user-name">
-                        @User.Identity?.Name
-                    </div>
-
-                    <div class="admin-user-role">
-                        Rol:
-                        @User.FindFirst(ClaimTypes.Role)?.Value
-                    </div>
-
-                    <a class="admin-logout"
-                       asp-controller="Auth"
-                       asp-action="Logout">
-                        Cerrar sesión
+                    <div class="admin-user-name">@User.Identity?.Name</div>
+                    <div class="admin-user-role mb-2">Rol: @User.FindFirst(ClaimTypes.Role)?.Value</div>
+                    <a class="d-block text-decoration-none text-light small mb-2 opacity-75" asp-controller="Auth" asp-action="CambiarPassword">
+                        <i class="bi bi-key-fill me-1"></i> Cambiar contraseña
                     </a>
-
+                    <a class="admin-logout" asp-controller="Auth" asp-action="Logout">Cerrar sesión</a>
                 </div>
-
             </aside>
 
-            <!-- CONTENIDO ADMIN -->
             <main class="admin-main">
-
                 <div class="admin-content">
                     @RenderBody()
                 </div>
-
             </main>
-
         </div>
     }
-
     else if (isAuthenticated && isTecnico)
     {
         <div class="admin-layout">
-
-            <!----------------- SIDEBAR TECNICO -------------------->
             <aside class="admin-sidebar">
-
-                <div class="admin-sidebar-title">
-                    Panel Técnico
-                </div>
-
+                <div class="admin-sidebar-title">Panel Técnico</div>
                 <nav class="admin-menu">
-
-                    <a class="admin-menu-link"
-                       asp-controller="Tecnico"
-                       asp-action="Index">
-                        Menú inicial
+                    <a class="admin-menu-link @Active("Tecnico", "Solicitudes")" asp-controller="Tecnico" asp-action="Solicitudes">
+                        <i class="bi bi-inbox-fill me-2"></i> Pendientes de Taller
                     </a>
-
+                    <a class="admin-menu-link @Active("Tecnico", "MisReparaciones") @Active("Tecnico", "Detalle")" asp-controller="Tecnico" asp-action="MisReparaciones">
+                        <i class="bi bi-tools me-2"></i> Mis Reparaciones
+                    </a>
                 </nav>
 
-                <!-- FOOTER TECNICO -->
                 <div class="admin-sidebar-footer">
-
-                    <div class="admin-user-name">
-                        @User.Identity?.Name
-                    </div>
-
-                    <div class="admin-user-role">
-                        Rol: Técnico
-                    </div>
-
-                    <a class="admin-logout"
-                       asp-controller="Auth"
-                       asp-action="Logout">
-                        Cerrar sesión
+                    <div class="admin-user-name">@User.Identity?.Name</div>
+                    <div class="admin-user-role mb-2">Rol: Técnico</div>
+                    <a class="d-block text-decoration-none text-light small mb-2 opacity-75" asp-controller="Auth" asp-action="CambiarPassword">
+                        <i class="bi bi-key-fill me-1"></i> Cambiar contraseña
                     </a>
-
+                    <a class="admin-logout" asp-controller="Auth" asp-action="Logout">Cerrar sesión</a>
                 </div>
-
             </aside>
 
-            <!-- CONTENIDO TECNICO -->
             <main class="admin-main">
-
                 <div class="admin-content">
                     @RenderBody()
                 </div>
-
             </main>
-
         </div>
-    }
 
+        <!-- SCRIPT DE SIGNALR EXCLUSIVO PARA EL TÉCNICO EN TIEMPO REAL -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/notificacionHub")
+                    .build();
+
+                connection.on("RecibirNotificacionNuevaReparacion", function (idReparacion, equipo) {
+                    console.log("¡Nueva orden detectada en tiempo real!");
+                    mostrarAlertaNotificacion(`🔔 ¡Nueva reparación #${idReparacion} registrada (${equipo})!`);
+                });
+
+                connection.start()
+                    .then(() => console.log("Conectado a SignalR exitosamente."))
+                    .catch(err => console.error("Error al conectar con SignalR: ", err.toString()));
+            });
+
+            function mostrarAlertaNotificacion(mensaje) {
+                let contenedor = document.getElementById("toast-container-erp");
+                if (!contenedor) {
+                    contenedor = document.createElement("div");
+                    contenedor.id = "toast-container-erp";
+                    contenedor.style.cssText = "position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;";
+                    document.body.appendChild(contenedor);
+                }
+
+                const toast = document.createElement("div");
+                toast.style.cssText = "background: #198754; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: sans-serif; font-size: 14px; font-weight: bold; transition: opacity 0.5s ease; cursor: pointer;";
+                toast.innerHTML = `${mensaje} <br><small style="font-weight: normal; font-size: 11px;">Haz clic para actualizar o ver solicitudes</small>`;
+
+                toast.onclick = function() {
+                    location.reload();
+                };
+
+                contenedor.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = "0";
+                    setTimeout(() => toast.remove(), 500);
+                }, 8000);
+            }
+        </script>
+    }
     else
     {
         <main>
@@ -311,18 +188,9 @@
     }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/js/site.js"
-            asp-append-version="true">
-    </script>
-
-    @await RenderSectionAsync(
-    "Scripts",
-        required: false
-        )
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
-
 </html>

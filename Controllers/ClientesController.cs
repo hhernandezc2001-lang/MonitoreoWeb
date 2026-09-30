@@ -102,9 +102,6 @@ namespace MonitoreoWeb.Controllers
             var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
 
             model.FechaRegistro = DateTime.Now;
-            model.EmailVerificado = false;
-            model.TokenVerificacion = token;
-            model.TokenExpira = DateTime.Now.AddHours(24);
 
             _context.Cliente.Add(model);
             await _context.SaveChangesAsync();
@@ -115,35 +112,6 @@ namespace MonitoreoWeb.Controllers
 
             TempData["Success"] = "Cliente registrado. Se envió un correo para verificar el email.";
             return RedirectToAction("Registrar");
-        }
-
-        // GET VERIFICAR (el link del correo llega aquí)
-        [HttpGet]
-        public async Task<IActionResult> Verificar(string token)
-        {
-            var cliente = await _context.Cliente
-                .FirstOrDefaultAsync(c => c.TokenVerificacion == token);
-
-            if (cliente == null)
-            {
-                TempData["Error"] = "El enlace de verificación no es válido.";
-                return RedirectToAction("Index");
-            }
-
-            if (cliente.TokenExpira < DateTime.Now)
-            {
-                TempData["Error"] = "El enlace ha expirado. Solicita uno nuevo.";
-                return RedirectToAction("Index");
-            }
-
-            cliente.EmailVerificado = true;
-            cliente.TokenVerificacion = null;
-            cliente.TokenExpira = null;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "¡Correo verificado correctamente!";
-            return RedirectToAction("Index");
         }
     }
 }

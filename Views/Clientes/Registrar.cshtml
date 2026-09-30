@@ -94,6 +94,26 @@
 
             </div>
 
+            <!-- TELEGRAM CHAT ID -->
+            <div class="mb-3">
+
+                <label asp-for="TelegramChatId"
+                       class="form-label">
+                    Telegram Chat ID (Opcional)
+                </label>
+
+                <input asp-for="TelegramChatId"
+                       class="form-control"
+                       placeholder="Ej. 123456789" />
+
+                <span asp-validation-for="TelegramChatId"
+                      class="text-danger">
+                </span>
+
+                <div class="form-text">Identificador numérico del cliente en Telegram para recibir notificaciones automáticas.</div>
+
+            </div>
+
             <!-- ACTIVO -->
             <div class="form-check mb-4">
 

@@ -2,97 +2,158 @@
     ViewData["Title"] = "Panel Técnico";
 }
 
-<div class="container-fluid">
+<!-- ESTILOS PERSONALIZADOS EN AZUL MARINO -->
+<style>
+    .bg-navy {
+        background-color: #0f2a4a !important;
+    }
 
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
+    .text-navy {
+        color: #0f2a4a !important;
+    }
 
-            <h2 class="mb-3">
-                Bienvenido, @User.Identity?.Name
-            </h2>
+    .border-navy {
+        border-color: #0f2a4a !important;
+    }
 
-            <p class="text-muted">
-                Desde este panel podrás gestionar las reparaciones asignadas,
-                consultar solicitudes disponibles y actualizar avances de los equipos.
-            </p>
+    .btn-navy {
+        background-color: #0f2a4a;
+        color: #ffffff;
+        border: none;
+    }
 
+        .btn-navy:hover {
+            background-color: #1b3b6f;
+            color: #ffffff;
+        }
+
+    .btn-outline-navy {
+        border: 2px solid #0f2a4a;
+        color: #0f2a4a;
+        background-color: transparent;
+    }
+
+        .btn-outline-navy:hover {
+            background-color: #0f2a4a;
+            color: #ffffff;
+        }
+
+    .badge-navy {
+        background-color: #e8eef5;
+        color: #0f2a4a;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <!-- ENCABEZADO DE BIENVENIDA -->
+    <div class="card border-0 shadow-sm mb-4 bg-navy text-white rounded-3">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-light text-dark mb-2 fw-bold">PANEL PRINCIPAL</span>
+                <h2 class="fw-bold mb-1">Bienvenido, @User.Identity?.Name</h2>
+                <p class="mb-0 opacity-75">
+                    Desde este panel podrás gestionar las reparaciones asignadas y atender nuevas solicitudes del taller.
+                </p>
+            </div>
+            <div class="d-none d-md-block opacity-25">
+                <i class="bi bi-tools display-3"></i>
+            </div>
         </div>
     </div>
 
-    <div class="row">
+    <!-- ACCESOS PRINCIPALES (2 COLUMNAS) -->
+    <div class="row g-4 mb-4">
 
-        <div class="col-md-4 mb-3">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Solicitudes disponibles</h5>
-
-                    <p>
-                        Consulta los equipos pendientes y acepta nuevas reparaciones.
-                    </p>
-
-                    <a asp-controller="Tecnico"
-                       asp-action="Solicitudes"
-                       class="btn btn-primary">
-                        Ver solicitudes
-                    </a>
-
+        <!-- TARJETA 1: SOLICITUDES DISPONIBLES -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-navy rounded-3">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase text-muted fw-bold small">RECEPCIONES NUEVAS</span>
+                            <span class="badge badge-navy fw-bold p-2">Equipos sin asignar</span>
+                        </div>
+                        <h4 class="fw-bold text-navy mb-2">Solicitudes Disponibles</h4>
+                        <p class="text-muted small mb-4">
+                            Consulta la lista de dispositivos ingresados en recepción que requieren técnico y acepta nuevos trabajos.
+                        </p>
+                    </div>
+                    <div>
+                        <a asp-controller="Tecnico"
+                           asp-action="Solicitudes"
+                           class="btn btn-outline-navy btn-lg w-100 fw-bold shadow-sm">
+                            <i class="bi bi-inbox-fill me-2"></i> Ver Solicitudes Disponibles
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </div>
 
+        <!-- TARJETA 2: MIS REPARACIONES ACTIVAS -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 border-start border-4 border-navy rounded-3">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase text-muted fw-bold small">EN SEGUIMIENTO</span>
+                            <span class="badge badge-navy fw-bold p-2">En tu taller</span>
+                        </div>
+                        <h4 class="fw-bold text-navy mb-2">Mis Reparaciones</h4>
+                        <p class="text-muted small mb-4">
+                            Gestiona los equipos que tienes asignados actualmente, registra diagnósticos y actualiza los estados de trabajo.
+                        </p>
+                    </div>
+                    <div>
+                        <a asp-controller="Tecnico"
+                           asp-action="MisReparaciones"
+                           class="btn btn-navy btn-lg w-100 fw-bold shadow-sm">
+                            <i class="bi bi-wrench-adjustable me-2"></i> Ir a Mis Reparaciones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SECCIÓN DE FLUJO DE TRABAJO -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-navy mb-3"><i class="bi bi-diagram-3-fill me-2"></i> Guía del Flujo de Trabajo</h5>
+
+            <div class="row text-center g-3">
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-secondary mb-2">Paso 1</span>
+                        <div class="fw-bold text-navy small">Tomar Solicitud</div>
+                        <div class="text-muted extra-small">Acepta el equipo pendiente.</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-primary mb-2">Paso 2</span>
+                        <div class="fw-bold text-navy small">Diagnosticar</div>
+                        <div class="text-muted extra-small">Registra la falla detectada.</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-dark mb-2">Paso 3</span>
+                        <div class="fw-bold text-navy small">Reparación y Pruebas</div>
+                        <div class="text-muted extra-small">Sustituye la refacción y valida.</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-success mb-2">Paso 4</span>
+                        <div class="fw-bold text-navy small">Concluir Servicio</div>
+                        <div class="text-muted extra-small">Equipo listo para entrega.</div>
+                    </div>
+                </div>
             </div>
 
         </div>
-
-        <div class="col-md-4 mb-3">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Mis reparaciones</h5>
-
-                    <p>
-                        Consulta los equipos que tienes asignados actualmente.
-                    </p>
-
-                    <a asp-controller="Tecnico"
-                       asp-action="MisReparaciones"
-                       class="btn btn-success">
-                        Ver reparaciones
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-4 mb-3">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Historial de avances</h5>
-
-                    <p>
-                        Revisa y actualiza el progreso de las reparaciones.
-                    </p>
-
-                    <a asp-controller="Tecnico"
-                       asp-action="Historial"
-                       class="btn btn-warning">
-                        Ver historial
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
     </div>
 
 </div>

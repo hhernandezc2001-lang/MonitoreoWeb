@@ -1,12 +1,10 @@
 ﻿@model MonitoreoWeb.Models.ViewModels.NuevoServicioViewModel
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" id="formServicio" enctype="multipart/form-data">
 
     <h2>Nuevo servicio</h2>
 
-    <div asp-validation-summary="ModelOnly"
-         class="alert alert-danger">
-    </div>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
     <hr />
 
@@ -17,7 +15,6 @@
     <h4>Datos del cliente</h4>
 
     <div class="mb-3">
-
         <div class="form-check">
             <input class="form-check-input"
                    type="radio"
@@ -26,12 +23,10 @@
                    value="existente"
                    checked />
 
-            <label class="form-check-label"
-                   for="clienteExistente">
+            <label class="form-check-label" for="clienteExistente">
                 Cliente existente
             </label>
         </div>
-
 
         <div class="form-check">
             <input class="form-check-input"
@@ -40,12 +35,10 @@
                    id="clienteNuevo"
                    value="nuevo" />
 
-            <label class="form-check-label"
-                   for="clienteNuevo">
+            <label class="form-check-label" for="clienteNuevo">
                 Nuevo cliente
             </label>
         </div>
-
     </div>
 
 
@@ -54,12 +47,8 @@
     <!-- ========================= -->
 
     <div id="seccionClienteExistente">
-
         <div class="mb-3">
-
-            <label class="form-label">
-                Buscar cliente
-            </label>
+            <label class="form-label">Buscar cliente</label>
 
             <input type="text"
                    id="buscadorCliente"
@@ -67,27 +56,20 @@
                    placeholder="Escribe nombre, apellido, teléfono o correo..."
                    autocomplete="off" />
 
-
             <!-- Resultados de búsqueda -->
-            <div id="resultadosClientes"
-                 class="list-group mt-2">
-            </div>
-
+            <div id="resultadosClientes" class="list-group mt-2"></div>
 
             <!-- Id del cliente seleccionado -->
             <input type="hidden"
                    asp-for="Cliente.IdCliente"
                    id="clienteSelect" />
 
-
             <!-- Cliente seleccionado visualmente -->
             <div id="clienteSeleccionado"
                  class="alert alert-success mt-3"
                  style="display: none;">
             </div>
-
         </div>
-
     </div>
 
 
@@ -95,68 +77,34 @@
     <!-- CLIENTE NUEVO -->
     <!-- ========================= -->
 
-    <div id="seccionClienteNuevo"
-         style="display: none;">
-
+    <div id="seccionClienteNuevo" style="display: none;">
         <div class="row">
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Cliente.Nombre"
-                       class="form-label">
-                    Nombre
-                </label>
-
-                <input asp-for="Cliente.Nombre"
-                       class="form-control" />
-
+                <label asp-for="Cliente.Nombre" class="form-label">Nombre</label>
+                <input asp-for="Cliente.Nombre" class="form-control" />
+                <span asp-validation-for="Cliente.Nombre" class="text-danger"></span>
             </div>
 
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Cliente.Apellido"
-                       class="form-label">
-                    Apellido
-                </label>
-
-                <input asp-for="Cliente.Apellido"
-                       class="form-control" />
-
+                <label asp-for="Cliente.Apellido" class="form-label">Apellido</label>
+                <input asp-for="Cliente.Apellido" class="form-control" />
+                <span asp-validation-for="Cliente.Apellido" class="text-danger"></span>
             </div>
-
         </div>
 
-
         <div class="row">
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Cliente.Telefono"
-                       class="form-label">
-                    Teléfono
-                </label>
-
-                <input asp-for="Cliente.Telefono"
-                       class="form-control" />
-
+                <label asp-for="Cliente.Telefono" class="form-label">Teléfono</label>
+                <input asp-for="Cliente.Telefono" class="form-control" />
+                <span asp-validation-for="Cliente.Telefono" class="text-danger"></span>
             </div>
 
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Cliente.Email"
-                       class="form-label">
-                    Correo electrónico
-                </label>
-
-                <input asp-for="Cliente.Email"
-                       class="form-control" />
-
+                <label asp-for="Cliente.Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Cliente.Email" class="form-control" />
+                <span asp-validation-for="Cliente.Email" class="text-danger"></span>
             </div>
-
         </div>
-
     </div>
 
 
@@ -170,9 +118,7 @@
     <h4>Datos del dispositivo</h4>
 
     <div class="mb-3">
-
         <div class="form-check">
-
             <input class="form-check-input"
                    type="radio"
                    name="tipoDispositivo"
@@ -180,29 +126,22 @@
                    value="existente"
                    checked />
 
-            <label class="form-check-label"
-                   for="dispositivoExistente">
+            <label class="form-check-label" for="dispositivoExistente">
                 Dispositivo existente
             </label>
-
         </div>
 
-
         <div class="form-check">
-
             <input class="form-check-input"
                    type="radio"
                    name="tipoDispositivo"
                    id="dispositivoNuevo"
                    value="nuevo" />
 
-            <label class="form-check-label"
-                   for="dispositivoNuevo">
+            <label class="form-check-label" for="dispositivoNuevo">
                 Nuevo dispositivo
             </label>
-
         </div>
-
     </div>
 
 
@@ -211,12 +150,8 @@
     <!-- ========================= -->
 
     <div id="seccionDispositivoExistente">
-
         <div class="mb-3">
-
-            <label class="form-label">
-                Buscar dispositivo
-            </label>
+            <label class="form-label">Buscar dispositivo</label>
 
             <input type="text"
                    id="buscadorDispositivo"
@@ -224,27 +159,20 @@
                    placeholder="Escribe marca, modelo o IMEI..."
                    autocomplete="off" />
 
-
             <!-- Resultados de búsqueda -->
-            <div id="resultadosDispositivos"
-                 class="list-group mt-2">
-            </div>
-
+            <div id="resultadosDispositivos" class="list-group mt-2"></div>
 
             <!-- Id del dispositivo seleccionado -->
             <input type="hidden"
                    asp-for="Dispositivo.IdDispositivo"
                    id="dispositivoSelect" />
 
-
             <!-- Dispositivo seleccionado visualmente -->
             <div id="dispositivoSeleccionado"
                  class="alert alert-success mt-3"
                  style="display: none;">
             </div>
-
         </div>
-
     </div>
 
 
@@ -252,17 +180,11 @@
     <!-- DISPOSITIVO NUEVO -->
     <!-- ========================= -->
 
-    <div id="seccionDispositivoNuevo"
-         style="display: none;">
-
+    <div id="seccionDispositivoNuevo" style="display: none;">
         <div class="row">
-
             <!-- MARCA -->
             <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                    Marca
-                </label>
+                <label class="form-label">Marca</label>
 
                 <select id="marcaSelect" class="form-select">
                     <option value="">Selecciona una marca...</option>
@@ -278,20 +200,14 @@
                        placeholder="Escribe la marca..."
                        style="display: none;" />
 
-                <!-- Campo real que se envía al servidor -->
                 <input type="hidden"
                        asp-for="Dispositivo.Marca"
                        id="Dispositivo_Marca" />
-
             </div>
-
 
             <!-- MODELO -->
             <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                    Modelo
-                </label>
+                <label class="form-label">Modelo</label>
 
                 <select id="modeloSelect" class="form-select" disabled>
                     <option value="">Selecciona primero una marca...</option>
@@ -303,45 +219,130 @@
                        placeholder="Escribe el modelo..."
                        style="display: none;" />
 
-                <!-- Campo real que se envía al servidor -->
                 <input type="hidden"
                        asp-for="Dispositivo.Modelo"
                        id="Dispositivo_Modelo" />
-
             </div>
-
         </div>
-
 
         <div class="row">
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Dispositivo.IMEI"
-                       class="form-label">
-                    IMEI
-                </label>
-
-                <input asp-for="Dispositivo.IMEI"
-                       class="form-control" />
-
+                <label asp-for="Dispositivo.IMEI" class="form-label">IMEI</label>
+                <input asp-for="Dispositivo.IMEI" id="Dispositivo_IMEI" class="form-control" />
             </div>
 
-
             <div class="col-md-6 mb-3">
-
-                <label asp-for="Dispositivo.Color"
-                       class="form-label">
-                    Color
-                </label>
-
-                <input asp-for="Dispositivo.Color"
-                       class="form-control" />
-
+                <label asp-for="Dispositivo.Color" class="form-label">Color</label>
+                <input asp-for="Dispositivo.Color" id="Dispositivo_Color" class="form-control" />
             </div>
-
         </div>
+    </div>
 
+
+    <hr />
+
+
+    <!-- ========================= -->
+    <!-- CHECKLIST DE INSPECCIÓN FÍSICA -->
+    <!-- ========================= -->
+
+    <h4>Inspección física del dispositivo</h4>
+
+    <div class="card mb-3 bg-light">
+        <div class="card-body">
+            <div class="row">
+                <!-- Columna 1 -->
+                <div class="col-md-4">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.Enciende">
+                        <label class="form-check-label" asp-for="Checklist.Enciende">¿Enciende?</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.PantallaEstrellada">
+                        <label class="form-check-label" asp-for="Checklist.PantallaEstrellada">Pantalla Estrellada</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.TapaTraseraDañada">
+                        <label class="form-check-label" asp-for="Checklist.TapaTraseraDañada">Tapa Trasera Dañada</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.RayonesVisibles">
+                        <label class="form-check-label" asp-for="Checklist.RayonesVisibles">Rayones Visibles</label>
+                    </div>
+                </div>
+
+                <!-- Columna 2 -->
+                <div class="col-md-4">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.HumedadOAgua">
+                        <label class="form-check-label" asp-for="Checklist.HumedadOAgua">Signos de Humedad</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.CargaCorrectamente">
+                        <label class="form-check-label" asp-for="Checklist.CargaCorrectamente">Carga Correctamente</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.BotonesFuncionan">
+                        <label class="form-check-label" asp-for="Checklist.BotonesFuncionan">Botones Funcionan</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.LeeSIM">
+                        <label class="form-check-label" asp-for="Checklist.LeeSIM">Lee Tarjeta SIM</label>
+                    </div>
+                </div>
+
+                <!-- Columna 3 -->
+                <div class="col-md-4">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.CamaraFrontalOk">
+                        <label class="form-check-label" asp-for="Checklist.CamaraFrontalOk">Cámara Frontal OK</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.CamaraTraseraOk">
+                        <label class="form-check-label" asp-for="Checklist.CamaraTraseraOk">Cámara Trasera OK</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="Checklist.AltavozMicOk">
+                        <label class="form-check-label" asp-for="Checklist.AltavozMicOk">Altavoz y Micrófono OK</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <label asp-for="Checklist.Observaciones" class="form-label">Observaciones del Estado Físico</label>
+                <input asp-for="Checklist.Observaciones" class="form-control" placeholder="Ej. Golpe en esquina superior derecha, sin bandeja de chip" />
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- FOTOGRAFÍAS DE RECEPCIÓN Y CÁMARA -->
+    <!-- ========================= -->
+
+    <h4>Evidencia fotográfica e ingreso</h4>
+
+    <div class="card mb-3 bg-light">
+        <div class="card-body">
+            <label asp-for="FotosRecepcion" class="form-label fw-bold">Adjuntar o capturar imágenes del estado inicial</label>
+
+            <div class="d-flex gap-2 mb-2">
+                <input asp-for="FotosRecepcion" type="file" id="inputArchivosFoto" class="form-control" multiple accept="image/*" />
+                <button type="button" class="btn btn-outline-primary text-nowrap" id="btnAbrirCamara">
+                    <i class="bi bi-camera-fill me-1"></i> Usar Cámara
+                </button>
+            </div>
+            <div class="form-text mb-3">Puedes subir archivos o tomar fotos directamente con la cámara del dispositivo.</div>
+
+            <!-- DESCRIPCIÓN DE RECEPCIÓN (BITÁCORA INICIAL) -->
+            <div class="mb-2">
+                <label class="form-label fw-bold">Descripción de recepción (Bitácora)</label>
+                <textarea name="descripcionRecepcion" class="form-control" rows="2" placeholder="Ej. Se recibe dispositivo con detalles estéticos visibles y batería al 50%..."></textarea>
+                <div class="form-text">Este texto se registrará como el avance inicial en el historial del equipo junto con las fotos.</div>
+            </div>
+
+            <!-- Vista previa de las imágenes seleccionadas o capturadas -->
+            <div id="previewFotos" class="d-flex flex-wrap gap-2 mt-3"></div>
+        </div>
     </div>
 
 
@@ -355,653 +356,399 @@
     <h4>Datos de la reparación</h4>
 
     <div class="mb-3">
-
-        <label asp-for="Reparacion.ProblemaReportado"
-               class="form-label">
-            Problema reportado
-        </label>
-
+        <label asp-for="Reparacion.ProblemaReportado" class="form-label">Problema reportado</label>
         <textarea asp-for="Reparacion.ProblemaReportado"
                   class="form-control"
-                  rows="4"
+                  rows="3"
                   placeholder="Describe el problema que presenta el dispositivo"></textarea>
-
     </div>
 
+    <div class="row mb-4">
+        <!-- PRIORIDAD DE LA REPARACIÓN -->
+        <div class="col-md-3 mb-3">
+            <label asp-for="Reparacion.Prioridad" class="form-label fw-bold">Prioridad del servicio</label>
+            <select asp-for="Reparacion.Prioridad" class="form-select">
+                <option value="Normal" selected>🔵 Normal</option>
+                <option value="Alta">🟡 Alta</option>
+                <option value="Urgente">🔴 Urgente</option>
+            </select>
+        </div>
 
-    <div class="row">
-
-        <div class="col-md-4 mb-3">
-
-            <label asp-for="Reparacion.CostoEstimado"
-                   class="form-label">
-                Costo estimado
-            </label>
-
+        <!-- COSTO ESTIMADO -->
+        <div class="col-md-3 mb-3">
+            <label asp-for="Reparacion.CostoEstimado" class="form-label">Costo estimado</label>
             <input asp-for="Reparacion.CostoEstimado"
                    type="number"
                    step="0.01"
                    class="form-control"
                    placeholder="Ej. 1500.00" />
-
         </div>
 
-
-        <div class="col-md-4 mb-3">
-
-            <label asp-for="PagoInicial"
-                   class="form-label">
-                Pago inicial / anticipo (opcional)
-            </label>
-
+        <!-- PAGO INICIAL / ANTICIPO -->
+        <div class="col-md-2 mb-3">
+            <label asp-for="PagoInicial" class="form-label">Anticipo</label>
             <input asp-for="PagoInicial"
                    type="number"
                    step="0.01"
                    min="0"
                    class="form-control"
                    placeholder="Ej. 500.00" />
-
         </div>
 
+        <!-- MÉTODO DE PAGO DEL ANTICIPO -->
+        <div class="col-md-2 mb-3">
+            <label asp-for="MetodoPago" class="form-label">Método de pago</label>
+            <select asp-for="MetodoPago" class="form-select">
+                <option value="Efectivo" selected>Efectivo</option>
+                <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                <option value="Transferencia">Transferencia SPEI</option>
+            </select>
+        </div>
 
-        <div class="col-md-4 mb-3">
-
-            <label asp-for="Reparacion.FechaEntregaEstimada"
-                   class="form-label">
-                Fecha estimada de entrega
-            </label>
-
+        <!-- FECHA ESTIMADA DE ENTREGA -->
+        <div class="col-md-2 mb-3">
+            <label asp-for="Reparacion.FechaEntregaEstimada" class="form-label">Entrega estimada</label>
             <input asp-for="Reparacion.FechaEntregaEstimada"
                    type="date"
                    class="form-control" />
-
         </div>
-
     </div>
 
 
-    <div class="mt-4 mb-5">
+    <!-- ========================================== -->
+    <!-- BOTÓN QUE ABRE EL MODAL DE FIRMA -->
+    <!-- ========================================== -->
 
-        <button type="submit"
-                class="btn btn-primary">
-            Registrar servicio
-        </button>
-
+    <div class="card bg-light border-0 p-3 my-4">
+        <div class="d-flex justify-content-end align-items-center gap-3">
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary px-4">
+                Cancelar
+            </a>
+            <button type="button" class="btn btn-primary btn-lg fw-bold px-5 shadow" id="btnAbrirModalFirma">
+                Registrar Servicio y Firmar
+            </button>
+        </div>
     </div>
 
-
-    <!-- ========================= -->
-    <!-- JAVASCRIPT -->
-    <!-- ========================= -->
-
-    <script>
-
-        // ==========================================
-        // ELEMENTOS DEL CLIENTE
-        // ==========================================
-
-        const clienteExistente =
-            document.getElementById("clienteExistente");
-
-        const clienteNuevo =
-            document.getElementById("clienteNuevo");
-
-        const seccionClienteExistente =
-            document.getElementById("seccionClienteExistente");
-
-        const seccionClienteNuevo =
-            document.getElementById("seccionClienteNuevo");
-
-        const buscadorCliente =
-            document.getElementById("buscadorCliente");
-
-        const resultadosClientes =
-            document.getElementById("resultadosClientes");
-
-        const clienteSelect =
-            document.getElementById("clienteSelect");
-
-        const clienteSeleccionado =
-            document.getElementById("clienteSeleccionado");
-
-
-        // ==========================================
-        // ELEMENTOS DEL DISPOSITIVO
-        // ==========================================
-
-        const dispositivoExistente =
-            document.getElementById("dispositivoExistente");
-
-        const dispositivoNuevo =
-            document.getElementById("dispositivoNuevo");
-
-        const seccionDispositivoExistente =
-            document.getElementById("seccionDispositivoExistente");
-
-        const seccionDispositivoNuevo =
-            document.getElementById("seccionDispositivoNuevo");
-
-        const buscadorDispositivo =
-            document.getElementById("buscadorDispositivo");
-
-        const resultadosDispositivos =
-            document.getElementById("resultadosDispositivos");
-
-        const dispositivoSelect =
-            document.getElementById("dispositivoSelect");
-
-        const dispositivoSeleccionado =
-            document.getElementById("dispositivoSeleccionado");
-
-
-        // ==========================================
-        // CLIENTE SELECCIONADO ACTUALMENTE
-        // ==========================================
-
-        let idClienteSeleccionado = null;
-
-
-        // ==========================================
-        // CLIENTE EXISTENTE
-        // ==========================================
-
-        clienteExistente.addEventListener("change", function () {
-
-            // Mostrar sección de cliente existente
-            seccionClienteExistente.style.display = "block";
-
-            // Ocultar sección de cliente nuevo
-            seccionClienteNuevo.style.display = "none";
-
-
-            // Limpiar datos de cliente existente
-            clienteSelect.value = "";
-
-            buscadorCliente.value = "";
-
-            resultadosClientes.innerHTML = "";
-
-            clienteSeleccionado.innerHTML = "";
-
-            clienteSeleccionado.style.display = "none";
-
-
-            // Limpiar cliente seleccionado
-            idClienteSeleccionado = null;
-
-
-            // Limpiar dispositivo
-            dispositivoSelect.value = "";
-
-            buscadorDispositivo.value = "";
-
-            resultadosDispositivos.innerHTML = "";
-
-            dispositivoSeleccionado.innerHTML = "";
-
-            dispositivoSeleccionado.style.display = "none";
-
-        });
-
-
-        // ==========================================
-        // CLIENTE NUEVO
-        // ==========================================
-
-        clienteNuevo.addEventListener("change", function () {
-
-            // Ocultar sección de cliente existente
-            seccionClienteExistente.style.display = "none";
-
-            // Mostrar sección de cliente nuevo
-            seccionClienteNuevo.style.display = "block";
-
-
-            // Limpiar cliente existente seleccionado
-            clienteSelect.value = "";
-
-            buscadorCliente.value = "";
-
-            resultadosClientes.innerHTML = "";
-
-            clienteSeleccionado.innerHTML = "";
-
-            clienteSeleccionado.style.display = "none";
-
-
-            // Limpiar cliente seleccionado
-            idClienteSeleccionado = null;
-
-
-            // Limpiar dispositivo existente
-            dispositivoSelect.value = "";
-
-            buscadorDispositivo.value = "";
-
-            resultadosDispositivos.innerHTML = "";
-
-            dispositivoSeleccionado.innerHTML = "";
-
-            dispositivoSeleccionado.style.display = "none";
-
-        });
-
-
-        // ==========================================
-        // DISPOSITIVO EXISTENTE
-        // ==========================================
-        dispositivoExistente.addEventListener("change", function () {
-
-            // Mostrar dispositivo existente
-            seccionDispositivoExistente.style.display = "block";
-
-            // Ocultar dispositivo nuevo
-            seccionDispositivoNuevo.style.display = "none";
-
-
-            // Limpiar dispositivo nuevo
-            document.getElementById("Dispositivo_Marca").value = "";
-            document.getElementById("Dispositivo_Modelo").value = "";
-            document.getElementById("Dispositivo_IMEI").value = "";
-            document.getElementById("Dispositivo_Color").value = "";
-
-            marcaSelect.value = "";
-            marcaOtra.value = "";
-            marcaOtra.style.display = "none";
-
-            modeloSelect.innerHTML =
-                '<option value="">Selecciona primero una marca...</option>';
-            modeloSelect.disabled = true;
-
-            modeloOtro.value = "";
-            modeloOtro.style.display = "none";
-
-        });
-
-
-        // ==========================================
-        // DISPOSITIVO NUEVO
-        // ==========================================
-
-        dispositivoNuevo.addEventListener("change", function () {
-
-            // Ocultar dispositivo existente
-            seccionDispositivoExistente.style.display = "none";
-
-            // Mostrar dispositivo nuevo
-            seccionDispositivoNuevo.style.display = "block";
-
-
-            // Limpiar dispositivo existente seleccionado
-            dispositivoSelect.value = "";
-
-            buscadorDispositivo.value = "";
-
-            resultadosDispositivos.innerHTML = "";
-
-            dispositivoSeleccionado.innerHTML = "";
-
-            dispositivoSeleccionado.style.display = "none";
-
-        });
-
-
-        // ==========================================
-        // BUSCADOR DINÁMICO DE CLIENTES
-        // ==========================================
-
-        buscadorCliente.addEventListener("input", function () {
-
-            const termino =
-                this.value.trim();
-
-
-            // Limpiar resultados anteriores
-            resultadosClientes.innerHTML = "";
-
-
-            // Si hay menos de 2 caracteres,
-            // no realizar búsqueda
-            if (termino.length < 2) {
-
-                return;
-
-            }
-
-
-            // Consultar servidor
-            fetch(
-                `/Servicio/BuscarClientes?termino=${encodeURIComponent(termino)}`
-            )
-
-                .then(response => response.json())
-
-                .then(clientes => {
-
-                    // Limpiar resultados
-                    resultadosClientes.innerHTML = "";
-
-
-                    // ==========================================
-                    // SIN RESULTADOS
-                    // ==========================================
-
-                    if (clientes.length === 0) {
-
-                        const mensaje =
-                            document.createElement("div");
-
-                        mensaje.className =
-                            "list-group-item text-muted";
-
-                        mensaje.textContent =
-                            "No se encontraron clientes.";
-
-                        resultadosClientes.appendChild(
-                            mensaje
-                        );
-
-                        return;
-
-                    }
-
-
-                    // ==========================================
-                    // MOSTRAR CLIENTES
-                    // ==========================================
-
-                    clientes.forEach(cliente => {
-
-                        const elemento =
-                            document.createElement("button");
-
-                        elemento.type =
-                            "button";
-
-                        elemento.className =
-                            "list-group-item list-group-item-action";
-
-
-                        elemento.innerHTML = `
-                            <strong>${cliente.nombre}</strong><br>
+    <!-- ========================================================================= -->
+    <!-- MODAL DE FIRMA DE CONFORMIDAD DEL CLIENTE -->
+    <!-- ========================================================================= -->
+
+    <div class="modal fade" id="modalFirmaCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pen-fill me-2"></i> Conformidad y Recepción del Equipo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body text-center">
+                    <p class="small text-muted mb-3" style="text-align: justify;">
+                        Confirmo que he entregado mi equipo bajo las condiciones físicas especificadas en la inspección de recepción y acepto los términos y condiciones de servicio y resguardo del taller.
+                    </p>
+
+                    <div class="d-inline-block border rounded bg-white mx-auto">
+                        <canvas id="canvasFirma" width="400" height="150" style="border: 1px dashed #aaa; cursor: crosshair; touch-action: none;"></canvas>
+                    </div>
+
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="btnLimpiarFirma">
+                            Limpiar Firma
+                        </button>
+                    </div>
+
+                    <input type="hidden" asp-for="FirmaClienteBase64" id="FirmaClienteBase64" required />
+                    <span asp-validation-for="FirmaClienteBase64" class="text-danger d-block mt-1"></span>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Regresar</button>
+                    <button type="submit" class="btn btn-primary fw-bold" id="btnConfirmarGuardar">Confirmar y Guardar Servicio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<!-- ========================================================================= -->
+<!-- MODAL DE CAPTURA CON CÁMARA WEB -->
+<!-- ========================================================================= -->
+
+<div class="modal fade" id="modalCamara" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-camera-fill me-2"></i> Capturar Foto del Dispositivo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnCloseCamara"></button>
+            </div>
+
+            <div class="modal-body text-center bg-black">
+                <video id="videoCamara" autoplay playsinline class="w-100 rounded shadow" style="max-height: 400px; object-fit: cover;"></video>
+                <canvas id="canvasCamara" style="display: none;"></canvas>
+            </div>
+
+            <div class="modal-footer bg-light justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelarCamara">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-lg px-4 fw-bold" id="btnCapturarFoto">
+                    <i class="bi bi-circle-fill text-danger me-2"></i> Tomar Fotografía
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================= -->
+
+<script>
+    // ==========================================
+    // ELEMENTOS DEL CLIENTE
+    // ==========================================
+    const clienteExistente = document.getElementById("clienteExistente");
+    const clienteNuevo = document.getElementById("clienteNuevo");
+    const seccionClienteExistente = document.getElementById("seccionClienteExistente");
+    const seccionClienteNuevo = document.getElementById("seccionClienteNuevo");
+    const buscadorCliente = document.getElementById("buscadorCliente");
+    const resultadosClientes = document.getElementById("resultadosClientes");
+    const clienteSelect = document.getElementById("clienteSelect");
+    const clienteSeleccionado = document.getElementById("clienteSeleccionado");
+
+    // ==========================================
+    // ELEMENTOS DEL DISPOSITIVO
+    // ==========================================
+    const dispositivoExistente = document.getElementById("dispositivoExistente");
+    const dispositivoNuevo = document.getElementById("dispositivoNuevo");
+    const seccionDispositivoExistente = document.getElementById("seccionDispositivoExistente");
+    const seccionDispositivoNuevo = document.getElementById("seccionDispositivoNuevo");
+    const buscadorDispositivo = document.getElementById("buscadorDispositivo");
+    const resultadosDispositivos = document.getElementById("resultadosDispositivos");
+    const dispositivoSelect = document.getElementById("dispositivoSelect");
+    const dispositivoSeleccionado = document.getElementById("dispositivoSeleccionado");
+
+    // ==========================================
+    // CLIENTE SELECCIONADO ACTUALMENTE
+    // ==========================================
+    let idClienteSeleccionado = null;
+
+    // ==========================================
+    // CLIENTE EXISTENTE
+    // ==========================================
+    clienteExistente.addEventListener("change", function () {
+        seccionClienteExistente.style.display = "block";
+        seccionClienteNuevo.style.display = "none";
+
+        clienteSelect.value = "";
+        buscadorCliente.value = "";
+        resultadosClientes.innerHTML = "";
+        clienteSeleccionado.innerHTML = "";
+        clienteSeleccionado.style.display = "none";
+
+        idClienteSeleccionado = null;
+
+        dispositivoSelect.value = "";
+        buscadorDispositivo.value = "";
+        resultadosDispositivos.innerHTML = "";
+        dispositivoSeleccionado.innerHTML = "";
+        dispositivoSeleccionado.style.display = "none";
+    });
+
+    // ==========================================
+    // CLIENTE NUEVO
+    // ==========================================
+    clienteNuevo.addEventListener("change", function () {
+        seccionClienteExistente.style.display = "none";
+        seccionClienteNuevo.style.display = "block";
+
+        clienteSelect.value = "";
+        buscadorCliente.value = "";
+        resultadosClientes.innerHTML = "";
+        clienteSeleccionado.innerHTML = "";
+        clienteSeleccionado.style.display = "none";
+
+        idClienteSeleccionado = null;
+
+        dispositivoSelect.value = "";
+        buscadorDispositivo.value = "";
+        resultadosDispositivos.innerHTML = "";
+        dispositivoSeleccionado.innerHTML = "";
+        dispositivoSeleccionado.style.display = "none";
+    });
+
+    // ==========================================
+    // DISPOSITIVO EXISTENTE
+    // ==========================================
+    dispositivoExistente.addEventListener("change", function () {
+        seccionDispositivoExistente.style.display = "block";
+        seccionDispositivoNuevo.style.display = "none";
+
+        document.getElementById("Dispositivo_Marca").value = "";
+        document.getElementById("Dispositivo_Modelo").value = "";
+        document.getElementById("Dispositivo_IMEI").value = "";
+        document.getElementById("Dispositivo_Color").value = "";
+
+        marcaSelect.value = "";
+        marcaOtra.value = "";
+        marcaOtra.style.display = "none";
+
+        modeloSelect.innerHTML = '<option value="">Selecciona primero una marca...</option>';
+        modeloSelect.disabled = true;
+
+        modeloOtro.value = "";
+        modeloOtro.style.display = "none";
+    });
+
+    // ==========================================
+    // DISPOSITIVO NUEVO
+    // ==========================================
+    dispositivoNuevo.addEventListener("change", function () {
+        seccionDispositivoExistente.style.display = "none";
+        seccionDispositivoNuevo.style.display = "block";
+
+        dispositivoSelect.value = "";
+        buscadorDispositivo.value = "";
+        resultadosDispositivos.innerHTML = "";
+        dispositivoSeleccionado.innerHTML = "";
+        dispositivoSeleccionado.style.display = "none";
+    });
+
+    // ==========================================
+    // BUSCADOR DINÁMICO DE CLIENTES
+    // ==========================================
+    buscadorCliente.addEventListener("input", function () {
+        const termino = this.value.trim();
+        resultadosClientes.innerHTML = "";
+
+        if (termino.length < 2) return;
+
+        fetch(`/Servicio/BuscarClientes?termino=${encodeURIComponent(termino)}`)
+            .then(response => response.json())
+            .then(clientes => {
+                resultadosClientes.innerHTML = "";
+
+                if (clientes.length === 0) {
+                    const mensaje = document.createElement("div");
+                    mensaje.className = "list-group-item text-muted";
+                    mensaje.textContent = "No se encontraron clientes.";
+                    resultadosClientes.appendChild(mensaje);
+                    return;
+                }
+
+                clientes.forEach(cliente => {
+                    const elemento = document.createElement("button");
+                    elemento.type = "button";
+                    elemento.className = "list-group-item list-group-item-action";
+                    elemento.innerHTML = `
+                        <strong>${cliente.nombre}</strong><br>
+                        <small>
+                            Tel: ${cliente.telefono || "Sin teléfono"} &nbsp; | &nbsp; Email: ${cliente.email || "Sin correo"}
+                        </small>
+                    `;
+
+                    elemento.addEventListener("click", function () {
+                        clienteSelect.value = cliente.id;
+                        idClienteSeleccionado = cliente.id;
+
+                        clienteSeleccionado.innerHTML = `
+                            <strong>Cliente seleccionado:</strong><br>
+                            ${cliente.nombre}<br>
                             <small>
-                                Tel: ${cliente.telefono || "Sin teléfono"}
-                                &nbsp; | &nbsp;
-                                Email: ${cliente.email || "Sin correo"}
+                                Tel: ${cliente.telefono || "Sin teléfono"} &nbsp; | &nbsp; Email: ${cliente.email || "Sin correo"}
                             </small>
                         `;
+                        clienteSeleccionado.style.display = "block";
+                        buscadorCliente.value = cliente.nombre;
+                        resultadosClientes.innerHTML = "";
 
-
-                        // ==========================================
-                        // SELECCIONAR CLIENTE
-                        // ==========================================
-
-                        elemento.addEventListener(
-                            "click",
-                            function () {
-
-                                // Guardar IdCliente
-                                clienteSelect.value =
-                                    cliente.id;
-
-
-                                // Guardar cliente actual
-                                idClienteSeleccionado =
-                                    cliente.id;
-
-
-                                // Mostrar cliente seleccionado
-                                clienteSeleccionado.innerHTML = `
-                                    <strong>Cliente seleccionado:</strong><br>
-                                    ${cliente.nombre}<br>
-                                    <small>
-                                        Tel: ${cliente.telefono || "Sin teléfono"}
-                                        &nbsp; | &nbsp;
-                                        Email: ${cliente.email || "Sin correo"}
-                                    </small>
-                                `;
-
-
-                                clienteSeleccionado.style.display =
-                                    "block";
-
-
-                                // Mostrar nombre en buscador
-                                buscadorCliente.value =
-                                    cliente.nombre;
-
-
-                                // Ocultar resultados
-                                resultadosClientes.innerHTML =
-                                    "";
-
-
-                                // ==========================================
-                                // LIMPIAR DISPOSITIVO ANTERIOR
-                                // ==========================================
-
-                                dispositivoSelect.value = "";
-
-                                buscadorDispositivo.value = "";
-
-                                resultadosDispositivos.innerHTML = "";
-
-                                dispositivoSeleccionado.innerHTML = "";
-
-                                dispositivoSeleccionado.style.display =
-                                    "none";
-
-                            }
-                        );
-
-
-                        resultadosClientes.appendChild(
-                            elemento
-                        );
-
+                        dispositivoSelect.value = "";
+                        buscadorDispositivo.value = "";
+                        resultadosDispositivos.innerHTML = "";
+                        dispositivoSeleccionado.innerHTML = "";
+                        dispositivoSeleccionado.style.display = "none";
                     });
 
-                })
-
-                .catch(error => {
-
-                    console.error(
-                        "Error al buscar clientes:",
-                        error
-                    );
-
+                    resultadosClientes.appendChild(elemento);
                 });
+            })
+            .catch(error => console.error("Error al buscar clientes:", error));
+    });
 
-        });
+    // ==========================================
+    // BUSCADOR DINÁMICO DE DISPOSITIVOS
+    // ==========================================
+    buscadorDispositivo.addEventListener("input", function () {
+        const termino = this.value.trim();
+        resultadosDispositivos.innerHTML = "";
 
+        if (!idClienteSeleccionado || termino.length < 2) return;
 
-        // ==========================================
-        // BUSCADOR DINÁMICO DE DISPOSITIVOS
-        // ==========================================
+        fetch(`/Servicio/BuscarDispositivos?idCliente=${idClienteSeleccionado}&termino=${encodeURIComponent(termino)}`)
+            .then(response => response.json())
+            .then(dispositivos => {
+                resultadosDispositivos.innerHTML = "";
 
-        buscadorDispositivo.addEventListener("input", function () {
+                if (dispositivos.length === 0) {
+                    const mensaje = document.createElement("div");
+                    mensaje.className = "list-group-item text-muted";
+                    mensaje.textContent = "No se encontraron dispositivos.";
+                    resultadosDispositivos.appendChild(mensaje);
+                    return;
+                }
 
-            const termino =
-                this.value.trim();
+                dispositivos.forEach(dispositivo => {
+                    const elemento = document.createElement("button");
+                    elemento.type = "button";
+                    elemento.className = "list-group-item list-group-item-action";
+                    elemento.innerHTML = `
+                        <strong>${dispositivo.marca} ${dispositivo.modelo}</strong><br>
+                        <small>IMEI: ${dispositivo.imei || "Sin IMEI"}</small>
+                    `;
 
+                    elemento.addEventListener("click", function () {
+                        dispositivoSelect.value = dispositivo.id;
 
-            // Limpiar resultados anteriores
-            resultadosDispositivos.innerHTML = "";
-
-
-            // ==========================================
-            // VALIDAR CLIENTE
-            // ==========================================
-
-            if (!idClienteSeleccionado) {
-
-                return;
-
-            }
-
-
-            // Si hay menos de 2 caracteres,
-            // no realizar búsqueda
-            if (termino.length < 2) {
-
-                return;
-
-            }
-
-
-            // ==========================================
-            // CONSULTAR SERVIDOR
-            // ==========================================
-
-            fetch(
-                `/Servicio/BuscarDispositivos?idCliente=${idClienteSeleccionado}&termino=${encodeURIComponent(termino)}`
-            )
-
-                .then(response => response.json())
-
-                .then(dispositivos => {
-
-                    // Limpiar resultados
-                    resultadosDispositivos.innerHTML = "";
-
-
-                    // ==========================================
-                    // SIN RESULTADOS
-                    // ==========================================
-
-                    if (dispositivos.length === 0) {
-
-                        const mensaje =
-                            document.createElement("div");
-
-                        mensaje.className =
-                            "list-group-item text-muted";
-
-                        mensaje.textContent =
-                            "No se encontraron dispositivos.";
-
-                        resultadosDispositivos.appendChild(
-                            mensaje
-                        );
-
-                        return;
-
-                    }
-
-
-                    // ==========================================
-                    // MOSTRAR DISPOSITIVOS
-                    // ==========================================
-
-                    dispositivos.forEach(dispositivo => {
-
-                        const elemento =
-                            document.createElement("button");
-
-                        elemento.type =
-                            "button";
-
-                        elemento.className =
-                            "list-group-item list-group-item-action";
-
-
-                        elemento.innerHTML = `
-                            <strong>
-                                ${dispositivo.marca}
-                                ${dispositivo.modelo}
-                            </strong>
-                            <br>
-                            <small>
-                                IMEI:
-                                ${dispositivo.imei || "Sin IMEI"}
-                            </small>
+                        dispositivoSeleccionado.innerHTML = `
+                            <strong>Dispositivo seleccionado:</strong><br>
+                            ${dispositivo.marca} ${dispositivo.modelo}<br>
+                            <small>IMEI: ${dispositivo.imei || "Sin IMEI"}</small>
                         `;
-
-
-                        // ==========================================
-                        // SELECCIONAR DISPOSITIVO
-                        // ==========================================
-
-                        elemento.addEventListener(
-                            "click",
-                            function () {
-
-                                // Guardar IdDispositivo
-                                dispositivoSelect.value =
-                                    dispositivo.id;
-
-
-                                // Mostrar dispositivo seleccionado
-                                dispositivoSeleccionado.innerHTML = `
-                                    <strong>Dispositivo seleccionado:</strong><br>
-                                    ${dispositivo.marca}
-                                    ${dispositivo.modelo}<br>
-                                    <small>
-                                        IMEI:
-                                        ${dispositivo.imei || "Sin IMEI"}
-                                    </small>
-                                `;
-
-
-                                dispositivoSeleccionado.style.display =
-                                    "block";
-
-
-                                // Mostrar dispositivo en buscador
-                                buscadorDispositivo.value =
-                                    `${dispositivo.marca} ${dispositivo.modelo}`;
-
-
-                                // Ocultar resultados
-                                resultadosDispositivos.innerHTML =
-                                    "";
-
-                            }
-                        );
-
-
-                        resultadosDispositivos.appendChild(
-                            elemento
-                        );
-
+                        dispositivoSeleccionado.style.display = "block";
+                        buscadorDispositivo.value = `${dispositivo.marca} ${dispositivo.modelo}`;
+                        resultadosDispositivos.innerHTML = "";
                     });
 
-                })
-
-                .catch(error => {
-
-                    console.error(
-                        "Error al buscar dispositivos:",
-                        error
-                    );
-
+                    resultadosDispositivos.appendChild(elemento);
                 });
+            })
+            .catch(error => console.error("Error al buscar dispositivos:", error));
+    });
 
-        });
-
-                // ==========================================
-        // CATÁLOGO DE MARCAS Y MODELOS
-        // ==========================================
-
-        const catalogoModelos = {
-            "Samsung": [
-                "Galaxy S21", "Galaxy S21+", "Galaxy S21 Ultra",
-                "Galaxy S22", "Galaxy S22+", "Galaxy S22 Ultra",
-                "Galaxy S23", "Galaxy S23+", "Galaxy S23 Ultra",
-                "Galaxy S24", "Galaxy S24+", "Galaxy S24 Ultra",
-                "Galaxy S25", "Galaxy S25+", "Galaxy S25 Ultra",
-                "Galaxy A14", "Galaxy A34", "Galaxy A54", "Galaxy A55",
-                "Galaxy Z Flip5", "Galaxy Z Fold5", "Galaxy Note 20"
-            ],
-            "Apple": [
-                "iPhone 11", "iPhone 11 Pro Max",
-                "iPhone 12", "iPhone 12 mini", "iPhone 12 Pro Max",
-                "iPhone 13", "iPhone 13 mini", "iPhone 13 Pro", "iPhone 13 Pro Max",
-                "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max",
-                "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max",
-                "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max",
-                "iPhone 17", "iPhone 17 Pro", "iPhone 17 Pro Max"
-            ],
+    // ==========================================
+    // CATÁLOGO DE MARCAS Y MODELOS
+    // ==========================================
+    const catalogoModelos = {
+        "Samsung": [
+            "Galaxy S21", "Galaxy S21+", "Galaxy S21 Ultra",
+            "Galaxy S22", "Galaxy S22+", "Galaxy S22 Ultra",
+            "Galaxy S23", "Galaxy S23+", "Galaxy S23 Ultra",
+            "Galaxy S24", "Galaxy S24+", "Galaxy S24 Ultra",
+            "Galaxy S25", "Galaxy S25+", "Galaxy S25 Ultra",
+            "Galaxy A14", "Galaxy A34", "Galaxy A54", "Galaxy A55",
+            "Galaxy Z Flip5", "Galaxy Z Fold5", "Galaxy Note 20"
+        ],
+        "Apple": [
+            "iPhone 11", "iPhone 11 Pro Max",
+            "iPhone 12", "iPhone 12 mini", "iPhone 12 Pro Max",
+            "iPhone 13", "iPhone 13 mini", "iPhone 13 Pro", "iPhone 13 Pro Max",
+            "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max",
+            "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max",
+            "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max",
+            "iPhone 17", "iPhone 17 Pro", "iPhone 17 Pro Max"
+        ],
         "Honor": [
             "Honor 90", "Honor 90 Lite", "Honor 90 GT",
             "Honor Magic5", "Honor Magic5 Pro", "Honor Magic5 Lite",
@@ -1010,112 +757,268 @@
             "Honor 200", "Honor 200 Pro",
             "Honor Play 8T", "Honor 50", "Honor 20"
         ]
-        };
+    };
 
+    const marcaSelect = document.getElementById("marcaSelect");
+    const marcaOtra = document.getElementById("marcaOtra");
+    const dispositivoMarcaHidden = document.getElementById("Dispositivo_Marca");
 
-        const marcaSelect = document.getElementById("marcaSelect");
-        const marcaOtra = document.getElementById("marcaOtra");
-        const dispositivoMarcaHidden = document.getElementById("Dispositivo_Marca");
+    const modeloSelect = document.getElementById("modeloSelect");
+    const modeloOtro = document.getElementById("modeloOtro");
+    const dispositivoModeloHidden = document.getElementById("Dispositivo_Modelo");
 
-        const modeloSelect = document.getElementById("modeloSelect");
-        const modeloOtro = document.getElementById("modeloOtro");
-        const dispositivoModeloHidden = document.getElementById("Dispositivo_Modelo");
+    // ==========================================
+    // CAMBIO DE MARCA
+    // ==========================================
+    marcaSelect.addEventListener("change", function () {
+        const marca = this.value;
 
+        modeloOtro.value = "";
+        modeloOtro.style.display = "none";
+        dispositivoModeloHidden.value = "";
 
-        // ==========================================
-        // CAMBIO DE MARCA
-        // ==========================================
+        if (marca === "Otra") {
+            marcaOtra.style.display = "block";
+            marcaOtra.value = "";
+            dispositivoMarcaHidden.value = "";
 
-        marcaSelect.addEventListener("change", function () {
+            modeloSelect.innerHTML = '<option value="">Escribe la marca primero...</option>';
+            modeloSelect.disabled = true;
+            return;
+        }
 
-            const marca = this.value;
+        marcaOtra.style.display = "none";
+        dispositivoMarcaHidden.value = marca;
 
-            // Reiniciar modelo
+        if (!marca || !catalogoModelos[marca]) {
+            modeloSelect.innerHTML = '<option value="">Selecciona primero una marca...</option>';
+            modeloSelect.disabled = true;
+            return;
+        }
+
+        let opciones = '<option value="">Selecciona un modelo...</option>';
+        catalogoModelos[marca].forEach(function (modelo) {
+            opciones += `<option value="${modelo}">${modelo}</option>`;
+        });
+        opciones += '<option value="Otro">Otro (especificar)</option>';
+
+        modeloSelect.innerHTML = opciones;
+        modeloSelect.disabled = false;
+    });
+
+    marcaOtra.addEventListener("input", function () {
+        dispositivoMarcaHidden.value = this.value.trim();
+    });
+
+    // ==========================================
+    // CAMBIO DE MODELO
+    // ==========================================
+    modeloSelect.addEventListener("change", function () {
+        const modelo = this.value;
+
+        if (modelo === "Otro") {
+            modeloOtro.style.display = "block";
             modeloOtro.value = "";
-            modeloOtro.style.display = "none";
             dispositivoModeloHidden.value = "";
+            return;
+        }
 
-            if (marca === "Otra") {
+        modeloOtro.style.display = "none";
+        dispositivoModeloHidden.value = modelo;
+    });
 
-                marcaOtra.style.display = "block";
-                marcaOtra.value = "";
-                dispositivoMarcaHidden.value = "";
+    modeloOtro.addEventListener("input", function () {
+        dispositivoModeloHidden.value = this.value.trim();
+    });
 
-                modeloSelect.innerHTML =
-                    '<option value="">Escribe la marca primero...</option>';
-                modeloSelect.disabled = true;
+    // ==========================================
+    // LÓGICA GENERAL AL CARGAR EL DOM
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function () {
+        // Control de Cámara Web
+        const btnAbrirCamara = document.getElementById("btnAbrirCamara");
+        const modalCamaraEl = document.getElementById("modalCamara");
+        const modalCamara = new bootstrap.Modal(modalCamaraEl);
+        const video = document.getElementById("videoCamara");
+        const canvasCamara = document.getElementById("canvasCamara");
+        const btnCapturarFoto = document.getElementById("btnCapturarFoto");
+        const btnCancelarCamara = document.getElementById("btnCancelarCamara");
+        const btnCloseCamara = document.getElementById("btnCloseCamara");
+        const inputArchivos = document.getElementById("inputArchivosFoto");
+        const previewFotos = document.getElementById("previewFotos");
 
-                return;
+        let streamCamara = null;
+
+        btnAbrirCamara.addEventListener("click", async function () {
+            try {
+                streamCamara = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+                video.srcObject = streamCamara;
+                modalCamara.show();
+            } catch (error) {
+                console.error("Error al acceder a la cámara:", error);
+                alert("No se pudo acceder a la cámara. Asegúrate de otorgar permisos o conectar una.");
+            }
+        });
+
+        function detenerCamara() {
+            if (streamCamara) {
+                streamCamara.getTracks().forEach(track => track.stop());
+                streamCamara = null;
+            }
+        }
+
+        btnCancelarCamara.addEventListener("click", detenerCamara);
+        btnCloseCamara.addEventListener("click", detenerCamara);
+
+        btnCapturarFoto.addEventListener("click", function () {
+            if (!streamCamara) return;
+
+            canvasCamara.width = video.videoWidth;
+            canvasCamara.height = video.videoHeight;
+            const ctx = canvasCamara.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvasCamara.width, canvasCamara.height);
+
+            canvasCamara.toBlob(function (blob) {
+                const nombreArchivo = `captura_camara_${Date.now()}.png`;
+                const archivoFile = new File([blob], nombreArchivo, { type: "image/png" });
+
+                // Agregar la foto capturada al input file existente mediante DataTransfer
+                const dataTransfer = new DataTransfer();
+                if (inputArchivos.files) {
+                    for (let i = 0; i < inputArchivos.files.length; i++) {
+                        dataTransfer.items.add(inputArchivos.files[i]);
+                    }
+                }
+                dataTransfer.items.add(archivoFile);
+                inputArchivos.files = dataTransfer.files;
+
+                renderizarMiniaturas();
+                detenerCamara();
+                modalCamara.hide();
+            }, "image/png");
+        });
+
+        // Función para renderizar miniaturas y permitir borrar
+        function renderizarMiniaturas() {
+            previewFotos.innerHTML = "";
+
+            if (inputArchivos.files) {
+                Array.from(inputArchivos.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const div = document.createElement("div");
+                        div.className = "position-relative border rounded p-1 bg-white shadow-sm";
+                        div.style.width = "90px";
+                        div.style.height = "90px";
+
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="w-100 h-100 rounded" style="object-fit: cover;" />
+                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0 d-flex align-items-center justify-content-center shadow-sm eliminar-foto" data-index="${index}" style="width: 24px; height: 24px; transform: translate(30%, -30%); border-radius: 50%;" title="Eliminar foto">
+                                <i class="bi bi-x" style="font-size: 16px;"></i>
+                            </button>
+                        `;
+
+                        // Evento para eliminar la foto al hacer clic en la "X"
+                        div.querySelector(".eliminar-foto").addEventListener("click", function () {
+                            const indexParaBorrar = parseInt(this.getAttribute("data-index"));
+                            eliminarArchivo(indexParaBorrar);
+                        });
+
+                        previewFotos.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // Función para quitar un archivo de la lista de selección
+        function eliminarArchivo(indexAEliminar) {
+            const dataTransfer = new DataTransfer();
+            const archivosActuales = inputArchivos.files;
+
+            for (let i = 0; i < archivosActuales.length; i++) {
+                if (i !== indexAEliminar) {
+                    dataTransfer.items.add(archivosActuales[i]);
+                }
             }
 
-            marcaOtra.style.display = "none";
-            dispositivoMarcaHidden.value = marca;
+            inputArchivos.files = dataTransfer.files;
+            renderizarMiniaturas();
+        }
 
-            if (!marca || !catalogoModelos[marca]) {
+        inputArchivos.addEventListener("change", renderizarMiniaturas);
 
-                modeloSelect.innerHTML =
-                    '<option value="">Selecciona primero una marca...</option>';
-                modeloSelect.disabled = true;
+        // Control de Modal de Firma del Cliente
+        const btnAbrirModalFirma = document.getElementById("btnAbrirModalFirma");
+        const modalFirmaEl = document.getElementById("modalFirmaCliente");
+        const modalFirma = new bootstrap.Modal(modalFirmaEl);
 
+        const canvasFirma = document.getElementById("canvasFirma");
+        const ctxFirma = canvasFirma.getContext("2d");
+        const inputFirma = document.getElementById("FirmaClienteBase64");
+        const btnLimpiarFirma = document.getElementById("btnLimpiarFirma");
+        const formServicio = document.getElementById("formServicio");
+
+        let dibujando = false;
+        ctxFirma.strokeStyle = "#000000";
+        ctxFirma.lineWidth = 2.5;
+        ctxFirma.lineCap = "round";
+
+        function getPosFirma(e) {
+            const rect = canvasFirma.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function empezarFirma(e) {
+            dibujando = true;
+            const pos = getPosFirma(e);
+            ctxFirma.beginPath();
+            ctxFirma.moveTo(pos.x, pos.y);
+        }
+
+        function moverFirma(e) {
+            if (!dibujando) return;
+            e.preventDefault();
+            const pos = getPosFirma(e);
+            ctxFirma.lineTo(pos.x, pos.y);
+            ctxFirma.stroke();
+        }
+
+        function detenerFirma() {
+            if (dibujando) {
+                dibujando = false;
+                inputFirma.value = canvasFirma.toDataURL("image/png");
+            }
+        }
+
+        canvasFirma.addEventListener("mousedown", empezarFirma);
+        canvasFirma.addEventListener("mousemove", moverFirma);
+        canvasFirma.addEventListener("mouseup", detenerFirma);
+
+        canvasFirma.addEventListener("touchstart", empezarFirma);
+        canvasFirma.addEventListener("touchmove", moverFirma);
+        canvasFirma.addEventListener("touchend", detenerFirma);
+
+        btnLimpiarFirma.addEventListener("click", function () {
+            ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
+            inputFirma.value = "";
+        });
+
+        btnAbrirModalFirma.addEventListener("click", function () {
+            if (!formServicio.checkValidity()) {
+                formServicio.reportValidity();
                 return;
             }
-
-            // Llenar modelos según la marca elegida
-            let opciones =
-                '<option value="">Selecciona un modelo...</option>';
-
-            catalogoModelos[marca].forEach(function (modelo) {
-                opciones += `<option value="${modelo}">${modelo}</option>`;
-            });
-
-            opciones += '<option value="Otro">Otro (especificar)</option>';
-
-            modeloSelect.innerHTML = opciones;
-            modeloSelect.disabled = false;
-
+            modalFirma.show();
         });
 
-
-        // ==========================================
-        // MARCA "OTRA" ESCRITA MANUALMENTE
-        // ==========================================
-
-        marcaOtra.addEventListener("input", function () {
-            dispositivoMarcaHidden.value = this.value.trim();
-        });
-
-
-        // ==========================================
-        // CAMBIO DE MODELO
-        // ==========================================
-
-        modeloSelect.addEventListener("change", function () {
-
-            const modelo = this.value;
-
-            if (modelo === "Otro") {
-
-                modeloOtro.style.display = "block";
-                modeloOtro.value = "";
-                dispositivoModeloHidden.value = "";
-
-                return;
+        formServicio.addEventListener("submit", function (e) {
+            if (!inputFirma.value) {
+                e.preventDefault();
+                alert("El cliente debe firmar de conformidad antes de registrar el servicio.");
             }
-
-            modeloOtro.style.display = "none";
-            dispositivoModeloHidden.value = modelo;
-
         });
-
-
-        // ==========================================
-        // MODELO "OTRO" ESCRITO MANUALMENTE
-        // ==========================================
-
-        modeloOtro.addEventListener("input", function () {
-            dispositivoModeloHidden.value = this.value.trim();
-        });
-
-    </script>
-
-</form>
+    });
+</script>

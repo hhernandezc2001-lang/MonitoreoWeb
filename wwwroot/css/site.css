@@ -2152,3 +2152,56 @@
     .btn-ver-dispositivos:hover {
         background-color: #e9ecef;
     }
+
+/* Sidebar con tono Azul Marino */
+.admin-sidebar {
+    background-color: #0b1f3a !important; /* Azul marino oscuro */
+    color: #ffffff;
+}
+
+.admin-sidebar-title {
+    border-bottom: 1px solid #16325c;
+    color: #ffffff;
+}
+
+.admin-menu-link {
+    color: #c0d1e8;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+    .admin-menu-link:hover {
+        background-color: #16325c;
+        color: #ffffff;
+    }
+
+    /* Estado activo del menú */
+    .admin-menu-link.active {
+        background-color: #1d4074 !important;
+        color: #ffffff !important;
+        border-left: 4px solid #38bdf8; /* Indicador azul claro */
+        font-weight: bold;
+    }
+
+.admin-sidebar-footer {
+    border-top: 1px solid #16325c;
+    background-color: #071528;
+}
+
+.admin-logout {
+    background-color: #dc2626;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 6px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+    .admin-logout:hover {
+        background-color: #b91c1c;
+        color: #ffffff;
+    }

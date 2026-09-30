@@ -1,602 +1,620 @@
 ﻿@model MonitoreoWeb.Models.Reparacion
 
-<div class="tecnico-solicitudes-page">
+@{
+    // LÓGICA DE CLASES Y COLORES SEGÚN LA PRIORIDAD Y GARANTÍA
+    string stripeClass = Model.EsGarantia
+    ? "stripe-garantia"
+    : Model.Prioridad switch
+    {
+        "Urgente" => "stripe-urgente",
+        "Alta" => "stripe-alta",
+        _ => "stripe-normal"
+    };
+
+    string badgeClass = Model.EsGarantia
+    ? "badge-garantia"
+    : Model.Prioridad switch
+    {
+        "Urgente" => "badge-urgente",
+        "Alta" => "badge-alta",
+        _ => "badge-normal"
+    };
+
+    string textoPrioridad = Model.EsGarantia
+    ? "GARANTÍA"
+    : (string.IsNullOrWhiteSpace(Model.Prioridad) ? "NORMAL" : Model.Prioridad.ToUpper());
+}
+
+<style>
+    /* ESTILOS DE FRANJAS SUPERIORES E IMPORTANCIA */
+    .stripe-urgente {
+        border-top: 6px solid #ef4444 !important;
+    }
+
+    .stripe-alta {
+        border-top: 6px solid #f59e0b !important;
+    }
+
+    .stripe-normal {
+        border-top: 6px solid #3b82f6 !important;
+    }
+
+    .stripe-garantia {
+        border-top: 6px solid #a855f7 !important;
+    }
+
+    .badge-urgente {
+        background-color: #ffffff;
+        color: #991b1b;
+        border: 1.5px solid #ef4444;
+    }
+
+    .badge-alta {
+        background-color: #ffffff;
+        color: #92400e;
+        border: 1.5px solid #f59e0b;
+    }
+
+    .badge-normal {
+        background-color: #ffffff;
+        color: #1e3a8a;
+        border: 1.5px solid #1e3a8a;
+    }
+
+    .badge-garantia {
+        background-color: #ffffff;
+        color: #6b21a8;
+        border: 1.5px solid #a855f7;
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <!-- ALERTAS -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["Error"]
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="tecnico-solicitudes-header">
+    <!-- ========================================== -->
+    <!-- TARJETA CONTENEDORA CON LA BARRITA SUPERIOR -->
+    <!-- ========================================== -->
+    <div class="card border-0 shadow-sm rounded-4 @stripeClass mb-4 overflow-hidden">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-uppercase text-muted fw-bold small">PANEL DEL TÉCNICO</span>
+                    <h2 class="fw-bold mb-0 text-dark">Orden de Reparación #@Model.IdReparacion</h2>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- BARRITA / BADGE DE PRIORIDAD BONITA -->
+                    <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill border shadow-sm">
+                        <span class="small text-muted fw-bold">Prioridad:</span>
+                        <span class="badge @badgeClass rounded-pill px-3 py-1 fw-bold" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                            @textoPrioridad
+                        </span>
+                    </div>
+                    <a asp-controller="Tecnico" asp-action="MisReparaciones" class="btn btn-outline-secondary">
+                        Volver a mis reparaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div>
+    <!-- BANNER DE GARANTÍA -->
+    @if (Model.EsGarantia)
+    {
+        <div class="alert alert-danger border-0 shadow-sm d-flex justify-content-between align-items-center mb-4 p-3 rounded-3">
+            <div>
+                <h5 class="fw-bold mb-1 text-danger">
+                    <i class="bi bi-shield-exclamation me-2"></i> ¡SERVICIO DE GARANTÍA (PRIORITARIO)!
+                </h5>
+                <p class="mb-0 small text-dark">
+                    Esta reparación es un reingreso por garantía y no tiene costo de mano de obra para el cliente.
+                    @if (Model.IdReparacionOriginal.HasValue)
+                    {
+                        <span>Proviene de la Orden Original <strong>#@Model.IdReparacionOriginal</strong>.</span>
+                    }
+                </p>
+            </div>
 
-            <span class="tecnico-subtitulo">
-                PANEL DEL TÉCNICO
-            </span>
+            @if (Model.IdReparacionOriginal.HasValue)
+            {
+                <a asp-controller="Tecnico"
+                   asp-action="Detalle"
+                   asp-route-id="@Model.IdReparacionOriginal"
+                   class="btn btn-sm btn-white text-danger fw-bold shadow-sm border text-nowrap ms-3"
+                   target="_blank">
+                    <i class="bi bi-eye-fill me-1"></i> Ver Orden Anterior
+                </a>
+            }
+        </div>
+    }
 
-            <h1>
-                Reparación #@Model.IdReparacion
-            </h1>
+    <!-- BARRA DE PASOS / ESTADO -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
+        </div>
+    </div>
 
-            <p>
-                Detalle de la reparación asignada.
-            </p>
+    <!-- GRID PRINCIPAL DE 2 COLUMNAS -->
+    <div class="row g-4">
+
+        <!-- COLUMNA IZQUIERDA: FLUJO DE TRABAJO -->
+        <div class="col-lg-8">
+
+            <!-- TARJETA DE ACCIÓN DE ETAPA -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-gear-fill me-2"></i> Etapa Actual y Acciones
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    @if (Model.IdEstado == 2)
+                    {
+                        <div class="text-center py-3">
+                            <h4 class="fw-bold text-dark">Reparación Aceptada</h4>
+                            <p class="text-muted mb-4">
+                                Inicia el diagnóstico para revisar el dispositivo y registrar los hallazgos.
+                            </p>
+
+                            <form asp-controller="Tecnico"
+                                  asp-action="IniciarDiagnostico"
+                                  asp-route-id="@Model.IdReparacion"
+                                  method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success btn-lg px-5 fw-bold shadow-sm">
+                                    Iniciar Diagnóstico
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else if (Model.IdEstado == 3)
+                    {
+                        bool tieneDiagnostico = !string.IsNullOrWhiteSpace(Model.Diagnostico);
+
+                        @if (!tieneDiagnostico)
+                        {
+                            <h5 class="fw-bold text-dark mb-2">Registrar Diagnóstico</h5>
+                            <p class="text-muted small">
+                                Describe en detalle la falla encontrada antes de continuar.
+                            </p>
+
+                            <form asp-controller="Tecnico"
+                                  asp-action="GuardarDiagnostico"
+                                  asp-route-id="@Model.IdReparacion"
+                                  method="post">
+                                @Html.AntiForgeryToken()
+
+                                <textarea name="diagnostico"
+                                  class="form-control mb-3"
+                                  rows="4"
+                                  placeholder="Ej. Falla en circuito de carga U2. Se requiere cambio de integrado..."
+                                  required></textarea>
+
+                                <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold">
+                                    Guardar Diagnóstico
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-light border p-3 rounded-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-success">Diagnóstico Guardado</span>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none" onclick="toggleEditDiag(true)">Editar</button>
+                                </div>
+                                <p class="mb-0 fw-bold text-dark" id="txtDiag">@Model.Diagnostico</p>
+                            </div>
+
+                            <div id="formEditDiag" style="display:none;" class="mb-3">
+                                <form asp-controller="Tecnico"
+                                      asp-action="GuardarDiagnostico"
+                                      asp-route-id="@Model.IdReparacion"
+                                      method="post">
+                                    @Html.AntiForgeryToken()
+                                    <textarea name="diagnostico" class="form-control mb-2" rows="3">@Model.Diagnostico</textarea>
+                                    <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="toggleEditDiag(false)">Cancelar</button>
+                                </form>
+                            </div>
+
+                            <div class="border-top pt-3 mt-3">
+                                <h6 class="fw-bold text-dark">¿Cuál es el siguiente paso?</h6>
+                                <div class="d-flex gap-2 mt-2">
+                                    <form asp-controller="Tecnico" asp-action="EsperarRefaccion" asp-route-id="@Model.IdReparacion" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-warning fw-bold">Requiere Refacción</button>
+                                    </form>
+                                    <form asp-controller="Tecnico" asp-action="IniciarReparacion" asp-route-id="@Model.IdReparacion" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-success fw-bold">Continuar a Reparación</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (Model.IdEstado == 4)
+                    {
+                        <div class="alert alert-warning border-0 p-3 mb-3">
+                            <h5 class="fw-bold mb-1">Esperando Refacción</h5>
+                            <p class="mb-0 small">El trabajo está pausado hasta recibir los repuestos necesarios.</p>
+                        </div>
+                        <form asp-controller="Tecnico" asp-action="RefaccionRecibida" asp-route-id="@Model.IdReparacion" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-lg px-4 fw-bold">Refacción Recibida (Reanudar)</button>
+                        </form>
+                    }
+                    else if (Model.IdEstado == 5)
+                    {
+                        <div class="alert alert-info border-0 p-3 mb-3">
+                            <h5 class="fw-bold mb-1">En Proceso de Reparación</h5>
+                            <p class="mb-0 small">Trabaja en el dispositivo. Al finalizar, envíalo al módulo de pruebas.</p>
+                        </div>
+                        <form asp-controller="Tecnico" asp-action="EnviarAPruebas" asp-route-id="@Model.IdReparacion" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold">Finalizar y Enviar a Pruebas</button>
+                        </form>
+                    }
+                    else if (Model.IdEstado == 6)
+                    {
+                        <h5 class="fw-bold text-dark mb-2">Control de Calidad y Pruebas</h5>
+                        <p class="text-muted small">Verifica el correcto funcionamiento antes de dar por terminada la orden.</p>
+
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-7">
+                                <div class="card card-body bg-light border-0">
+                                    <h6 class="fw-bold text-success mb-2">Pruebas Correctas</h6>
+                                    <form asp-controller="Tecnico" asp-action="PruebasSatisfactorias" asp-route-id="@Model.IdReparacion" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="number" name="costoFinal" step="0.01" min="0" class="form-control mb-2" placeholder="Costo final ($)" />
+                                        <button type="submit" class="btn btn-success w-100 fw-bold">Pruebas Satisfactorias</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card card-body bg-light border-0">
+                                    <h6 class="fw-bold text-danger mb-2">Pruebas Fallidas</h6>
+                                    <form asp-controller="Tecnico" asp-action="PruebasNoSatisfactorias" asp-route-id="@Model.IdReparacion" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger w-100 fw-bold">Regresar a Trabajo</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.IdEstado == 7)
+                    {
+                        <div class="alert alert-success border-0 p-3 mb-0">
+                            <h5 class="fw-bold mb-1">Reparación Terminada</h5>
+                            <p class="mb-0 small">
+                                Entregado o listo para entrega el:
+                                <strong>@(Model.FechaEntregaReal.HasValue? Model.FechaEntregaReal.Value.ToString("dd/MM/yyyy HH:mm") : "N/R")</strong>
+                            </p>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- FORMULARIO PRINCIPAL DE AGREGAR EVIDENCIA -->
+            <!-- ========================================== -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-camera-fill me-2"></i> Agregar Evidencia Fotográfica</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-controller="Tecnico" asp-action="AgregarAvance" asp-route-id="@Model.IdReparacion" method="post" enctype="multipart/form-data" id="formAgregarAvance">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Adjuntar o capturar evidencias</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <input type="file" name="FotosAvance" id="inputArchivosFoto" class="form-control" multiple accept="image/*" style="display: none;" />
+                                <button type="button" class="btn btn-primary btn-sm" id="btnSeleccionarArchivos">
+                                    <i class="bi bi-folder2-open me-1"></i> Seleccionar Imágenes
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="btnAbrirCamara">
+                                    <i class="bi bi-camera-fill me-1"></i> Usar Cámara
+                                </button>
+                            </div>
+                            <div class="form-text mb-3">Agrega al menos una foto y describe detalladamente lo que muestra cada una en su cuadro correspondiente.</div>
+
+                            <!-- Contenedor de miniaturas con textarea grande de descripción -->
+                            <div id="contenedorFotosConDescripcion" class="row g-3"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success fw-bold px-4 mt-2" id="btnPublicarAvance">
+                            <i class="bi bi-send-fill me-1"></i> Publicar Avance
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: RESUMEN Y DATOS (SIDEBAR) -->
+        <div class="col-lg-4">
+            <!-- Dispositivo -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-dark text-white py-2">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-phone me-2"></i> Dispositivo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Equipo:</span>
+                        <span class="fw-bold">@Model.Dispositivo?.Marca @Model.Dispositivo?.Modelo</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">IMEI:</span>
+                        <span class="fw-bold text-break">@(string.IsNullOrWhiteSpace(Model.Dispositivo?.IMEI) ? "N/R" : Model.Dispositivo.IMEI)</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Color:</span>
+                        <span class="fw-bold">@(string.IsNullOrWhiteSpace(Model.Dispositivo?.Color) ? "N/R" : Model.Dispositivo.Color)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problema Reportado -->
+            <div class="card border-0 shadow-sm mb-3 border-start border-4 @(Model.EsGarantia ? "border-danger" : "border-warning")">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-uppercase text-muted small mb-0">Problema Reportado</h6>
+                        @if (Model.EsGarantia)
+                        {
+                            <span class="badge bg-danger text-white">GARANTÍA</span>
+                        }
+                    </div>
+                    <p class="mb-0 text-dark fw-bold fs-6">@Model.ProblemaReportado</p>
+                </div>
+            </div>
+
+            <!-- Cliente y quién recibió la orden -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white py-2 border-bottom">
+                    <h6 class="mb-0 fw-bold text-secondary"><i class="bi bi-person me-2"></i> Cliente</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 fw-bold" style="width:36px; height:36px;">
+                            @(Model.Dispositivo?.Cliente?.Nombre?.Substring(0, 1).ToUpper() ?? "?")
+                        </div>
+                        <div>
+                            <div class="fw-bold">
+                                @Model.Dispositivo?.Cliente?.Nombre @Model.Dispositivo?.Cliente?.Apellido
+                            </div>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i> @Model.Dispositivo?.Cliente?.Telefono</div>
+                    <div class="small text-muted mb-3"><i class="bi bi-envelope me-1"></i> @Model.Dispositivo?.Cliente?.Email</div>
+
+                    <!-- 👤 QUIÉN RECIBIó / REGISTRÓ LA ORDEN -->
+                    <div class="p-2 bg-light rounded-3 border small text-muted">
+                        <i class="fas fa-user-shield me-1 text-primary"></i> Recibió en mostrador:
+                        <strong class="text-dark">@(Model.UsuarioCrea != null ? Model.UsuarioCrea.Nombre : "Admin")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finanzas -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-2 border-bottom">
+                    <h6 class="mb-0 fw-bold text-secondary"><i class="bi bi-cash-stack me-2"></i> Pagos y Saldos</h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
+                        decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
+                        decimal saldoPendiente = costoBase - totalPagado;
+                    }
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Total Pagado:</span>
+                        <span class="text-success fw-bold">$@totalPagado.ToString("N2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="fw-bold">Saldo Pendiente:</span>
+                        <span class="fw-bold text-danger fs-5">$@saldoPendiente.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
     </div>
 
-    @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
-
     <!-- ========================================== -->
-    <!-- ESTADO -->
+    <!-- HISTORIAL / BITÁCORA DE AVANCES (SOLO VISOR) -->
     <!-- ========================================== -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body p-4">
+            @await Html.PartialAsync("_BitacoraAvances", (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
+        </div>
+    </div>
+</div>
 
-    <div class="tecnico-card-seccion">
-
-        <span class="tecnico-seccion-titulo">
-            ESTADO ACTUAL
-        </span>
-
-        @if (Model.IdEstado == 2)
-        {
-            <h2>
-                Aceptada
-            </h2>
-
-            <p>
-                La reparación ha sido aceptada por el técnico.
-            </p>
-
-            <form asp-controller="Tecnico"
-                  asp-action="IniciarDiagnostico"
-                  asp-route-id="@Model.IdReparacion"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="btn-aceptar-reparacion">
-
-                    Iniciar diagnóstico
-
+<!-- ========================================================================= -->
+<!-- MODAL DE CAPTURA CON CÁMARA WEB -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="modalCamara" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-camera-fill me-2"></i> Capturar Evidencia Fotográfica</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnCloseCamara"></button>
+            </div>
+            <div class="modal-body text-center bg-black">
+                <video id="videoCamara" autoplay playsinline class="w-100 rounded shadow" style="max-height: 400px; object-fit: cover;"></video>
+                <canvas id="canvasCamara" style="display: none;"></canvas>
+            </div>
+            <div class="modal-footer bg-light justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelarCamara">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-lg px-4 fw-bold" id="btnCapturarFoto">
+                    <i class="bi bi-circle-fill text-danger me-2"></i> Tomar Fotografía
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-            </form>
-        }
+<script>
+    function toggleEditDiag(show) {
+        document.getElementById('txtDiag').parentElement.style.display = show ? 'none' : 'block';
+        document.getElementById('formEditDiag').style.display = show ? 'block' : 'none';
+    }
 
-        else if (Model.IdEstado == 3)
-        {
-            <h2>
-                Diagnóstico
-            </h2>
+    // ==========================================
+    // LÓGICA DE CÁMARA, DESCRIPCIÓN Y VALIDACIÓN
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function () {
+        const btnAbrirCamara = document.getElementById("btnAbrirCamara");
+        const btnSeleccionarArchivos = document.getElementById("btnSeleccionarArchivos");
+        const modalCamaraEl = document.getElementById("modalCamara");
+        const modalCamara = new bootstrap.Modal(modalCamaraEl);
+        const video = document.getElementById("videoCamara");
+        const canvasCamara = document.getElementById("canvasCamara");
+        const btnCapturarFoto = document.getElementById("btnCapturarFoto");
+        const btnCancelarCamara = document.getElementById("btnCancelarCamara");
+        const btnCloseCamara = document.getElementById("btnCloseCamara");
+        const inputArchivos = document.getElementById("inputArchivosFoto");
+        const contenedorFotos = document.getElementById("contenedorFotosConDescripcion");
+        const formAgregarAvance = document.getElementById("formAgregarAvance");
 
-            <p>
-                Registra el diagnóstico encontrado durante la revisión
-                del dispositivo.
-            </p>
+        let streamCamara = null;
+        let listaArchivosConDescripcion = [];
 
-            <form asp-controller="Tecnico"
-                  asp-action="GuardarDiagnostico"
-                  asp-route-id="@Model.IdReparacion"
-                  method="post">
+        // Validación al enviar el formulario
+        formAgregarAvance.addEventListener("submit", function (e) {
+            if (listaArchivosConDescripcion.length === 0) {
+                e.preventDefault(); // Detiene el envío
+                alert("⚠️ Debes adjuntar o capturar al menos una fotografía antes de publicar el avance.");
+            }
+        });
 
-                @Html.AntiForgeryToken()
+        btnSeleccionarArchivos.addEventListener("click", function () {
+            inputArchivos.click();
+        });
 
-                <div class="mb-3">
+        inputArchivos.addEventListener("change", function () {
+            for (let i = 0; i < this.files.length; i++) {
+                listaArchivosConDescripcion.push({
+                    file: this.files[i],
+                    descripcion: ""
+                });
+            }
+            inputArchivos.value = "";
+            actualizarVistaPrevia();
+        });
 
-                    <label class="form-label">
-                        Diagnóstico
-                    </label>
+        btnAbrirCamara.addEventListener("click", async function () {
+            try {
+                streamCamara = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+                video.srcObject = streamCamara;
+                modalCamara.show();
+            } catch (error) {
+                console.error("Error al acceder a la cámara:", error);
+                alert("No se pudo acceder a la cámara.");
+            }
+        });
 
-                    <textarea name="diagnostico"
-                          class="form-control"
-                          rows="5"
-                          placeholder="Describe el diagnóstico realizado...">@Model.Diagnostico</textarea>
-
-                </div>
-
-                <button type="submit"
-                        class="btn-aceptar-reparacion">
-
-                    Guardar diagnóstico
-
-                </button>
-
-            </form>
-
-            @if (!string.IsNullOrWhiteSpace(Model.Diagnostico))
-            {
-                <div class="mt-4">
-
-                    <h3>
-                        ¿Qué procede?
-                    </h3>
-
-                    <p>
-                        Selecciona el siguiente paso para esta reparación.
-                    </p>
-
-
-                    <div class="d-flex gap-2">
-
-                        <!-- ============================== -->
-                        <!-- ESPERANDO REFACCIÓN -->
-                        <!-- ============================== -->
-
-                        <form asp-controller="Tecnico"
-                              asp-action="EsperarRefaccion"
-                              asp-route-id="@Model.IdReparacion"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit"
-                                    class="btn btn-warning">
-
-                                Requiere refacción
-
-                            </button>
-
-                        </form>
-
-
-                        <!-- ============================== -->
-                        <!-- EN REPARACIÓN -->
-                        <!-- ============================== -->
-
-                        <form asp-controller="Tecnico"
-                              asp-action="IniciarReparacion"
-                              asp-route-id="@Model.IdReparacion"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit"
-                                    class="btn btn-success">
-
-                                Continuar con reparación
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                </div>
+        function detenerCamara() {
+            if (streamCamara) {
+                streamCamara.getTracks().forEach(track => track.stop());
+                streamCamara = null;
             }
         }
 
-        else if (Model.IdEstado == 4)
-        {
-            <h2>
-                Esperando Refacción
-            </h2>
+        btnCancelarCamara.addEventListener("click", detenerCamara);
+        btnCloseCamara.addEventListener("click", detenerCamara);
 
-            <p>
-                Esta reparación se encuentra detenida
-                a la espera de una refacción.
-            </p>
+        btnCapturarFoto.addEventListener("click", function () {
+            if (!streamCamara) return;
 
-            <form asp-controller="Tecnico"
-                  asp-action="RefaccionRecibida"
-                  asp-route-id="@Model.IdReparacion"
-                  method="post">
+            canvasCamara.width = video.videoWidth;
+            canvasCamara.height = video.videoHeight;
+            const ctx = canvasCamara.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvasCamara.width, canvasCamara.height);
 
-                @Html.AntiForgeryToken()
+            canvasCamara.toBlob(function (blob) {
+                const nombreArchivo = `avance_${Date.now()}.png`;
+                const archivoFile = new File([blob], nombreArchivo, { type: "image/png" });
 
-                <button type="submit"
-                        class="btn btn-success">
+                listaArchivosConDescripcion.push({
+                    file: archivoFile,
+                    descripcion: "Captura de cámara"
+                });
 
-                    Refacción recibida
+                actualizarVistaPrevia();
+                detenerCamara();
+                modalCamara.hide();
+            }, "image/png");
+        });
 
-                </button>
+        function actualizarVistaPrevia() {
+            contenedorFotos.innerHTML = "";
+            const dataTransfer = new DataTransfer();
 
-            </form>
-        }
+            listaArchivosConDescripcion.forEach((item, index) => {
+                dataTransfer.items.add(item.file);
 
-        else if (Model.IdEstado == 5)
-        {
-            <h2>
-                En Reparación
-            </h2>
+                const col = document.createElement("div");
+                col.className = "col-12";
 
-            <p>
-                El técnico se encuentra trabajando
-                actualmente en el dispositivo.
-            </p>
-
-            <form asp-controller="Tecnico"
-                  asp-action="EnviarAPruebas"
-                  asp-route-id="@Model.IdReparacion"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="btn btn-primary">
-
-                    Enviar a pruebas
-
-                </button>
-
-            </form>
-        }
-
-        else if (Model.IdEstado == 6)
-        {
-            <h2>
-                En Pruebas
-            </h2>
-
-            <p>
-                La reparación ha sido realizada.
-                Realiza las pruebas necesarias para comprobar
-                el correcto funcionamiento del dispositivo.
-            </p>
-
-            <div class="mt-4">
-
-                <h3>
-                    Resultado de las pruebas
-                </h3>
-
-                <p>
-                    Selecciona el resultado correspondiente.
-                </p>
-
-
-                <div class="d-flex gap-2">
-                    <!-- ============================== -->
-                    <!-- PRUEBAS SATISFACTORIAS -->
-                    <!-- ============================== -->
-
-                    <form asp-controller="Tecnico"
-                          asp-action="PruebasSatisfactorias"
-                          asp-route-id="@Model.IdReparacion"
-                          method="post"
-                          class="mb-2">
-
-                        @Html.AntiForgeryToken()
-
-                        <div class="mb-2">
-
-                            <label class="form-label">
-                                Costo final (opcional)
-                            </label>
-
-                            <input type="number"
-                                   name="costoFinal"
-                                   step="0.01"
-                                   min="0"
-                                   class="form-control"
-                                   style="max-width: 220px;"
-                                   placeholder="Ej. 1800.00" />
-
+                col.innerHTML = `
+                    <div class="card p-3 shadow-sm border bg-light">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-3 text-center">
+                                <div class="position-relative d-inline-block" style="width: 100px; height: 100px;">
+                                    <img src="" class="w-100 h-100 rounded object-fit-cover shadow-sm img-preview-${index}" />
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0 d-flex align-items-center justify-content-center shadow eliminar-item" data-index="${index}" style="width: 26px; height: 26px; transform: translate(30%, -30%); border-radius: 50%;" title="Eliminar foto">
+                                        <i class="bi bi-x" style="font-size: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label small fw-bold mb-1 text-primary">Descripción / Detalle de esta fotografía</label>
+                                <textarea name="DescripcionesFotos[${index}]" class="form-control desc-input" rows="3" data-index="${index}" placeholder="Describe detalladamente el hallazgo o trabajo realizado en esta imagen..." required>${item.descripcion}</textarea>
+                            </div>
                         </div>
+                    </div>
+                `;
 
-                        <button type="submit"
-                                class="btn btn-success">
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    col.querySelector(`.img-preview-${index}`).src = e.target.result;
+                };
+                reader.readAsDataURL(item.file);
 
-                            Pruebas satisfactorias
+                col.querySelector(".desc-input").addEventListener("input", function () {
+                    listaArchivosConDescripcion[index].descripcion = this.value;
+                });
 
-                        </button>
+                col.querySelector(".eliminar-item").addEventListener("click", function () {
+                    listaArchivosConDescripcion.splice(index, 1);
+                    actualizarVistaPrevia();
+                });
 
-                    </form>
+                contenedorFotos.appendChild(col);
+            });
 
-                    <!-- ============================== -->
-                    <!-- PRUEBAS NO SATISFACTORIAS -->
-                    <!-- ============================== -->
-
-                    <form asp-controller="Tecnico"
-                          asp-action="PruebasNoSatisfactorias"
-                          asp-route-id="@Model.IdReparacion"
-                          method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <button type="submit"
-                                class="btn btn-danger">
-
-                            Pruebas no satisfactorias
-
-                        </button>
-
-                    </form>
-
-                </div>
-
-            </div>
+            inputArchivos.files = dataTransfer.files;
         }
-        else if (Model.IdEstado == 7)
-        {
-            <h2>
-                Reparación Terminada
-            </h2>
-
-            <p>
-                Las pruebas fueron satisfactorias y la reparación
-                ha sido concluida correctamente.
-            </p>
-
-            <div class="mt-3">
-
-                <strong>
-                    Fecha de terminación:
-                </strong>
-
-                <span>
-                    @(Model.FechaEntregaReal.HasValue
-                                    ? Model.FechaEntregaReal.Value
-                                    .ToString("dd/MM/yyyy HH:mm")
-                                    : "No registrada")
-            </span>
-
-            </div>
-                }
-        else
-        {
-            <h2>
-                Estado @Model.IdEstado
-            </h2>
-        }
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- DISPOSITIVO -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-seccion">
-
-        <span class="tecnico-seccion-titulo">
-            DISPOSITIVO
-        </span>
-
-        <div class="tecnico-datos">
-
-            <div>
-
-                <span>
-                    Marca
-                </span>
-
-                <strong>
-                    @Model.Dispositivo?.Marca
-                </strong>
-
-            </div>
-
-            <div>
-
-                <span>
-                    Modelo
-                </span>
-
-                <strong>
-                    @Model.Dispositivo?.Modelo
-                </strong>
-
-            </div>
-
-            <div>
-
-                <span>
-                    IMEI
-                </span>
-
-                <strong>
-                    @(string.IsNullOrWhiteSpace(Model.Dispositivo?.IMEI)
-                                        ? "No registrado"
-                                        : Model.Dispositivo.IMEI)
-                </strong>
-
-            </div>
-
-            <div>
-
-                <span>
-                    Color
-                </span>
-
-                <strong>
-                    @(string.IsNullOrWhiteSpace(Model.Dispositivo?.Color)
-                                        ? "No registrado"
-                                        : Model.Dispositivo.Color)
-                </strong>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- CLIENTE -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-seccion">
-
-        <span class="tecnico-seccion-titulo">
-            CLIENTE
-        </span>
-
-        <div class="tecnico-cliente">
-
-            <div class="tecnico-avatar">
-
-                @(Model.Dispositivo?.Cliente?.Nombre?
-                                .Substring(0, 1)
-                                .ToUpper() ?? "?")
-
-            </div>
-
-            <div>
-
-                <strong>
-
-                    @Model.Dispositivo?.Cliente?.Nombre
-                    @Model.Dispositivo?.Cliente?.Apellido
-
-                </strong>
-
-                <span>
-                    📞 @Model.Dispositivo?.Cliente?.Telefono
-                </span>
-
-                <span>
-                    ✉ @Model.Dispositivo?.Cliente?.Email
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- PROBLEMA -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-seccion">
-
-        <span class="tecnico-seccion-titulo">
-            PROBLEMA REPORTADO
-        </span>
-
-        <div class="tecnico-problema">
-
-            @Model.ProblemaReportado
-
-        </div>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- FECHAS -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-fechas">
-
-        <div>
-
-            <span>
-                Fecha de ingreso
-            </span>
-
-            <strong>
-                @Model.FechaIngreso.ToString("dd/MM/yyyy HH:mm")
-            </strong>
-
-        </div>
-
-        <div>
-
-            <span>
-                Entrega estimada
-            </span>
-
-            <strong>
-
-                @(Model.FechaEntregaEstimada.HasValue
-                                ? Model.FechaEntregaEstimada.Value
-                                .ToString("dd/MM/yyyy")
-                                : "Sin definir")
-
-            </strong>
-
-        </div>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- PAGOS Y SALDO -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-seccion">
-
-        <span class="tecnico-seccion-titulo">
-            PAGOS
-        </span>
-
-        @{
-            decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
-            decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
-            decimal saldoPendiente = costoBase - totalPagado;
-        }
-
-        @if (Model.Pagos == null || !Model.Pagos.Any())
-        {
-            <p class="text-muted">
-                Aún no se ha registrado ningún pago para esta reparación.
-            </p>
-        }
-        else
-        {
-            <ul>
-                @foreach (var pago in Model.Pagos.OrderBy(p => p.FechaPago))
-                {
-                    <li>
-                        @pago.FechaPago.ToString("dd/MM/yyyy HH:mm")
-                        &mdash;
-                        @($"${pago.Monto:N2}")
-                    </li>
-                }
-            </ul>
-        }
-
-        <p>
-            <strong>
-                Total pagado:
-            </strong>
-            @($"${totalPagado:N2}")
-        </p>
-
-        <p>
-            <strong>
-                Saldo pendiente:
-            </strong>
-            @($"${saldoPendiente:N2}")
-            <span class="text-muted">
-                (@(Model.CostoFinal.HasValue ? "sobre costo final" : "sobre costo estimado"))
-            </span>
-        </p>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- BITÁCORA -->
-    <!-- ========================================== -->
-    @await Html.PartialAsync(
-    "_BitacoraAvances",
-        (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
-
-    <!-- ========================================== -->
-    <!-- VOLVER -->
-    <!-- ========================================== -->
-
-    <div class="tecnico-card-footer">
-
-        <a asp-controller="Tecnico"
-           asp-action="MisReparaciones"
-           class="btn-aceptar-reparacion">
-
-            Volver a mis reparaciones
-
-        </a>
-
-    </div>
-
-</div>
+    });
+</script>

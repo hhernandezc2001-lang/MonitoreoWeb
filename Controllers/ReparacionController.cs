@@ -16,7 +16,6 @@ namespace MonitoreoWeb.Controllers
             _context = context;
         }
 
-
         // ==========================================
         // GET: Reparacion/Create
         // ==========================================
@@ -32,28 +31,40 @@ namespace MonitoreoWeb.Controllers
             return View();
         }
 
-
         // ==========================================
         // POST: Reparacion/Create
         // ==========================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Reparacion reparacion)
         {
+            // 1. OBTENER EL ID DEL USUARIO DESDE LA SESIÓN (CLAIMS)
+            var idUsuarioClaim = User.FindFirst("IdUsuario")?.Value;
+            if (!string.IsNullOrEmpty(idUsuarioClaim) && int.TryParse(idUsuarioClaim, out int idUser))
+            {
+                reparacion.IdUsuario = idUser; // 👈 Aquí se asigna directamente
+            }
+
             if (ModelState.IsValid)
             {
                 reparacion.FechaIngreso = DateTime.Now;
-
                 reparacion.Activo = true;
+                reparacion.IdEstado = 1; // Estado Pendiente
 
-                // Estado Pendiente
-                reparacion.IdEstado = 1;
-
-                reparacion.TokenConsulta = GenerarToken();
-
+                // 2. Guardar la reparación
                 _context.Reparacion.Add(reparacion);
+                _context.SaveChanges(); // 👈 Al guardarse aquí, la base de datos ya recibe el IdUsuario
 
+                // 3. Guardar el token en la tabla TokenConsulta
+                var tokenConsulta = new TokenConsulta
+                {
+                    IdReparacion = reparacion.IdReparacion,
+                    CodigoUnico = GenerarToken(),
+                    FechaCreacion = DateTime.Now,
+                    Activo = true
+                };
+
+                _context.TokenConsulta.Add(tokenConsulta);
                 _context.SaveChanges();
 
                 return View("Confirmacion", reparacion);
@@ -67,7 +78,6 @@ namespace MonitoreoWeb.Controllers
 
             return View(reparacion);
         }
-
 
         // ==========================================
         // GET: Reparacion/Index
@@ -110,9 +120,8 @@ namespace MonitoreoWeb.Controllers
             return View(solicitudes);
         }
 
-
         // ==========================================
-        // GENERAR TOKEN
+        // GENERAR TOKEN HELPER
         // ==========================================
 
         private string GenerarToken()

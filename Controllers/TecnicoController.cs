@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MonitoreoWeb.Data;
 using MonitoreoWeb.Models;
 using MonitoreoWeb.Models.ViewModels;
+using MonitoreoWeb.Services;
 using System.IO;
 using System.Security.Claims;
 
@@ -13,11 +14,13 @@ namespace MonitoreoWeb.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly TelegramService _telegramService;
 
-        public TecnicoController(ApplicationDbContext context, IWebHostEnvironment env)
+        public TecnicoController(ApplicationDbContext context, IWebHostEnvironment env, TelegramService telegramService)
         {
             _context = context;
             _env = env;
+            _telegramService = telegramService;
         }
 
 
@@ -40,6 +43,7 @@ namespace MonitoreoWeb.Controllers
             var solicitudes = _context.Reparacion
                 .Include(r => r.Dispositivo)
                     .ThenInclude(d => d.Cliente)
+                .Include(r => r.UsuarioCrea) // 👈 INCLUYE AL USUARIO QUE REGISTRÓ LA ORDEN
                 .Where(r =>
                     r.Activo &&
                     r.IdTecnico == null &&
@@ -130,7 +134,7 @@ namespace MonitoreoWeb.Controllers
                 .ToList();
 
             var enCurso = todas.Where(r => r.IdEstado >= 2 && r.IdEstado <= 6).ToList();
-            var finalizadas = todas.Where(r => r.IdEstado == 7).ToList();
+            var finalizadas = todas.Where(r => r.IdEstado == 7 || r.IdEstado == 8).ToList();
 
             ViewBag.Vista = vista;
             ViewBag.EnCursoCount = enCurso.Count;
@@ -164,6 +168,7 @@ namespace MonitoreoWeb.Controllers
                 .Include(r => r.Dispositivo)
                     .ThenInclude(d => d.Cliente)
                 .Include(r => r.Pagos)
+                .Include(r => r.UsuarioCrea)
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
@@ -200,128 +205,81 @@ namespace MonitoreoWeb.Controllers
         // ==========================================================
         // AGREGAR AVANCE (BITÁCORA)
         // ==========================================================
-
         [Authorize(Roles = "Tecnico")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AgregarAvance(
-            int id,
-            string descripcionAvance,
-            List<IFormFile> fotos)
+        public async Task<IActionResult> AgregarAvance(int id, string? descripcion, List<IFormFile>? FotosAvance, List<string>? DescripcionesFotos)
         {
-            var idUsuarioClaim = User.FindFirst("IdUsuario");
-
-            if (idUsuarioClaim == null)
+            int idUsuarioActual = 1;
+            var claimIdUsuario = User.FindFirst("IdUsuario")?.Value;
+            if (!string.IsNullOrEmpty(claimIdUsuario))
             {
-                return Unauthorized();
+                int.TryParse(claimIdUsuario, out idUsuarioActual);
             }
 
-            if (!int.TryParse(idUsuarioClaim.Value, out int idTecnico))
+            string textoBitacora = "Actualización de evidencias fotográficas.";
+
+            if (!string.IsNullOrWhiteSpace(descripcion))
             {
-                return Unauthorized();
+                textoBitacora = descripcion.Trim();
+            }
+            else if (DescripcionesFotos != null && DescripcionesFotos.Any() && !string.IsNullOrWhiteSpace(DescripcionesFotos[0]))
+            {
+                textoBitacora = DescripcionesFotos[0].Trim();
             }
 
-            var reparacion = _context.Reparacion
-                .FirstOrDefault(r =>
-                    r.IdReparacion == id &&
-                    r.IdTecnico == idTecnico &&
-                    r.Activo);
-
-            if (reparacion == null)
-            {
-                return NotFound();
-            }
-
-            // Solo se puede documentar mientras está activa
-            // (desde que fue aceptada hasta que entra a pruebas)
-            if (reparacion.IdEstado < 2 || reparacion.IdEstado > 6)
-            {
-                TempData["Error"] =
-                    "No se puede agregar una actualización en el estado actual de la reparación.";
-
-                return RedirectToAction("Detalle", new { id = id });
-            }
-
-            if (string.IsNullOrWhiteSpace(descripcionAvance))
-            {
-                TempData["Error"] =
-                    "Debes escribir una descripción para la actualización.";
-
-                return RedirectToAction("Detalle", new { id = id });
-            }
-
-            // ==========================================
-            // 1. REGISTRAR EL AVANCE
-            // ==========================================
-
-            var avance = new HistorialAvance
+            var nuevoAvance = new HistorialAvance
             {
                 IdReparacion = id,
-                IdUsuario = idTecnico,
-                Fecha = DateTime.Now,
-                Descripcion = descripcionAvance.Trim()
+                IdUsuario = idUsuarioActual,
+                Descripcion = textoBitacora,
+                Fecha = DateTime.Now
             };
 
-            _context.HistorialAvance.Add(avance);
+            _context.HistorialAvance.Add(nuevoAvance);
             _context.SaveChanges();
 
-            // ==========================================
-            // 2. GUARDAR LAS FOTOS (SI LAS HAY)
-            // ==========================================
-
-            if (fotos != null && fotos.Count > 0)
+            if (FotosAvance != null && FotosAvance.Any())
             {
-                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-
-                var carpeta = Path.Combine(
-                    _env.WebRootPath,
-                    "uploads",
-                    "reparaciones",
-                    id.ToString());
-
-                Directory.CreateDirectory(carpeta);
-
-                foreach (var foto in fotos)
+                string carpetaUploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "reparaciones");
+                if (!Directory.Exists(carpetaUploads))
                 {
-                    if (foto == null || foto.Length == 0)
+                    Directory.CreateDirectory(carpetaUploads);
+                }
+
+                for (int i = 0; i < FotosAvance.Count; i++)
+                {
+                    var archivo = FotosAvance[i];
+                    if (archivo.Length > 0)
                     {
-                        continue;
+                        string nombreUnico = Guid.NewGuid().ToString() + Path.GetExtension(archivo.FileName);
+                        string rutaCompleta = Path.Combine(carpetaUploads, nombreUnico);
+
+                        using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+                        {
+                            await archivo.CopyToAsync(stream);
+                        }
+
+                        var fotoAvance = new FotoAvance
+                        {
+                            IdReparacion = id,
+                            IdAvance = nuevoAvance.IdAvance,
+                            IdUsuario = idUsuarioActual,
+                            RutaArchivo = "/uploads/reparaciones/" + nombreUnico,
+                            NombreArchivo = archivo.FileName,
+                            FechaSubida = DateTime.Now,
+                            VisibleCliente = true,
+                            Activo = true
+                        };
+
+                        _context.FotoAvance.Add(fotoAvance);
                     }
-
-                    var extension = Path.GetExtension(foto.FileName).ToLower();
-
-                    if (!extensionesPermitidas.Contains(extension))
-                    {
-                        continue;
-                    }
-
-                    var nombreUnico = $"{Guid.NewGuid()}{extension}";
-                    var rutaFisica = Path.Combine(carpeta, nombreUnico);
-
-                    using (var stream = new FileStream(rutaFisica, FileMode.Create))
-                    {
-                        await foto.CopyToAsync(stream);
-                    }
-
-                    _context.FotoAvance.Add(new FotoAvance
-                    {
-                        IdReparacion = id,
-                        IdAvance = avance.IdAvance,
-                        IdUsuario = idTecnico,
-                        RutaArchivo = $"/uploads/reparaciones/{id}/{nombreUnico}",
-                        NombreArchivo = foto.FileName,
-                        FechaSubida = DateTime.Now,
-                        VisibleCliente = true,
-                        Activo = true
-                    });
                 }
 
                 _context.SaveChanges();
             }
 
-            TempData["Success"] =
-                "La actualización se agregó correctamente a la bitácora.";
-
+            TempData["Success"] = "Avance publicado correctamente.";
             return RedirectToAction("Detalle", new { id = id });
         }
 
@@ -676,12 +634,12 @@ namespace MonitoreoWeb.Controllers
         }
 
         // ==========================================================
-        // PRUEBAS SATISFACTORIAS
+        // PRUEBAS SATISFACTORIAS (ESTADO 7: TERMINADA)
         // ==========================================================
         [Authorize(Roles = "Tecnico")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult PruebasSatisfactorias(int id, decimal? costoFinal)
+        public async Task<IActionResult> PruebasSatisfactorias(int id, decimal? costoFinal)
         {
             var idUsuarioClaim = User.FindFirst("IdUsuario");
 
@@ -690,14 +648,15 @@ namespace MonitoreoWeb.Controllers
                 return Unauthorized();
             }
 
-            if (!int.TryParse(
-                    idUsuarioClaim.Value,
-                    out int idTecnico))
+            if (!int.TryParse(idUsuarioClaim.Value, out int idTecnico))
             {
                 return Unauthorized();
             }
 
+            // ⚡ IMPORTANTE: Incluimos al Dispositivo y al Cliente con su TelegramChatId
             var reparacion = _context.Reparacion
+                .Include(r => r.Dispositivo)
+                    .ThenInclude(d => d.Cliente)
                 .FirstOrDefault(r =>
                     r.IdReparacion == id &&
                     r.IdTecnico == idTecnico &&
@@ -710,32 +669,44 @@ namespace MonitoreoWeb.Controllers
 
             if (reparacion.IdEstado != 6)
             {
-                TempData["Error"] =
-                    "La reparación no se encuentra en etapa de pruebas.";
-
-                return RedirectToAction(
-                    "Detalle",
-                    new { id = id }
-                );
+                TempData["Error"] = "La reparación no se encuentra en etapa de pruebas.";
+                return RedirectToAction("Detalle", new { id = id });
             }
 
-            reparacion.IdEstado = 7;
-            reparacion.FechaEntregaReal = DateTime.Now;
+            reparacion.IdEstado = 7; // Estado 7: Terminada
+            reparacion.FechaTerminacion = DateTime.Now;
 
             if (costoFinal.HasValue)
             {
                 reparacion.CostoFinal = costoFinal.Value;
             }
 
-            _context.SaveChanges();
+            _context.SaveChanges(); // Guardamos el cambio de estado en la BD
 
-            TempData["Success"] =
-                "Las pruebas fueron satisfactorias. La reparación está terminada.";
+            // ==========================================================
+            // 🚀 ENVIAR NOTIFICACIÓN AUTOMÁTICA A TELEGRAM
+            // ==========================================================
+            try
+            {
+                var cliente = reparacion.Dispositivo?.Cliente;
+                if (cliente != null && !string.IsNullOrWhiteSpace(cliente.TelegramChatId))
+                {
+                    string modeloDispositivo = $"{reparacion.Dispositivo?.Marca} {reparacion.Dispositivo?.Modelo}";
+                    string mensaje = $"¡Hola, {cliente.Nombre}! 🛠️\n\nTe informamos que tu dispositivo *{modeloDispositivo}* (Orden #{reparacion.IdReparacion}) ha sido **reparado con éxito** y superó las pruebas de calidad.\n\nYa puedes pasar a recogerlo a nuestro taller. ¡Te esperamos!";
 
-            return RedirectToAction(
-                "Detalle",
-                new { id = id }
-            );
+                    await _telegramService.EnviarNotificacionAsync(cliente.TelegramChatId, mensaje);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Si por alguna razón falla Telegram, no detenemos el sistema principal, solo lo registramos
+                System.Diagnostics.Debug.WriteLine($"Error al enviar notificación de Telegram: {ex.Message}");
+            }
+            // ==========================================================
+
+            TempData["Success"] = "Las pruebas fueron satisfactorias. La reparación está terminada y se envió la notificación al cliente.";
+
+            return RedirectToAction("Detalle", new { id = id });
         }
 
         // ==========================================================

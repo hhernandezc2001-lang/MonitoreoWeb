@@ -16,21 +16,23 @@ namespace MonitoreoWeb.Models
         public string Apellido { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El teléfono es obligatorio")]
-        public string Telefono { get; set; } = string.Empty;
+        public string? Telefono { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]
         [EmailAddress(ErrorMessage = "Ingresa un correo electrónico válido")]
-        public string Email { get; set; } = string.Empty;
-
+        public string? Email { get; set; } = string.Empty;
+        
         public DateTime FechaRegistro { get; set; }
 
         public bool Activo { get; set; }
 
-        // --- Campos para verificación de email ---
-        public bool EmailVerificado { get; set; } = false;
+        // NUEVOS CAMPOS : Para almacenar información adicional del cliente
 
-        public string? TokenVerificacion { get; set; }
+        // 🟢 NUEVO CAMPO: Almacenará el identificador único de Telegram del cliente
+        [StringLength(50)]
+        public string? TelegramChatId { get; set; }
 
-        public DateTime? TokenExpira { get; set; }
+        // Relación de navegación con Dispositivos
+        public virtual ICollection<Dispositivo> Dispositivos { get; set; } = new List<Dispositivo>();
     }
 }

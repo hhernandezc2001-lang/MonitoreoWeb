@@ -28,5 +28,7 @@ namespace MonitoreoWeb.Models
 
         [ForeignKey("IdCliente")]
         public Cliente? Cliente { get; set; }
+
+
     }
 }

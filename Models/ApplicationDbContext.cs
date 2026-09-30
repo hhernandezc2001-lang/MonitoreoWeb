@@ -41,7 +41,10 @@ namespace MonitoreoWeb.Data
         /// <summary>Obtiene o establece la tabla de Pagos realizados en las reparaciones.</summary>
         public DbSet<Pago> Pago { get; set; }
 
+        public DbSet<ChecklistRecepcion> ChecklistRecepcion { get; set; }
         #endregion
+
+        public DbSet<TokenConsulta> TokenConsulta { get; set; }
 
         /// <summary>
         /// Configura el modelo de datos, mapeo de tablas, claves primarias y relaciones entre entidades (Fluent API).
@@ -80,7 +83,7 @@ namespace MonitoreoWeb.Data
 
                 // Relación: Un Dispositivo pertenece a un Cliente (1:N)
                 entity.HasOne(d => d.Cliente)
-                      .WithMany()
+                      .WithMany(c => c.Dispositivos)
                       .HasForeignKey(d => d.IdCliente);
             });
 
@@ -134,6 +137,19 @@ namespace MonitoreoWeb.Data
                       .WithMany(r => r.Pagos)
                       .HasForeignKey(e => e.IdReparacion);
             });
+
+            modelBuilder.Entity<ChecklistRecepcion>(entity =>
+            {
+                entity.ToTable("ChecklistRecepcion");
+                entity.HasKey(e => e.IdChecklist);
+
+                // Configuración de la relación 1 a 1 entre Reparacion y ChecklistRecepcion
+                entity.HasOne(c => c.Reparacion)
+                      .WithOne(r => r.Checklist)
+                      .HasForeignKey<ChecklistRecepcion>(c => c.IdReparacion)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
         }
     }
 }

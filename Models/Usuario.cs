@@ -20,5 +20,7 @@ namespace MonitoreoWeb.Models
         public bool Activo { get; set; }
 
         public DateTime FechaCreacion { get; set; }
+
+        public bool DebeCambiarPassword { get; set; }
     }
 }

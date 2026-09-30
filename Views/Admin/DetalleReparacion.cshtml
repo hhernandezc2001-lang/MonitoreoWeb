@@ -12,27 +12,31 @@
         5 => "En reparación",
         6 => "En pruebas",
         7 => "Terminada",
+        8 => "Entregada",
         _ => "Desconocido"
     };
 
     decimal costoBase = Model.CostoFinal ?? Model.CostoEstimado ?? 0;
     decimal totalPagado = Model.Pagos?.Sum(p => p.Monto) ?? 0;
     decimal saldoPendiente = costoBase - totalPagado;
+    if (saldoPendiente < 0) saldoPendiente = 0;
 }
 
 <div class="container-fluid">
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["Error"]
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
@@ -40,44 +44,81 @@
     <!-- ENCABEZADO -->
     <!-- ========================================== -->
 
-    <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="text-muted text-uppercase fw-bold" style="font-size: 0.85rem;">GESTIÓN DE REPARACIONES</span>
+            <h1 class="fw-bold mb-0">Reparación @ViewBag.TokenConsulta</h1>
+        </div>
 
-        <span class="text-muted">
-            GESTIÓN DE REPARACIONES
-        </span>
-
-        <h1>
-            Reparación @Model.TokenConsulta
-        </h1>
-
-        <p class="text-muted">
-            Detalle y seguimiento de la reparación.
-        </p>
-
+        <!-- BOTONES DE ACCIÓN PRINCIPALES -->
+        <div class="d-flex gap-2 align-items-center">
+            <a asp-action="Reparaciones" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a reparaciones
+            </a>
+            <a asp-action="Ticket" asp-route-id="@Model.IdReparacion" target="_blank" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm">
+                <i class="bi bi-printer-fill me-2"></i> Ver / Imprimir ticket
+            </a>
+        </div>
     </div>
 
     @await Html.PartialAsync("_BarraEstado", Model.IdEstado)
 
     <!-- ========================================== -->
-    <!-- ESTADO -->
+    <!-- ESTADO ACTUAL, BOTÓN DE ENTREGA Y GARANTÍA -->
     <!-- ========================================== -->
 
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="card-title text-muted mb-1">Estado actual</h5>
+                <h2 class="fw-bold text-primary mb-0">@estado</h2>
+            </div>
 
-        <div class="card-body">
+            <div class="d-flex align-items-center gap-3">
+                <!-- BOTÓN: ABRE EL MODAL DE ENTREGA, PAGO Y FIRMA -->
+                @if (Model.IdEstado == 7)
+                {
+                    <button type="button" class="btn btn-success btn-lg fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEntrega">
+                        <i class="bi bi-check-circle-fill me-1"></i> Entregar y Cobrar (Firmar)
+                    </button>
+                }
 
-            <h5 class="card-title">
-                Estado actual
-            </h5>
+                <!-- CONTROL DE GARANTÍA -->
+                @if ((Model.IdEstado == 7 || Model.IdEstado == 8) && !Model.EsGarantia)
+                {
+                    var fechaBase = Model.FechaEntregaCliente ?? Model.FechaTerminacion ?? Model.FechaIngreso;
+                    var fechaLimite = fechaBase.AddDays(Model.DiasGarantia);
+                    bool estaEnGarantia = DateTime.Now <= fechaLimite;
+                    int diasRestantes = (fechaLimite - DateTime.Now).Days;
 
-            <h2>
-                @estado
-            </h2>
+                    <div class="text-end border-start ps-3">
+                        <div class="mb-1">
+                            <strong>Garantía:</strong>
+                            @if (estaEnGarantia)
+                            {
+                                <span class="badge bg-success">
+                                    Vigente (@(diasRestantes < 0 ? 0 : diasRestantes) días restantes)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    Expirada el @fechaLimite.ToString("dd/MM/yyyy")
+                                </span>
+                            }
+                        </div>
 
+                        @if (estaEnGarantia)
+                        {
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold mt-1" data-bs-toggle="modal" data-bs-target="#modalAplicarGarantia">
+                                <i class="bi bi-shield-exclamation me-1"></i> Reclamar Garantía
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
         </div>
-
     </div>
-
 
     <div class="row">
 
@@ -86,426 +127,273 @@
         <!-- ====================================== -->
 
         <div class="col-md-6 mb-4">
-
-            <div class="card h-100">
-
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
-
-                    <h5 class="card-title mb-4">
-                        Cliente
-                    </h5>
-
-                    <p>
-                        <strong>
-                            Nombre:
-                        </strong>
-
-                        @Model.Dispositivo?.Cliente?.Nombre
-                        @Model.Dispositivo?.Cliente?.Apellido
-                    </p>
-
-                    <p>
-                        <strong>
-                            Teléfono:
-                        </strong>
-
-                        @Model.Dispositivo?.Cliente?.Telefono
-                    </p>
-
-                    <p>
-                        <strong>
-                            Correo:
-                        </strong>
-
-                        @Model.Dispositivo?.Cliente?.Email
-                    </p>
-
+                    <h5 class="card-title mb-4 border-bottom pb-2">Cliente</h5>
+                    <p><strong>Nombre:</strong> @Model.Dispositivo?.Cliente?.Nombre @Model.Dispositivo?.Cliente?.Apellido</p>
+                    <p><strong>Teléfono:</strong> @Model.Dispositivo?.Cliente?.Telefono</p>
+                    <p class="mb-0"><strong>Correo:</strong> @Model.Dispositivo?.Cliente?.Email</p>
                 </div>
-
             </div>
-
         </div>
-
 
         <!-- ====================================== -->
         <!-- DISPOSITIVO -->
         <!-- ====================================== -->
 
         <div class="col-md-6 mb-4">
-
-            <div class="card h-100">
-
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
-
-                    <h5 class="card-title mb-4">
-                        Dispositivo
-                    </h5>
-
-                    <p>
-                        <strong>
-                            Marca:
-                        </strong>
-
-                        @Model.Dispositivo?.Marca
-                    </p>
-
-                    <p>
-                        <strong>
-                            Modelo:
-                        </strong>
-
-                        @Model.Dispositivo?.Modelo
-                    </p>
-
-                    <p>
-                        <strong>
-                            IMEI:
-                        </strong>
-
-                        @(string.IsNullOrWhiteSpace(
-                                                Model.Dispositivo?.IMEI)
-                                                ? "No registrado"
-                                                : Model.Dispositivo.IMEI)
-                    </p>
-
-                    <p>
-                        <strong>
-                            Color:
-                        </strong>
-
-                        @(string.IsNullOrWhiteSpace(
-                                                Model.Dispositivo?.Color)
-                                                ? "No registrado"
-                                                : Model.Dispositivo.Color)
-
-                    </p>
-
+                    <h5 class="card-title mb-4 border-bottom pb-2">Dispositivo</h5>
+                    <p><strong>Marca:</strong> @Model.Dispositivo?.Marca</p>
+                    <p><strong>Modelo:</strong> @Model.Dispositivo?.Modelo</p>
+                    <p><strong>IMEI:</strong> @(string.IsNullOrWhiteSpace(Model.Dispositivo?.IMEI) ? "No registrado" : Model.Dispositivo.IMEI)</p>
+                    <p class="mb-0"><strong>Color:</strong> @(string.IsNullOrWhiteSpace(Model.Dispositivo?.Color) ? "No registrado" : Model.Dispositivo.Color)</p>
                 </div>
-
             </div>
-
         </div>
 
     </div>
-
 
     <!-- ========================================== -->
     <!-- INFORMACIÓN DE LA REPARACIÓN -->
     <!-- ========================================== -->
 
-    <div class="card mb-4">
-
+    <div class="card mb-4 shadow-sm border-0">
         <div class="card-body">
-
-            <h5 class="card-title mb-4">
-                Información de la reparación
-            </h5>
+            <h5 class="card-title mb-4 border-bottom pb-2">Información de la reparación</h5>
 
             <div class="row">
-
                 <div class="col-md-6">
-
-                    <p>
-                        <strong>
-                            Código:
-                        </strong>
-
-                        @Model.TokenConsulta
-                    </p>
-
-                    <p>
-                        <strong>
-                            Fecha de ingreso:
-                        </strong>
-
-                        @(Model.FechaIngreso
-                                                .ToString("dd/MM/yyyy HH:mm"))
-                    </p>
-
-                    <p>
-                        <strong>
-                            Entrega estimada:
-                        </strong>
-
-                        @(Model.FechaEntregaEstimada.HasValue
-                                                ? Model.FechaEntregaEstimada.Value
-                                                .ToString("dd/MM/yyyy")
-                                                : "Sin definir")
-
-                    </p>
-
+                    <p><strong>Código:</strong> @ViewBag.TokenConsulta</p>
+                    <p><strong>Fecha de ingreso:</strong> @Model.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p class="mb-0"><strong>Entrega estimada:</strong> @(Model.FechaEntregaEstimada.HasValue? Model.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy") : "Sin definir")</p>
                 </div>
 
-
                 <div class="col-md-6">
-
-                    <p>
-                        <strong>
-                            Técnico asignado:
-                        </strong>
-
-                        @(Model.Tecnico?.Nombre
-                                                ?? "Sin asignar")
-                    </p>
-
-                    <p>
-                        <strong>
-                            Costo estimado:
-                        </strong>
-
-                        @(Model.CostoEstimado.HasValue
-                                                ? $"${Model.CostoEstimado:N2}"
-                                                : "No definido")
-                    </p>
-
-                    <p>
-                        <strong>
-                            Costo final:
-                        </strong>
-
-                        @(Model.CostoFinal.HasValue
-                                                ? $"${Model.CostoFinal:N2}"
-                                                : "No definido")
-                    </p>
-
+                    <p><strong>Técnico asignado:</strong> @(Model.Tecnico?.Nombre ?? "Sin asignar")</p>
+                    <p><strong>Costo estimado:</strong> @(Model.CostoEstimado.HasValue ? $"${Model.CostoEstimado:N2}" : "No definido")</p>
+                    <p class="mb-0"><strong>Costo final:</strong> @(Model.CostoFinal.HasValue ? $"${Model.CostoFinal:N2}" : "No definido")</p>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-
     <!-- ========================================== -->
-    <!-- PAGOS -->
+    <!-- TRAZABILIDAD Y FECHAS DE CIERRE -->
     <!-- ========================================== -->
-
-    <div class="card mb-4">
-
-        <div class="card-body">
-
-            <h5 class="card-title mb-4">
-                Pagos
-            </h5>
-
-            @if (Model.Pagos == null || !Model.Pagos.Any())
-            {
-                <p class="text-muted">
-                    Aún no se ha registrado ningún pago para esta reparación.
-                </p>
-            }
-            else
-            {
-                <table class="table table-sm">
-
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Monto</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @foreach (var pago in Model.Pagos.OrderBy(p => p.FechaPago))
-                        {
-                            <tr>
-                                <td>@pago.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@($"${pago.Monto:N2}")</td>
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-            }
-
-            <hr />
-
-            <div class="row">
-
-                <div class="col-md-4">
-                    <p>
-                        <strong>Costo a cubrir:</strong>
-                        @($"${costoBase:N2}")
-                        <span class="text-muted">
-                            (@(Model.CostoFinal.HasValue ? "costo final" : "costo estimado"))
-                        </span>
-                    </p>
-                </div>
-
-                <div class="col-md-4">
-                    <p>
-                        <strong>Total pagado:</strong>
-                        @($"${totalPagado:N2}")
-                    </p>
-                </div>
-
-                <div class="col-md-4">
-                    <p>
-                        <strong>Saldo pendiente:</strong>
-                        @($"${saldoPendiente:N2}")
-                    </p>
-                </div>
-
-            </div>
-
-            @if (saldoPendiente > 0 && Model.Activo)
-            {
-                <form asp-controller="Admin"
-                      asp-action="RegistrarPago"
-                      asp-route-id="@Model.IdReparacion"
-                      method="post"
-                      class="d-flex gap-2 align-items-end mt-3">
-
-                    @Html.AntiForgeryToken()
-
-                    <div>
-                        <label class="form-label">
-                            Registrar nuevo pago
-                        </label>
-
-                        <input type="number"
-                               name="monto"
-                               step="0.01"
-                               min="0.01"
-                               max="@saldoPendiente"
-                               class="form-control"
-                               placeholder="Ej. @saldoPendiente.ToString("0.00")" />
+    @if (Model.FechaTerminacion.HasValue || Model.FechaEntregaCliente.HasValue)
+    {
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title border-bottom pb-2">Fechas de Cierre</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">
+                            <strong>Terminación técnica:</strong>
+                            @(Model.FechaTerminacion.HasValue? Model.FechaTerminacion.Value.ToString("dd/MM/yyyy HH:mm") : "En proceso")
+                        </p>
                     </div>
-
-                    <button type="submit"
-                            class="btn btn-success">
-                        Registrar pago
-                    </button>
-
-                </form>
-            }
-            else if (saldoPendiente <= 0)
-            {
-                <div class="alert alert-success mt-3 mb-0">
-                    ✅ Esta reparación ya está completamente pagada.
+                    <div class="col-md-6">
+                        <p class="mb-0">
+                            <strong>Entrega al cliente:</strong>
+                            @(Model.FechaEntregaCliente.HasValue? Model.FechaEntregaCliente.Value.ToString("dd/MM/yyyy HH:mm") : "Pendiente de entrega")
+                        </p>
+                    </div>
                 </div>
-            }
-
+            </div>
         </div>
-
-    </div>
-
+    }
 
     <!-- ========================================== -->
     <!-- PROBLEMA -->
     <!-- ========================================== -->
 
-    <div class="card mb-4">
-
+    <div class="card mb-4 shadow-sm border-0">
         <div class="card-body">
-
-            <h5 class="card-title">
-                Problema reportado
-            </h5>
-
-            <p>
-                @Model.ProblemaReportado
-            </p>
-
+            <h5 class="card-title border-bottom pb-2">Problema reportado</h5>
+            <p class="mb-0">@Model.ProblemaReportado</p>
         </div>
-
     </div>
-
 
     <!-- ========================================== -->
     <!-- DIAGNÓSTICO -->
     <!-- ========================================== -->
 
-    <div class="card mb-4">
-
+    <div class="card mb-4 shadow-sm border-0">
         <div class="card-body">
-
-            <h5 class="card-title">
-                Diagnóstico
-            </h5>
+            <h5 class="card-title border-bottom pb-2">Diagnóstico</h5>
 
             @if (string.IsNullOrWhiteSpace(Model.Diagnostico))
             {
-                <p class="text-muted">
-                    El técnico todavía no ha registrado un diagnóstico.
-                </p>
+                <p class="text-muted mb-0">El técnico todavía no ha registrado un diagnóstico.</p>
             }
             else
             {
-                <p>
-                    @Model.Diagnostico
-                </p>
+                <p class="mb-0 fw-bold">@Model.Diagnostico</p>
             }
-
         </div>
-
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- FECHA DE TERMINACIÓN -->
-    <!-- ========================================== -->
-    @if (Model.FechaEntregaReal.HasValue)
-    {
-        <div class="card mb-4">
-
-            <div class="card-body">
-
-                <h5 class="card-title">
-                    Terminación
-                </h5>
-
-                <p>
-
-                    <strong>
-                        Fecha de terminación:
-                    </strong>
-
-                    @(Model.FechaEntregaReal.Value
-                                    .ToString("dd/MM/yyyy HH:mm"))
-
-            </p>
-
-            </div>
-
-        </div>
-        }
-
-
-    <!-- ========================================== -->
-    <!-- BITÁCORA -->
-    <!-- ========================================== -->
-    @await Html.PartialAsync(
-    "_BitacoraAvances",
-        (MonitoreoWeb.Models.ViewModels.BitacoraViewModel)ViewBag.Bitacora)
-
-    <!-- ========================================== -->
-    <!-- ACCIONES -->
-    <!-- ========================================== -->
-
-    <div class="mt-4 d-flex gap-2">
-
-        <a asp-controller="Admin"
-           asp-action="Reparaciones"
-           class="btn btn-secondary">
-
-            ← Volver a reparaciones
-
-        </a>
-
-        <a asp-controller="Admin"
-           asp-action="Ticket"
-           asp-route-id="@Model.IdReparacion"
-           target="_blank"
-           class="btn btn-outline-primary">
-
-            🧾 Ver ticket
-
-        </a>
-
     </div>
 
 </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL DE LIQUIDACIÓN, ENTREGA Y FIRMA DEL ADMINISTRADOR -->
+<!-- ========================================================================= -->
+
+<div class="modal fade" id="modalEntrega" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-box-arrow-right me-2"></i> Liquidación, Entrega y Garantía</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form asp-controller="Admin" asp-action="LiquidarYEntregar" method="post" id="formEntrega">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="idReparacion" value="@Model.IdReparacion" />
+                <input type="hidden" name="montoLiquidar" value="@saldoPendiente" />
+
+                <div class="modal-body">
+                    <!-- RESUMEN FINANCIERO -->
+                    <div class="alert alert-info text-center py-2 mb-3">
+                        <span class="d-block small text-muted">Saldo Pendiente a Cobrar</span>
+                        <strong class="fs-4 text-dark">$@saldoPendiente.ToString("N2")</strong>
+                    </div>
+
+                    <!-- MÉTODO DE PAGO FINAL -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Método de Pago Final</label>
+                        <select name="metodoPago" class="form-select" required>
+                            <option value="Efectivo" selected>Efectivo</option>
+                            <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                            <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                            <option value="Transferencia">Transferencia SPEI</option>
+                        </select>
+                    </div>
+
+                    <!-- CANVAS DE FIRMA DEL ADMINISTRADOR -->
+                    <div class="mb-2 text-center">
+                        <label class="form-label fw-bold">Firma del Administrador (Autoriza Garantía)</label>
+                        <div class="d-inline-block border rounded bg-light mx-auto">
+                            <canvas id="canvasFirmaAdmin" width="380" height="140" style="border: 1px dashed #aaa; cursor: crosshair; touch-action: none; background: white;"></canvas>
+                        </div>
+                        <div class="mt-1">
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="btnLimpiarFirmaAdmin">Limpiar Firma</button>
+                        </div>
+                        <input type="hidden" name="firmaAdminBase64" id="FirmaAdminBase64" required />
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold">Liquidar, Entregar y Generar Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL APLICAR GARANTÍA -->
+<!-- ========================================== -->
+
+<div class="modal fade" id="modalAplicarGarantia" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form asp-controller="Admin" asp-action="AplicarGarantia" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="idReparacionOriginal" value="@Model.IdReparacion" />
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-shield-exclamation me-2"></i> Reclamar Garantía</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="small text-muted">
+                        Esta acción generará una <strong>nueva orden de servicio de $0.00</strong> vinculada a la orden original <strong>#@Model.IdReparacion</strong>.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Motivo del reingreso / Falla reclamada</label>
+                        <textarea name="motivoGarantia" class="form-control" rows="3" placeholder="Describe la falla presentada por el cliente..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Generar Orden por Garantía</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.getElementById("canvasFirmaAdmin");
+            if (!canvas) return;
+
+            const ctx = canvas.getContext("2d");
+            const inputFirma = document.getElementById("FirmaAdminBase64");
+            const btnLimpiar = document.getElementById("btnLimpiarFirmaAdmin");
+            const formEntrega = document.getElementById("formEntrega");
+
+            let dibujando = false;
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function empezar(e) {
+                dibujando = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function mover(e) {
+                if (!dibujando) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+
+            function detener() {
+                if (dibujando) {
+                    dibujando = false;
+                    inputFirma.value = canvas.toDataURL("image/png");
+                }
+            }
+
+            canvas.addEventListener("mousedown", empezar);
+            canvas.addEventListener("mousemove", mover);
+            canvas.addEventListener("mouseup", detener);
+
+            canvas.addEventListener("touchstart", empezar);
+            canvas.addEventListener("touchmove", mover);
+            canvas.addEventListener("touchend", detener);
+
+            btnLimpiar.addEventListener("click", function () {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                inputFirma.value = "";
+            });
+
+            formEntrega.addEventListener("submit", function (e) {
+                if (!inputFirma.value) {
+                    e.preventDefault();
+                    alert("El administrador debe firmar para autorizar la entrega y garantía.");
+                }
+            });
+        });
+    </script>
+}

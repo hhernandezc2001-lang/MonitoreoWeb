@@ -81,6 +81,25 @@ namespace MonitoreoWeb.Controllers
                 return View(model);
             }
 
+            // ✅ AVISO Y VALIDACIÓN DE CAMBIO OBLIGATORIO DE CONTRASEÑA
+            if (usuario.DebeCambiarPassword)
+            {
+                // Creamos una sesión temporal o autenticación parcial para que pueda cambiar su clave
+                var tempClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Role, usuario.Rol),
+                    new Claim("IdUsuario", usuario.IdUsuario.ToString())
+                };
+
+                var tempIdentity = new ClaimsIdentity(tempClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(tempIdentity));
+
+                TempData["Warning"] = "⚠️ Por seguridad de los datos del taller, debes cambiar tu contraseña predeterminada antes de continuar.";
+                return RedirectToAction("CambiarPassword", "Auth");
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, usuario.Nombre),
@@ -112,7 +131,7 @@ namespace MonitoreoWeb.Controllers
             }
             else if (usuario.Rol == "Tecnico")
             {
-                return RedirectToAction("Index", "Tecnico");
+                return RedirectToAction("Solicitudes", "Tecnico");
             }
             return RedirectToAction("Login");
         }
@@ -135,6 +154,67 @@ namespace MonitoreoWeb.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        // =========================
+        // CAMBIAR PASSWORD GET
+        // =========================
+        [Authorize]
+        [HttpGet]
+        public IActionResult CambiarPassword()
+        {
+            return View();
+        }
+
+        // =========================
+        // CAMBIAR PASSWORD POST
+        // =========================
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarPassword(CambiarPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var claimId = User.FindFirst("IdUsuario")?.Value;
+            if (string.IsNullOrEmpty(claimId))
+                return RedirectToAction("Login", "Auth");
+
+            int idUsuario = int.Parse(claimId);
+            var usuario = _context.Usuario.FirstOrDefault(u => u.IdUsuario == idUsuario);
+
+            if (usuario == null)
+                return NotFound();
+
+            var passwordHasher = new PasswordHasher<Usuario>();
+            var resultado = passwordHasher.VerifyHashedPassword(usuario, usuario.PasswordHash, model.PasswordActual);
+
+            if (resultado == PasswordVerificationResult.Failed)
+            {
+                ModelState.AddModelError("", "La contraseña actual es incorrecta.");
+                return View(model);
+            }
+
+            // Actualizar contraseña y desactivar la bandera de cambio obligatorio
+            usuario.PasswordHash = passwordHasher.HashPassword(usuario, model.PasswordNueva);
+            usuario.DebeCambiarPassword = false;
+
+            _context.Usuario.Update(usuario);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "¡Contraseña actualizada correctamente!";
+
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Inicio", "Admin");
+            }
+            else if (User.IsInRole("Tecnico"))
+            {
+                return RedirectToAction("Index", "Tecnico");
+            }
+
+            return RedirectToAction("Login", "Auth");
         }
 
         // =========================
@@ -199,7 +279,8 @@ namespace MonitoreoWeb.Controllers
                     Email = model.Email,
                     PasswordHash = "",
                     Rol = string.IsNullOrEmpty(model.Rol) ? "Usuario" : model.Rol,
-                    Activo = model.Activo, // ← este es el cambio
+                    Activo = model.Activo,
+                    DebeCambiarPassword = true, // 👈 Obliga al nuevo usuario a cambiar su contraseña en su primer inicio de sesión
                     FechaCreacion = DateTime.Now
                 };
 
